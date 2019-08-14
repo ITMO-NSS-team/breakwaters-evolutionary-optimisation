@@ -1,9 +1,11 @@
 from Classes.Breaker import Breaker_descr, xy_to_points, Breaker
 from Classes.Grid import Grid
 
+
 class Harbor:
     base_breakers = []
     base_grid = []
+
 
 class Sochi_Harbor(Harbor):
 
@@ -17,8 +19,8 @@ class Sochi_Harbor(Harbor):
         }
 
         self.base_grid = Grid(grid_x=84,
-                         grid_y=59,
-                         spatial_step=25)
+                              grid_y=59,
+                              spatial_step=25)
 
         base_breaker_1 = Breaker("Ia", all_base_breakers["Ia"])
         base_breaker_2 = Breaker("Ib", all_base_breakers["Ib"])
@@ -27,9 +29,3 @@ class Sochi_Harbor(Harbor):
         base_breaker_5 = Breaker("IIIb", all_base_breakers["IIIb"])
 
         self.base_breakers = [base_breaker_1, base_breaker_2, base_breaker_3, base_breaker_4, base_breaker_5]
-
-
-
-
-
-
