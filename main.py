@@ -1,8 +1,9 @@
 from Classes.Breaker import Breaker_descr, xy_to_points, Breaker
 from Classes.Obstacler import Obstacler
-from Classes.Harbor import Sochi_Harbor
+from Classes.Harbor import SochiHarbor
+from Classes.WaveModel import SimpleGeomWaveModel, WaveSimulationResult
 
-domain = Sochi_Harbor()
+exp_domain = SochiHarbor()
 
 all_modifications = []
 
@@ -19,9 +20,13 @@ breaker_modification_26 = Breaker("mod26", all_modifications["mod26"])
 
 modifications = [breaker_modification_1, breaker_modification_12, breaker_modification_26]
 
-fake_obstacler = Obstacler(domain.grid, index_mode=True)
+fake_obstacler = Obstacler(exp_domain.model_grid, index_mode=True)
 
-obstacle_items = fake_obstacler.get_obstacle_for_modification(domain.base_breakers, modifications)
+construction_indexes = fake_obstacler.get_obstacle_for_modification(exp_domain.base_breakers, modifications)
 
-for obst_item in obstacle_items:
-    print(obst_item)
+wave_model = SimpleGeomWaveModel(exp_domain)
+simulation_result = wave_model.run_simulation_for_constructions(construction_indexes)
+
+hs0 = simulation_result.get_hs_for_target_point(exp_domain.target_points[0])
+
+print(hs0)

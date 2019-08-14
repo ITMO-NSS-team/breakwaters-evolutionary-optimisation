@@ -2,13 +2,13 @@ from collections import namedtuple
 
 
 def xy_to_points(xy):
-    return Breaker_point(xy[0], xy[1])
+    return BreakerPoint(xy[0], xy[1])
 
 
 Breaker_descr = namedtuple('Breaker_descr', ['points', 'reflection', 'base_id'])
 
 
-class Breaker_point:
+class BreakerPoint:
     x = 0
     y = 0
 
