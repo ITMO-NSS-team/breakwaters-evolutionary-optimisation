@@ -39,10 +39,4 @@ class SochiHarbor(Domain):
 
         self.model_grid = self.base_grid
 
-        base_breaker_1 = Breaker("Ia", all_base_breakers["Ia"])
-        base_breaker_2 = Breaker("Ib", all_base_breakers["Ib"])
-        base_breaker_3 = Breaker("II", all_base_breakers["II"])
-        base_breaker_4 = Breaker("IIIa", all_base_breakers["IIIa"])
-        base_breaker_5 = Breaker("IIIb", all_base_breakers["IIIb"])
-
-        self.base_breakers = [base_breaker_1, base_breaker_2, base_breaker_3, base_breaker_4, base_breaker_5]
+        self.base_breakers=[Breaker(_, all_base_breakers[_]) for _ in ["Ia", "Ib", "II","IIIa","IIIb"]]
