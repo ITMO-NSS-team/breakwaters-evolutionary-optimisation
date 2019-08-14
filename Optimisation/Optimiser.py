@@ -1,4 +1,5 @@
-from Optimisation.OptimisationStrategies import DifferentialOptimisationStrategy, ManualOptimisationStrategy
+from Optimisation.OptimisationStrategies import DifferentialOptimisationStrategy, ManualOptimisationStrategy, \
+    EmptyOptimisationStrategy
 
 
 class Optimiser(object):
@@ -7,6 +8,12 @@ class Optimiser(object):
 
     def optimise(self, model):
         return self._optimisation_strategy.optimise(model)
+
+
+class StubOptimiser(Optimiser):
+    def __init__(self):
+        man_strategy = EmptyOptimisationStrategy()
+        super(StubOptimiser, self).__init__(man_strategy)
 
 
 class ManualOptimiser(Optimiser):
