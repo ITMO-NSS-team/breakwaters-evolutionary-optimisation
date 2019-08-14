@@ -8,13 +8,13 @@ exp_domain = SochiHarbor()
 manual_modifications = []
 
 manual_modifications = {
-    "mod1": Breaker_descr(list(map(xy_to_points, [[30, 20], [33, 22], [42, 17]])), 0, 'Ia'),
-    "mod2": Breaker_descr(list(map(xy_to_points, [[24, 16], [33, 22], [42, 17]])), 0, 'Ia'),
-    "mod12": Breaker_descr(list(map(xy_to_points, [[50, 24], [50, 32], [50, 39]])), 0, 'II'),
-    "mod26": Breaker_descr(list(map(xy_to_points, [[56, 40], [56, 38]])), 0, '-'),
+    'mod1': Breaker_descr(list(map(xy_to_points, [[30, 20], [33, 22], [42, 17]])), 0, 'Ia'),
+    'mod2': Breaker_descr(list(map(xy_to_points, [[24, 16], [33, 22], [42, 17]])), 0, 'Ia'),
+    'mod12': Breaker_descr(list(map(xy_to_points, [[50, 24], [50, 32], [50, 39]])), 0, 'II'),
+    'mod26': Breaker_descr(list(map(xy_to_points, [[56, 40], [56, 38]])), 0, '-'),
 }
 
-modifications = [Breaker(_, manual_modifications[_]) for _ in ["mod1", "mod12", "mod26"]]
+modifications = [Breaker(_, manual_modifications[_]) for _ in ['mod1', 'mod12', 'mod26']]
 
 fake_obstacler = Obstacler(exp_domain.model_grid, index_mode=True)
 

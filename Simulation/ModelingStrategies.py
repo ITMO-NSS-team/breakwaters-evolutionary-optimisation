@@ -25,7 +25,7 @@ class SimpleGeomSimulationStrategy(SimulationStrategyAbstract):
 
 class SwanSimulationStrategy(SimulationStrategyAbstract):
     def simulate(self, configuration_info):
-        os.system(r"swanrun.bat {}".format(configuration_info.info))
+        os.system(r'swanrun.bat {}'.format(configuration_info.info))
 
         hs = np.zeros(shape=(configuration_info.model_grid.grid_x, configuration_info.model_grid.grid_y))
 

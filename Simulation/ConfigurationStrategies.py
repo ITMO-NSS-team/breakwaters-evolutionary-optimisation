@@ -31,7 +31,7 @@ class ConfigFileConfigurationStrategy(ConfigurationStrategyAbstract):
     def configurate(self, domain, constructions_data):
         out_file_name = 'HSign_snip_obst_obs_onlywind'
         base_name = 'CONFIG_opt.swn'
-        os.chdir("D:\\SWAN_sochi\\")
+        os.chdir('D:\\SWAN_sochi\\')
 
         for i, line in enumerate(fileinput.input(base_name, inplace=1)):
             if 'optline' in line:
@@ -47,7 +47,7 @@ class ConfigFileConfigurationStrategy(ConfigurationStrategyAbstract):
                 sys.stdout.write(line)
 
         time.sleep(2)
-        newConfigName = "CONFIG_opt_id{}.swn".format(id)
+        newConfigName = 'CONFIG_opt_id{}.swn'.format(id)
         time.sleep(2)
         shutil.copy(base_name, newConfigName)
         time.sleep(2)

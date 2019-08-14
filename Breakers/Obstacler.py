@@ -29,18 +29,18 @@ class Obstacler:
 
     def get_obst_for_breaker(self, breaker):
         indices = breaker.points
-        obs_str = "OBSTACLE TRANSM 0. REFL {}. LINE ".format(breaker.reflection)
+        obs_str = 'OBSTACLE TRANSM 0. REFL {}. LINE '.format(breaker.reflection)
         obs_ind_list = []
         for i in range(0, len(indices)):
             p_cur_ind = breaker.points[i]
             obs_ind_list.append([p_cur_ind.x, p_cur_ind.y])
 
             p_cur = self.grid.get_coords_meter(breaker.points[i])
-            obs_str += "{},{}".format(p_cur[0], p_cur[1])
+            obs_str += '{},{}'.format(p_cur[0], p_cur[1])
             if i != len(indices) - 1:
-                obs_str += ","
+                obs_str += ','
 
-        obs_str += "#id_{}".format(breaker.id)
+        obs_str += '#id_{}'.format(breaker.id)
         if (self.index_mode):
             return obs_ind_list
         else:

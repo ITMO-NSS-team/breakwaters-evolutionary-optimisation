@@ -18,8 +18,8 @@ class BreakerPoint:
 
 
 class Breaker:
-    def __init__(self, id, breaker_descr):
-        self.id = id
+    def __init__(self, breaker_id, breaker_descr):
+        self.id = breaker_id
         self.base_id = breaker_descr.base_id
         self.points = breaker_descr.points
         self.reflection = breaker_descr.reflection
