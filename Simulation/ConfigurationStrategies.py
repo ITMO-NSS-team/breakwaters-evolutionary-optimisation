@@ -6,6 +6,7 @@ import re
 import os
 import shutil
 import time
+from Breakers.Obstacler import Obstacler
 
 
 class ConfigurationInfo(object):
@@ -21,10 +22,18 @@ class ConfigurationStrategyAbstract(object):
     def configurate(self, domain, constructions_data):
         return
 
+    @abc.abstractmethod
+    def build_constructions(self, model_grid, base_breakers, modifications):
+        return
+
 
 class GeomConfigurationStrategy(ConfigurationStrategyAbstract):
     def configurate(self, domain, constructions_data):
         return ConfigurationInfo(constructions_data, domain)
+
+    def build_constructions(self, model_grid, base_breakers, modifications):
+        obstacler = Obstacler(model_grid, index_mode=True)
+        return obstacler.get_obstacle_for_modification(base_breakers, modifications)
 
 
 class ConfigFileConfigurationStrategy(ConfigurationStrategyAbstract):
@@ -47,9 +56,13 @@ class ConfigFileConfigurationStrategy(ConfigurationStrategyAbstract):
                 sys.stdout.write(line)
 
         time.sleep(2)
-        newConfigName = 'CONFIG_opt_id{}.swn'.format(id)
+        new_config_name = 'CONFIG_opt_id{}.swn'.format(id)
         time.sleep(2)
-        shutil.copy(base_name, newConfigName)
+        shutil.copy(base_name, new_config_name)
         time.sleep(2)
 
-        return ConfigurationInfo(newConfigName, domain)
+        return ConfigurationInfo(new_config_name, domain)
+
+    def build_constructions(self, model_grid, base_breakers, modifications):
+        obstacler = Obstacler(model_grid, index_mode=False)
+        return obstacler.get_obstacle_for_modification(base_breakers, modifications)
