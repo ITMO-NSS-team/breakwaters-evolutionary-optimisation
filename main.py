@@ -1,7 +1,7 @@
-from Classes.Breaker import Breaker_descr, xy_to_points, Breaker
-from Classes.Obstacler import Obstacler
-from Classes.Harbor import SochiHarbor
-from Classes.Simulation.WaveModel import SimpleGeomWaveModel
+from Breakers.Breaker import Breaker_descr, xy_to_points, Breaker
+from Breakers.Obstacler import Obstacler
+from Configuration.Harbor import SochiHarbor
+from Simulation.WaveModel import SimpleGeomWaveModel
 
 
 exp_domain = SochiHarbor()

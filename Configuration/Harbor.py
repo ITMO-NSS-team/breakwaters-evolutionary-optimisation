@@ -1,5 +1,5 @@
-from Classes.Breaker import Breaker_descr, xy_to_points, Breaker
-from Classes.Grid import Grid
+from Breakers.Breaker import Breaker_descr, xy_to_points, Breaker
+from Configuration.Grid import Grid
 
 
 class TargetPoint:
