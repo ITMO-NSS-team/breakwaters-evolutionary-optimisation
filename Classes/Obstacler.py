@@ -45,4 +45,3 @@ class Obstacler:
             return obs_ind_list
         else:
             return obs_str
-
