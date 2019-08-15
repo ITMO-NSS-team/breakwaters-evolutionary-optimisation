@@ -16,11 +16,13 @@ class Domain:
 
     target_points = []
 
-    wind_direction = 135
+    wind_direction = []
     wind_enabled = True
 
 
 class SochiHarbor(Domain):
+
+
 
     def __init__(self):
         all_base_breakers = {
@@ -40,3 +42,7 @@ class SochiHarbor(Domain):
         self.model_grid = self.base_grid
 
         self.base_breakers = [Breaker(_, all_base_breakers[_]) for _ in ['Ia', 'Ib', 'II', 'IIIa', 'IIIb']]
+
+        self.wind_direction = []
+        self.wind_enabled = True
+
