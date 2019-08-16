@@ -1,4 +1,4 @@
-import abc
+from abc import ABCMeta, abstractmethod
 from Breakers.Breaker import Breaker_descr, xy_to_points, Breaker
 
 
@@ -9,10 +9,9 @@ class OptimisationResults(object):
         self.history = history
 
 
-class OptimisationStrategyAbstract(object):
-    __metaclass__ = abc.ABCMeta
+class OptimisationStrategyAbstract(metaclass=ABCMeta):
 
-    @abc.abstractmethod
+    @abstractmethod
     def optimise(self, model, construction_indexes):
         return
 

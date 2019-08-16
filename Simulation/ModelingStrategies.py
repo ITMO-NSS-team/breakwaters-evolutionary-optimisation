@@ -1,13 +1,12 @@
-import abc
+from abc import ABCMeta, abstractmethod
 import numpy as np
 import os
 from Simulation.Results import WaveSimulationResult
 
 
-class SimulationStrategyAbstract(object):
-    __metaclass__ = abc.ABCMeta
+class SimulationStrategyAbstract(metaclass=ABCMeta):
 
-    @abc.abstractmethod
+    @abstractmethod
     def simulate(self, configuration_info):
         return
 

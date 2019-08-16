@@ -1,4 +1,4 @@
-import abc
+from abc import ABCMeta, abstractmethod
 import numpy as np
 import sys
 import fileinput
@@ -15,14 +15,13 @@ class ConfigurationInfo(object):
         self.domain = domain
 
 
-class ConfigurationStrategyAbstract(object):
-    __metaclass__ = abc.ABCMeta
+class ConfigurationStrategyAbstract(metaclass=ABCMeta):
 
-    @abc.abstractmethod
+    @abstractmethod
     def configurate(self, domain, constructions_data):
         return
 
-    @abc.abstractmethod
+    @abstractmethod
     def build_constructions(self, model_grid, base_breakers, modifications):
         return
 

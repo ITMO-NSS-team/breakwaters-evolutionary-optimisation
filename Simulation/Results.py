@@ -1,8 +1,8 @@
-import abc
+from abc import ABCMeta, abstractmethod
 
 
 class SimulationResult(object):
-    @abc.abstractmethod
+    @abstractmethod
     def get_output_for_target_point(self, point):
         return
 
