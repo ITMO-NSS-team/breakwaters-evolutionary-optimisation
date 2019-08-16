@@ -10,18 +10,19 @@ class Obstacler:
 
     def get_obstacle_for_modification(self, base_breakers, modifications):
         final_obst = []
-        all_modified_base_breakers = []
+        all_modified_base_breakers_ids = []
+
         for i in range(0, len(modifications)):
             modification = modifications[i]
 
-            all_modified_base_breakers.append(modifications[i].base_id)
+            all_modified_base_breakers_ids.append(modifications[i].base_id)
             final_obst.append(self.get_obst_for_breaker(modification))
 
-        all_modified_base_breakers = np.unique(all_modified_base_breakers)
+        all_modified_base_breakers = np.unique(all_modified_base_breakers_ids)
 
         for j in range(0, len(base_breakers)):
             base_breaker = base_breakers[j]
-            if base_breaker.id not in all_modified_base_breakers:
+            if all_modified_base_breakers != [] and base_breaker.breaker_id not in all_modified_base_breakers:
                 final_obst.append(self.get_obst_for_breaker(base_breaker))
 
         final_obst = np.unique(final_obst)
@@ -40,7 +41,7 @@ class Obstacler:
             if i != len(indices) - 1:
                 obs_str += ','
 
-        obs_str += '#id_{}'.format(breaker.id)
+        obs_str += '#id_{}'.format(breaker.breaker_id)
         if (self.index_mode):
             return obs_ind_list
         else:

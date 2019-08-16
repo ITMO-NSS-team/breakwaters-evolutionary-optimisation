@@ -1,19 +1,20 @@
 from Optimisation.OptimisationStrategies import DifferentialOptimisationStrategy, ManualOptimisationStrategy, \
     EmptyOptimisationStrategy
+from Optimisation.OptimisationTask import OptimisationTask
 
 
 class Optimiser(object):
     def __init__(self, optimisation_strategy):
         self._optimisation_strategy = optimisation_strategy
 
-    def optimise(self, model):
-        return self._optimisation_strategy.optimise(model)
+    def optimise(self, model, task: OptimisationTask):
+        return self._optimisation_strategy.optimise(model, task)
 
 
 class StubOptimiser(Optimiser):
     def __init__(self):
-        man_strategy = EmptyOptimisationStrategy()
-        super(StubOptimiser, self).__init__(man_strategy)
+        emp_strategy = EmptyOptimisationStrategy()
+        super(StubOptimiser, self).__init__(emp_strategy)
 
 
 class ManualOptimiser(Optimiser):
