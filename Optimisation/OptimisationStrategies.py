@@ -45,43 +45,65 @@ class ManualOptimisationStrategy(OptimisationStrategyAbstract):
 
 class DifferentialOptimisationStrategy(OptimisationStrategyAbstract):
 
-    def obtain_numerical_chromosome(self, possible_modifications, mod_points_to_optimise):
+    def obtain_numerical_chromosome(self, task):
         chromosome = []
 
-        for modification in possible_modifications:
+        for modification in task.possible_modifications:
             points_to_encode = [[modification.points[i].x, modification.points[i].y] for i in
-                                mod_points_to_optimise[modification.breaker_id]]
+                                task.mod_points_to_optimise[modification.breaker_id]]
             chromosome.append(list(chain.from_iterable(points_to_encode)))
         return list(chain.from_iterable(chromosome))
 
-    def build_breakers_from_genotype(self, genotype):
-        # TODO
-        return []
+    def build_breakers_from_genotype(self, genotype, task):
+        gen_id = 0
 
-    def build_fitness(self, model, task, genotype):
+        new_modifications = []
+
+        for modification in task.possible_modifications:
+
+            point_ids_to_optimise_in_modification = task.mod_points_to_optimise[modification.breaker_id]
+
+            if max(point_ids_to_optimise_in_modification) + 1 != len(modification.points):
+                # anchor for the calculation of relative displacement of optimised breakwater segments
+                anchor_point = modification.points[max(point_ids_to_optimise_in_modification) + 1]
+            else:
+                # works only for opt point in the beginning of breakwater
+                raise NotImplementedError
+
+            for point_ind in point_ids_to_optimise_in_modification:
+                modification.points[point_ind].x = np.round(genotype[gen_id], 0) + anchor_point.x
+                gen_id += 1
+                modification.points[point_ind].y = np.round(genotype[gen_id], 0) + anchor_point.y
+                gen_id += 1
+            new_modifications.append(modification)
+        return new_modifications
+
+    def calculate_fitness(self, genotype, model, task):
         fitness_value = 0
-        proposed_breakers = self.build_breakers_from_genotype(genotype)
+        proposed_breakers = self.build_breakers_from_genotype(genotype, task)
         for obj in task.objectives:
-            if obj is (CostObjective or NavigationObjective): #TODO expensive check can be missed? investigate
+            if obj is (CostObjective or NavigationObjective):  # TODO expensive check can be missed? investigate
                 fitness_value += obj.get_obj_value(model.domain, proposed_breakers)
-            if obj is WaveObjective:
-                #TODO read if already simulated
+            if obj is WaveHeightObjective:
+                # TODO read if already simulated
                 simulation_result = model.run_simulation_for_constructions(model.domain.base_breakers,
                                                                            proposed_breakers)
-                fitness_value = obj.get_obj_value(model.domain, proposed_breakers, simulation_result)
+                fitness_value += obj.get_obj_value(model.domain, proposed_breakers, simulation_result)
         return fitness_value
 
     def optimise(self, model: WaveModel, task: OptimisationTask):
         # TODO implement deoptim
+        genotype = self.obtain_numerical_chromosome(task)
 
-        # coords_bounds = [(0, model.domain.model_grid.spatial_step), (0, model.domain.model_grid.grid_x)]
-        # optimisation_result=optimize.differential_evolution(fitness, )
+        coords_bounds = list((-5, 5) for _ in range(len(genotype)))
 
-        genotype = self.obtain_numerical_chromosome(task.possible_modifications, task.mod_points_to_optimise)
-        print(genotype)
-        evolutionary_modifications = []  # TODO fill
+        optimisation_result = optimize.differential_evolution(self.calculate_fitness, coords_bounds, args=(model, task),
+                                                              popsize=10, maxiter=10, mutation=0.5, recombination=0.5,
+                                                              seed=42, disp=True)
 
-        best_modifications = []  # TODO best indiviual
+        best_genotype = optimisation_result.x
+
+        best_modifications = self.build_breakers_from_genotype(best_genotype, task)
 
         simulation_result = model.run_simulation_for_constructions(model.domain.base_breakers, best_modifications)
 

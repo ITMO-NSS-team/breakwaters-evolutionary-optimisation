@@ -39,8 +39,8 @@ class NavigationObjective(Objectives):
         return min_dist_to_fairway
 
 
-class WaveObjective(Objectives):
+class WaveHeightObjective(Objectives):
 
     def get_obj_value(self, domain, breakers, simulation_result):
-        hs = simulation_result.get_output_for_target_point(domain.target_points[0])
+        hs = simulation_result.get_output_for_target_point(domain.target_points)
         return hs
