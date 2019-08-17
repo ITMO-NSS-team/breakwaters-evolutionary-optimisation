@@ -3,7 +3,7 @@ from Simulation.WaveModel import SimpleGeomWaveModel
 from Optimisation.Optimiser import ManualOptimiser, StubOptimiser, DifferentialEvolutionaryOptimiser
 from Breakers.Breaker import xy_to_points, Breaker
 
-from Optimisation.Objectives import CostObjective, NavigationObjective, WaveHeightObjective
+from Optimisation.Objective import CostObjective, NavigationObjective, WaveHeightObjective
 from Optimisation.OptimisationTask import OptimisationTask
 
 exp_domain = SochiHarbor()
@@ -50,4 +50,3 @@ opt_result = optimiser.optimise(wave_model, task)
 
 hs0 = opt_result.simulation_result.get_output_for_target_points(exp_domain.target_points[0])
 
-print(hs0)

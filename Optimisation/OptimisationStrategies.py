@@ -1,10 +1,7 @@
-from abc import ABCMeta, abstractmethod
-from Breakers.Breaker import Breaker
-import numpy as np
 from scipy import optimize
 from itertools import chain
 from Optimisation import OptimisationTask
-from Optimisation.Objectives import *
+from Optimisation.Objective import *
 
 from Simulation import WaveModel
 
@@ -19,7 +16,7 @@ class OptimisationResults(object):
 class OptimisationStrategyAbstract(metaclass=ABCMeta):
 
     @abstractmethod
-    def optimise(self, model: WaveModel, task: OptimisationTask):
+    def optimise(self, model: WaveModel, task: OptimisationTask) -> OptimisationResults:
         return
 
 
@@ -78,17 +75,38 @@ class DifferentialOptimisationStrategy(OptimisationStrategyAbstract):
             new_modifications.append(modification)
         return new_modifications
 
-    def calculate_fitness(self, genotype, model, task):
+    def calculate_fitness(self, genotype, model, task, base_fintess):
         fitness_value = 0
+        # print(genotype)
+
         proposed_breakers = self.build_breakers_from_genotype(genotype, task)
+        obj_ind = 0
         for obj in task.objectives:
-            if obj is (CostObjective or NavigationObjective):  # TODO expensive check can be missed? investigate
-                fitness_value += obj.get_obj_value(model.domain, proposed_breakers)
-            if obj is WaveHeightObjective:
+            if isinstance(obj, CostObjective) or isinstance(obj, NavigationObjective):
+                # TODO expensive check can be missed? investigate
+                fitness_value += obj.get_obj_value(model.domain, proposed_breakers) / base_fintess[obj_ind]
+            if isinstance(obj, WaveHeightObjective):
                 # TODO read if already simulated
                 simulation_result = model.run_simulation_for_constructions(model.domain.base_breakers,
                                                                            proposed_breakers)
-                fitness_value += obj.get_obj_value(model.domain, proposed_breakers, simulation_result)
+                fitness_value += (obj.get_obj_value(model.domain, proposed_breakers, simulation_result)) / base_fintess[
+                    obj_ind]
+            obj_ind += 1
+        return fitness_value / 3
+
+    def calculate_default_fitness(self, genotype, model, task):
+        fitness_value = []
+        # print(genotype)
+        proposed_breakers = self.build_breakers_from_genotype(genotype, task)
+        for obj in task.objectives:
+            if isinstance(obj, CostObjective) or isinstance(obj, NavigationObjective):
+                # TODO expensive check can be missed? investigate
+                fitness_value.append(obj.get_obj_value(model.domain, proposed_breakers))
+            if isinstance(obj, WaveHeightObjective):
+                # TODO read if already simulated
+                simulation_result = model.run_simulation_for_constructions(model.domain.base_breakers,
+                                                                           proposed_breakers)
+                fitness_value.append(obj.get_obj_value(model.domain, proposed_breakers, simulation_result))
         return fitness_value
 
     def optimise(self, model: WaveModel, task: OptimisationTask):
@@ -97,11 +115,17 @@ class DifferentialOptimisationStrategy(OptimisationStrategyAbstract):
 
         coords_bounds = list((-5, 5) for _ in range(len(genotype)))
 
-        optimisation_result = optimize.differential_evolution(self.calculate_fitness, coords_bounds, args=(model, task),
-                                                              popsize=10, maxiter=10, mutation=0.5, recombination=0.5,
+        def_fitness = self.calculate_default_fitness([0] * len(genotype), model, task)
+
+        print('def fitness {}'.format(def_fitness))
+
+        optimisation_result = optimize.differential_evolution(self.calculate_fitness, coords_bounds,
+                                                              args=(model, task, def_fitness),
+                                                              popsize=40, maxiter=40, mutation=0.5, recombination=0.5,
                                                               seed=42, disp=True)
 
         best_genotype = optimisation_result.x
+        print(np.round(best_genotype))
 
         best_modifications = self.build_breakers_from_genotype(best_genotype, task)
 

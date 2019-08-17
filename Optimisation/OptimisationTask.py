@@ -1,11 +1,11 @@
-from Optimisation.Objectives import Objectives
+from Optimisation.Objective import Objective
 from typing import List
 from Breakers import Breaker
 
 
 class OptimisationTask(object):
     def __init__(self,
-                 objectives: List[Objectives],
+                 objectives: List[Objective],
                  possible_modifications,  #: List[Breaker],
                  mod_points_to_optimise: List):
         self.objectives = objectives

@@ -19,7 +19,7 @@ class Breaker(object):
         total_length = 0
         for i in range(1, len(self.points)):
             total_length += np.sqrt(
-                (self.points[i - 1].x - self.points[i].x) ^ 2 + (self.points[i - 1].y - self.points[i].y) ^ 2)
+                (self.points[i - 1].x - self.points[i].x) ** 2 + (self.points[i - 1].y - self.points[i].y) ** 2)
         assert total_length >= 0
 
         return total_length
