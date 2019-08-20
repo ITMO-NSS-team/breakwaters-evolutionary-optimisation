@@ -23,12 +23,11 @@ class CostObjective(Objective):
 class NavigationObjective(Objective):
 
     def _dist_from_fairway_to_breaker(self, fairway: Fairway, breaker: Breaker):
-        a = fairway.y1 - fairway.y2
-        b = fairway.x1 - fairway.x2
-        c = a * fairway.x1 + b * fairway.y1
-
-        dist = min([(abs((a * point.x + b * point.y + c)) / (np.sqrt(a * a + b * b))) for point in
+        p1 = np.asarray([fairway.x1, fairway.y1])
+        p2 = np.asarray([fairway.x2, fairway.y2])
+        dist = min([np.linalg.norm(np.cross(p2 - p1, p1 - np.asarray([p3.x, p3.y]))) / np.linalg.norm(p2 - p1) for p3 in
                     breaker.points])
+
         return dist
 
     def get_obj_value(self, domain, breakers):
@@ -43,13 +42,18 @@ class NavigationObjective(Objective):
 class WaveHeightObjective(Objective):
 
     def get_obj_value(self, domain, breakers, simulation_result: WaveSimulationResult):
-        hs_vals= simulation_result.get_output_for_target_points(domain.target_points)
-        return np.mean(hs_vals)+0.05  # to avoid zero
+        hs_vals = simulation_result.get_output_for_target_points(domain.target_points)
+
+        hs_weigtened = [hs * pt.weight for hs, pt in zip(hs_vals, domain.target_points)]
+
+        return np.mean(hs_weigtened) + 0.05  # to avoid zero
+
 
 class WaveHeightMultivariateObjective(Objective):
 
     def get_obj_value(self, domain, breakers, simulation_result: WaveSimulationResult):
-        hs_vals= simulation_result.get_output_for_target_points(domain.target_points)
-        return [(hs + 0.05) for hs in hs_vals]  # to avoid zero
+        hs_vals = simulation_result.get_output_for_target_points(domain.target_points)
 
+        hs_weigtened = [hs * pt.weight for hs, pt in zip(hs_vals, domain.target_points)]
 
+        return [(hs + 0.05) for hs in hs_weigtened]  # to avoid zero

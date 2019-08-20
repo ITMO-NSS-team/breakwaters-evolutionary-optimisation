@@ -12,12 +12,13 @@ class WaveModel(object):
     def run_simulation(self, configuration):
         return self._simulation_strategy.simulate(configuration)
 
-    def configurate(self, base_breakers, modifications):
+    def configurate(self, base_breakers, modifications, configuration_label):
         constructions = self._configuration_strategy.build_constructions(self.domain.model_grid, base_breakers, modifications)
-        return self._configuration_strategy.configurate(self.domain, constructions)
+        return self._configuration_strategy.configurate(self.domain, constructions, configuration_label)
 
-    def run_simulation_for_constructions(self, base_breakers, modifications):
-        configuration_info = self.configurate(base_breakers, modifications)
+    def run_simulation_for_constructions(self, base_breakers, modifications, configuration_label):
+
+        configuration_info = self.configurate(base_breakers, modifications, configuration_label)
         results = self.run_simulation(configuration_info)
         return results
 

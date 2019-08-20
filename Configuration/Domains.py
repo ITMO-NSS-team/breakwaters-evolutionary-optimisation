@@ -1,17 +1,7 @@
 from Breakers.Breaker import xy_to_points, Breaker
-from Configuration.Grid import *
+from Configuration.Grid import GridPoint, BreakerPoint, TargetPoint, Grid
 
-
-class GridPoint(object):
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-
-
-class TargetPoint(GridPoint):
-    def __init__(self, x, y, weight):
-        super(TargetPoint, self).__init__(x, y)
-        self.weight = weight
+import numpy as np
 
 
 class Fairway:
@@ -48,7 +38,9 @@ class SochiHarbor(Domain):
             Breaker('IIIb', list(map(xy_to_points, [[67, 39], [63, 38]])), 0.9, '')
         ]
 
-        self.target_points = [TargetPoint(x=62, y=37, weight=1)]
+        self.target_points = [TargetPoint(x=62, y=37, weight=1),
+                              TargetPoint(x=60, y=32, weight=0.5),
+                              TargetPoint(x=57, y=18, weight=0.25)]
 
         self.base_grid = Grid(grid_x=84,
                               grid_y=59,
@@ -62,4 +54,10 @@ class SochiHarbor(Domain):
         self.wind_direction = 135
         self.wind_enabled = True
 
-        self.fairways = [Fairway(GridPoint(20, 30), GridPoint(60, 25), 1)]  # TODO fill with real coordinates
+        self.fairways = [Fairway(GridPoint(20, 20), GridPoint(30, 28), importance=0.5),
+                         Fairway(GridPoint(30, 28), GridPoint(60, 22), importance=0.3),
+                         Fairway(GridPoint(60, 22), GridPoint(67, 27), importance=0.7),
+                         # internal
+                         Fairway(GridPoint(50, 24), GridPoint(51, 30), importance=1),
+                         Fairway(GridPoint(51, 30), GridPoint(71, 49), importance=0.7),
+                         Fairway(GridPoint(71, 49), GridPoint(71, 55), importance=0.7)]
