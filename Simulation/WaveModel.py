@@ -8,6 +8,7 @@ class WaveModel(object):
         self.domain = domain
         self._simulation_strategy = simulation_strategy
         self._configuration_strategy = configuration_strategy
+        self.expensive = False
 
     def run_simulation(self, configuration):
         return self._simulation_strategy.simulate(configuration)
@@ -35,6 +36,8 @@ class SimpleGeomWaveModel(WaveModel):
 class SwanWaveModel(WaveModel):
 
     def __init__(self, domain):
+        self.expensive = True
+
         sim_strategy = SwanSimulationStrategy()
         conf_strategy = ConfigFileConfigurationStrategy()
 

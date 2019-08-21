@@ -94,11 +94,69 @@ class DifferentialOptimisationStrategy(OptimisationStrategyAbstract):
 
         obj_ind = 0
         for obj_ind, obj in enumerate(task.objectives):
-            if isinstance(obj, CostObjective) or isinstance(obj, NavigationObjective):
+            if isinstance(obj, (CostObjective, NavigationObjective, StructuralObjective)):
                 # TODO expensive check can be missed? investigate
-                fitness_value += obj.get_obj_value(model.domain, proposed_breakers) / base_fintess[obj_ind]
+                new_fitness = obj.get_obj_value(model.domain, proposed_breakers)
+                if new_fitness is None:
+                    return 9999
+                if model.expensive and new_fitness > sum(base_fintess):
+                    return 9999
+                fitness_value += (new_fitness / base_fintess[obj_ind]) * obj.importance
             if isinstance(obj, WaveHeightObjective):
                 # TODO read if already simulated
+                # configuration_label = ''.join(str(g) for g in genotype)
+
+                txt = []
+                for pb in proposed_breakers:
+                    for pbp in pb.points:
+                        txt.append(str(int(pbp.x)))
+                        txt.append(str(int(pbp.y)))
+                txt_genotype = ",".join(txt)
+
+                config_exists = False
+                configuration_label = uuid.uuid4().hex
+
+                if model.expensive:
+                    with open('D://Projects//Sochi-prichal//breakwater-evo-opt//configs_catalog.csv',
+                              mode='r', newline='') as csv_file:
+                        sim_reader = csv.reader(csv_file, delimiter=',', quotechar='"')
+                        for row in sim_reader:
+                            if row[1] == txt_genotype:
+                                configuration_label = row[0]
+                                config_exists = True
+                                break
+                    if not config_exists:
+                        with open('D://Projects//Sochi-prichal//breakwater-evo-opt//configs_catalog.csv',
+                                  mode='a', newline='') as csv_file:
+                            sim_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+
+                            sim_writer.writerow([f'{configuration_label}', txt_genotype])
+
+                simulation_result = model.run_simulation_for_constructions(model.domain.base_breakers,
+                                                                           proposed_breakers, configuration_label)
+                fitness_value += \
+                    (obj.get_obj_value(model.domain, proposed_breakers, simulation_result) \
+                     / base_fintess[obj_ind]) * obj.importance
+            obj_ind += 1
+
+        return fitness_value / len(task.objectives)
+
+    def calculate_default_fitness(self, genotype, model, task):
+        fitness_value = []
+
+        genotype = [int(round(g, 0)) for g in genotype]
+
+        proposed_breakers = self.build_breakers_from_genotype(genotype, task)
+        for obj in task.objectives:
+            if isinstance(obj, (CostObjective, NavigationObjective, StructuralObjective)):
+                # TODO expensive check can be missed? investigate
+                new_fitness = obj.get_obj_value(model.domain, proposed_breakers)
+                if new_fitness is None:
+                    new_fitness = 9999
+                fitness_value.append(new_fitness)
+            if isinstance(obj, WaveHeightObjective):
+                # TODO read if already simulated
+
                 # configuration_label = ''.join(str(g) for g in genotype)
 
                 txt = []
@@ -129,55 +187,6 @@ class DifferentialOptimisationStrategy(OptimisationStrategyAbstract):
 
                 simulation_result = model.run_simulation_for_constructions(model.domain.base_breakers,
                                                                            proposed_breakers, configuration_label)
-                fitness_value += \
-                    obj.get_obj_value(model.domain, proposed_breakers, simulation_result) / base_fintess[obj_ind]
-            obj_ind += 1
-
-        return fitness_value / len(task.objectives)
-
-    def calculate_default_fitness(self, genotype, model, task):
-        fitness_value = []
-
-        genotype = [int(round(g, 0)) for g in genotype]
-
-        proposed_breakers = self.build_breakers_from_genotype(genotype, task)
-        for obj in task.objectives:
-            if isinstance(obj, CostObjective) or isinstance(obj, NavigationObjective):
-                # TODO expensive check can be missed? investigate
-                fitness_value.append(obj.get_obj_value(model.domain, proposed_breakers))
-            if isinstance(obj, WaveHeightObjective):
-                # TODO read if already simulated
-
-                # configuration_label = ''.join(str(g) for g in genotype)
-
-                txt = []
-                for pb in proposed_breakers:
-                    for pbp in pb.points:
-                        txt.append(str(int(pbp.x)))
-                        txt.append(str(int(pbp.y)))
-                txt_genotype = ",".join(txt)
-
-                config_exists = False
-
-                with open('D://Projects//Sochi-prichal//breakwater-evo-opt//configs_catalog.csv',
-                          mode='r', newline='') as csv_file:
-                    sim_reader = csv.reader(csv_file, delimiter=',', quotechar='"')
-                    for row in sim_reader:
-                        if row[1] == txt_genotype:
-                            configuration_label = row[0]
-                            config_exists = True
-                            break
-                if not config_exists:
-                    with open('D://Projects//Sochi-prichal//breakwater-evo-opt//configs_catalog.csv',
-                              mode='a', newline='') as csv_file:
-                        sim_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-
-                        configuration_label = uuid.uuid4().hex
-
-                        sim_writer.writerow([f'{configuration_label}', txt_genotype])
-
-                simulation_result = model.run_simulation_for_constructions(model.domain.base_breakers,
-                                                                           proposed_breakers, configuration_label)
                 fitness_value.append(obj.get_obj_value(model.domain, proposed_breakers, simulation_result))
 
         return fitness_value
@@ -185,7 +194,7 @@ class DifferentialOptimisationStrategy(OptimisationStrategyAbstract):
     def optimise(self, model: WaveModel, task: OptimisationTask):
         genotype = self.obtain_numerical_chromosome(task)
 
-        coords_bounds = [(0, 360) if x % 2 else (0, 10) for x in range(0, len(genotype))]
+        coords_bounds = [(0, 359) if x % 2 else (0, 6) for x in range(0, len(genotype))]
 
         default_fitness = self.calculate_default_fitness([0] * len(genotype), model, task)
 
@@ -193,7 +202,7 @@ class DifferentialOptimisationStrategy(OptimisationStrategyAbstract):
 
         optimisation_result = optimize.differential_evolution(self.calculate_fitness, coords_bounds,
                                                               args=(model, task, default_fitness),
-                                                              popsize=40, maxiter=80, mutation=0.2, recombination=0.6,
+                                                              popsize=400, maxiter=80, mutation=0.2, recombination=0.6,
                                                               seed=42, disp=True)
 
         best_genotype = optimisation_result.x

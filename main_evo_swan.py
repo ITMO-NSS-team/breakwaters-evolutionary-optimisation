@@ -3,7 +3,7 @@ from Simulation.WaveModel import SimpleGeomWaveModel, SwanWaveModel
 from Optimisation.Optimiser import ManualOptimiser, StubOptimiser, DifferentialEvolutionaryOptimiser
 from Breakers.Breaker import xy_to_points, Breaker
 
-from Optimisation.Objective import CostObjective, NavigationObjective, WaveHeightObjective
+from Optimisation.Objective import CostObjective, NavigationObjective, WaveHeightObjective, StructuralObjective
 from Optimisation.OptimisationTask import OptimisationTask
 
 exp_domain = SochiHarbor()
@@ -33,11 +33,10 @@ mod_points_to_optimise = {  # order is important
 selected_modifications_for_tuning = base_modifications_for_tuning
 selected_mod_points_to_optimise = [mod_points_to_optimise[mod.breaker_id] for mod in base_modifications_for_tuning]
 
-constraints = [CostObjective(),
-               NavigationObjective(),
-               WaveHeightObjective()]
+objectives = [StructuralObjective(importance=1), CostObjective(importance=3), NavigationObjective(importance=1),
+              WaveHeightObjective(importance=2)]
 
-task = OptimisationTask(constraints, selected_modifications_for_tuning, mod_points_to_optimise, )
+task = OptimisationTask(objectives, selected_modifications_for_tuning, mod_points_to_optimise, )
 
 opt_result = optimiser.optimise(wave_model, task)
 

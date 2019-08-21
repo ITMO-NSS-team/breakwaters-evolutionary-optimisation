@@ -1,7 +1,7 @@
 from Configuration.Domains import SochiHarbor
 from Simulation.WaveModel import SimpleGeomWaveModel
 from Optimisation.Optimiser import ManualOptimiser, StubOptimiser
-from Breakers.Breaker import Breaker_descr, xy_to_points, Breaker
+from Breakers.Breaker import xy_to_points, Breaker
 
 exp_domain = SochiHarbor()
 
