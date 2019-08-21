@@ -16,7 +16,7 @@ class Obstacler:
         all_modified_base_breakers_ids = []
 
         for modification in modifications:
-            all_modified_base_breakers_ids.append(modifications[i].base_id)
+            all_modified_base_breakers_ids.append(modification.base_id)
             final_obst.append(self.get_obst_for_breaker(modification))
 
         all_modified_base_breakers = np.unique(all_modified_base_breakers_ids)
