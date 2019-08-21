@@ -23,6 +23,7 @@ class Domain:
 
     wind_direction = []
     wind_enabled = True
+    max_height_of_wave = []
 
     fairways = []
 
@@ -53,6 +54,8 @@ class SochiHarbor(Domain):
 
         self.wind_direction = 135
         self.wind_enabled = True
+
+        self.max_height_of_wave = 80
 
         self.fairways = [Fairway(GridPoint(20, 20), GridPoint(30, 28), importance=0.5),
                          Fairway(GridPoint(30, 28), GridPoint(60, 22), importance=0.3),
