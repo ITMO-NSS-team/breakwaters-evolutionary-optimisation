@@ -64,3 +64,5 @@ class SochiHarbor(Domain):
                          Fairway(GridPoint(50, 24), GridPoint(51, 30), importance=1),
                          Fairway(GridPoint(51, 30), GridPoint(71, 49), importance=0.7),
                          Fairway(GridPoint(71, 49), GridPoint(71, 55), importance=0.7)]
+
+        print(self.fairways[0].x1)

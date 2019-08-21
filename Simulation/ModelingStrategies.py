@@ -7,6 +7,7 @@ import re
 import matplotlib.pyplot as plt
 from Simulation.Results import WaveSimulationResult
 from Simulation.ConfigurationStrategies import ConfigurationInfo
+import matplotlib.image as image
 
 
 class SimulationStrategyAbstract(metaclass=ABCMeta):
@@ -19,9 +20,11 @@ class SimulationStrategyAbstract(metaclass=ABCMeta):
 class SimpleGeomSimulationStrategy(SimulationStrategyAbstract):
     def simulate(self, configuration_info):
 
+        #print(configuration_info.domain.fairways[0])
+
         stop=0
         hs = np.zeros(shape=(configuration_info.domain.model_grid.grid_y, configuration_info.domain.model_grid.grid_x))
-        self.heatmap2d(hs,configuration_info.domain.base_breakers)
+        self.heatmap2d(hs,configuration_info.domain.base_breakers,configuration_info.domain.fairways)
 
         if stop==1:
             return WaveSimulationResult(hs)
@@ -67,13 +70,13 @@ class SimpleGeomSimulationStrategy(SimulationStrategyAbstract):
                     out.write('{}    '.format(hs[i][j]))
                 out.write("\r\n")
 
-        self.heatmap2d(hs,configuration_info.domain.base_breakers)
+        self.heatmap2d(hs,configuration_info.domain.base_breakers,configuration_info.domain.fairways)
 
 
 
         return WaveSimulationResult(hs)
 
-    def heatmap2d(self,arr: np.ndarray,base_breakers):
+    def heatmap2d(self,arr: np.ndarray,base_breakers,fairways):
         plt.imshow(arr, cmap='viridis')
         plt.colorbar()
 
@@ -82,14 +85,15 @@ class SimpleGeomSimulationStrategy(SimulationStrategyAbstract):
             for j in range(1,len(base_breakers[i].points)):
                 p1,p2=[base_breakers[i].points[j-1].x,base_breakers[i].points[j].x],\
                        [base_breakers[i].points[j-1].y,base_breakers[i].points[j].y]
-                plt.plot(p1, p2,c='r',linewidth=2)
+                plt.plot(p1, p2,c='r',linewidth=2,marker='.')
 
             for j in range(len(base_breakers[i].points)):
-                if j==len(base_breakers[i].points)-1:
-                    plt.annotate("(" + str(p1[1]) + "," + str(p2[1]) + ")", (p1[1], p2[1]))
-                else:
-                    plt.annotate("(" + str(p1[0]) + "," + str(p2[0]) + ")", (p1[0], p2[0]))
+                plt.annotate("(" + str(base_breakers[i].points[j].x) + "," + str(base_breakers[i].points[j].y) + ")",(base_breakers[i].points[j].x, base_breakers[i].points[j].y))
 
+            for i in range(len(fairways)):
+                p1,p2=[fairways[i].x1,fairways[i].x2],[fairways[i].y1,fairways[i].y2]
+                plt.plot(p1, p2, c='g', linewidth=2,marker='.')
+                #print(self.fairways[0].x1)
 
         plt.show()
 
