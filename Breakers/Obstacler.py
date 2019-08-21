@@ -1,5 +1,6 @@
 import numpy as np
 import warnings
+
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 
@@ -14,16 +15,13 @@ class Obstacler:
         final_obst = []
         all_modified_base_breakers_ids = []
 
-        for i in range(0, len(modifications)):
-            modification = modifications[i]
-
+        for modification in modifications:
             all_modified_base_breakers_ids.append(modifications[i].base_id)
             final_obst.append(self.get_obst_for_breaker(modification))
 
         all_modified_base_breakers = np.unique(all_modified_base_breakers_ids)
 
-        for j in range(0, len(base_breakers)):
-            base_breaker = base_breakers[j]
+        for base_breaker in base_breakers:
             if all_modified_base_breakers != [] and base_breaker.breaker_id not in all_modified_base_breakers:
                 final_obst.append(self.get_obst_for_breaker(base_breaker))
 
@@ -43,9 +41,25 @@ class Obstacler:
             if i != len(indices) - 1:
                 obs_str += ','
 
-        #debug only
-        #obs_str += '$id_{}'.format(breaker.breaker_id)
+        # debug only
+        # obs_str += '$id_{}'.format(breaker.breaker_id)
         if (self.index_mode):
             return obs_ind_list
         else:
             return obs_str
+
+    def merge_breakers_with_modifications(self, base_breakers, modifications):
+        final_breakers = []
+        all_modified_base_breakers_ids = []
+
+        for modification in modifications:
+            all_modified_base_breakers_ids.append(modification.base_id)
+            final_breakers.append(modification)
+
+        all_modified_base_breakers = np.unique(all_modified_base_breakers_ids)
+
+        for base_breaker in base_breakers:
+            if all_modified_base_breakers != [] and base_breaker.breaker_id not in all_modified_base_breakers:
+                final_breakers.append(base_breaker)
+
+        return final_breakers

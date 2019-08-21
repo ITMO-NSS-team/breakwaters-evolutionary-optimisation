@@ -4,6 +4,7 @@ from Optimisation import OptimisationTask
 from Optimisation.Objective import *
 from Configuration.Grid import BreakerPoint
 from Simulation import WaveModel
+from Simulation.WaveModel import SwanWaveModel
 import csv
 import uuid
 
@@ -108,23 +109,23 @@ class DifferentialOptimisationStrategy(OptimisationStrategyAbstract):
                 txt_genotype = ",".join(txt)
 
                 config_exists = False
+                configuration_label = uuid.uuid4().hex
 
-                with open('D://Projects//Sochi-prichal//breakwater-evo-opt//configs_catalog.csv',
-                          mode='r', newline='') as csv_file:
-                    sim_reader = csv.reader(csv_file, delimiter=',', quotechar='"')
-                    for row in sim_reader:
-                        if row[1] == txt_genotype:
-                            configuration_label = row[0]
-                            config_exists = True
-                            break
-                if not config_exists:
+                if isinstance(model, SwanWaveModel):
                     with open('D://Projects//Sochi-prichal//breakwater-evo-opt//configs_catalog.csv',
-                              mode='a', newline='') as csv_file:
-                        sim_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+                              mode='r', newline='') as csv_file:
+                        sim_reader = csv.reader(csv_file, delimiter=',', quotechar='"')
+                        for row in sim_reader:
+                            if row[1] == txt_genotype:
+                                configuration_label = row[0]
+                                config_exists = True
+                                break
+                    if not config_exists:
+                        with open('D://Projects//Sochi-prichal//breakwater-evo-opt//configs_catalog.csv',
+                                  mode='a', newline='') as csv_file:
+                            sim_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
-                        configuration_label = uuid.uuid4().hex
-
-                        sim_writer.writerow([f'{configuration_label}', txt_genotype])
+                            sim_writer.writerow([f'{configuration_label}', txt_genotype])
 
                 simulation_result = model.run_simulation_for_constructions(model.domain.base_breakers,
                                                                            proposed_breakers, configuration_label)

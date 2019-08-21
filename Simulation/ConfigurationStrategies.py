@@ -35,7 +35,7 @@ class GeomConfigurationStrategy(ConfigurationStrategyAbstract):
 
     def build_constructions(self, model_grid, base_breakers, modifications):
         obstacler = Obstacler(model_grid, index_mode=True)
-        return obstacler.get_obstacle_for_modification(base_breakers, modifications)
+        return obstacler.merge_breakers_with_modifications(base_breakers, modifications)
 
 
 class ConfigFileConfigurationStrategy(ConfigurationStrategyAbstract):
