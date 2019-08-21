@@ -36,9 +36,11 @@ class SimpleGeomWaveModel(WaveModel):
 class SwanWaveModel(WaveModel):
 
     def __init__(self, domain):
-        self.expensive = True
 
         sim_strategy = SwanSimulationStrategy()
         conf_strategy = ConfigFileConfigurationStrategy()
 
         super(SwanWaveModel, self).__init__(domain, sim_strategy, conf_strategy)
+
+        self.expensive = True
+

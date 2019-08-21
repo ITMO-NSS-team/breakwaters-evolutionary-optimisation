@@ -194,7 +194,6 @@ class SwanSimulationStrategy(SimulationStrategyAbstract):
                 'D:\\SWAN_sochi\\r\\hs{}.d'.format(configuration_info.configuration_label)):
             print("SWAN RUNNED")
             os.system(r'swanrun.bat {}'.format(configuration_info.info))
-            NotImplementedError
             print("SWAN FINISHED")
         # else:
         # print("FILE {} EXISTS".format(configuration_info.configuration_label))

@@ -98,9 +98,11 @@ class DifferentialOptimisationStrategy(OptimisationStrategyAbstract):
                 # TODO expensive check can be missed? investigate
                 new_fitness = obj.get_obj_value(model.domain, proposed_breakers)
                 if new_fitness is None:
+                    print ('BAD CONF')
                     return 9999
-                if model.expensive and new_fitness > sum(base_fintess):
-                    return 9999
+                #if model.expensive and (new_fitness/ base_fintess[obj_ind])  > sum(base_fintess):
+                #   print ('TOO EXP')
+                #   return 9999
                 fitness_value += (new_fitness / base_fintess[obj_ind]) * obj.importance
             if isinstance(obj, WaveHeightObjective):
                 # TODO read if already simulated
@@ -202,7 +204,7 @@ class DifferentialOptimisationStrategy(OptimisationStrategyAbstract):
 
         optimisation_result = optimize.differential_evolution(self.calculate_fitness, coords_bounds,
                                                               args=(model, task, default_fitness),
-                                                              popsize=400, maxiter=80, mutation=0.2, recombination=0.6,
+                                                              popsize=40, maxiter=80, mutation=0.2, recombination=0.6,
                                                               seed=42, disp=True)
 
         best_genotype = optimisation_result.x
