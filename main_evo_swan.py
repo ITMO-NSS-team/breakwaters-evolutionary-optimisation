@@ -1,6 +1,8 @@
 from Configuration.Domains import SochiHarbor
 from Simulation.WaveModel import SimpleGeomWaveModel, SwanWaveModel
-from Optimisation.Optimiser import ManualOptimiser, StubOptimiser, DifferentialEvolutionaryOptimiser
+from Optimisation.Optimiser import ManualOptimiser, StubOptimiser, DifferentialEvolutionaryOptimiser, \
+    ParetoEvolutionaryOptimiser
+
 from Breakers.Breaker import xy_to_points, Breaker
 
 from Optimisation.Objective import CostObjective, NavigationObjective, WaveHeightObjective, StructuralObjective
@@ -10,7 +12,7 @@ exp_domain = SochiHarbor()
 
 wave_model = SwanWaveModel(exp_domain)
 
-optimiser = DifferentialEvolutionaryOptimiser()
+optimiser = ParetoEvolutionaryOptimiser()
 
 base_modifications_for_tuning = [
     Breaker('mod1', list(map(xy_to_points, [[-1, -1], [-1, -1], [33, 22], [42, 17]])), 0, 'Ia'),

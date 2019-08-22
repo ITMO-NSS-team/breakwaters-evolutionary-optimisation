@@ -1,5 +1,8 @@
-from Optimisation.OptimisationStrategies import DifferentialOptimisationStrategy, ManualOptimisationStrategy, \
-    EmptyOptimisationStrategy
+from Optimisation.OptimisationStrategies.DiffirentialEvoStrategy import DifferentialOptimisationStrategy
+from Optimisation.OptimisationStrategies.ManualStrategy import ManualOptimisationStrategy
+from Optimisation.OptimisationStrategies.EmptyStrategy import EmptyOptimisationStrategy
+from Optimisation.OptimisationStrategies.SPEA2Strategy import SPEA2OptimisationStrategy
+
 from Optimisation.OptimisationTask import OptimisationTask
 
 
@@ -27,3 +30,9 @@ class DifferentialEvolutionaryOptimiser(Optimiser):
     def __init__(self):
         deoptim_strategy = DifferentialOptimisationStrategy()
         super(DifferentialEvolutionaryOptimiser, self).__init__(deoptim_strategy)
+
+
+class ParetoEvolutionaryOptimiser(Optimiser):
+    def __init__(self):
+        spea2_strategy = SPEA2OptimisationStrategy()
+        super(ParetoEvolutionaryOptimiser, self).__init__(spea2_strategy)

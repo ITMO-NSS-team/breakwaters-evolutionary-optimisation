@@ -7,40 +7,13 @@ from Simulation import WaveModel
 from Simulation.WaveModel import SwanWaveModel
 import csv
 import uuid
+from functools import partial
 
-
-class OptimisationResults(object):
-    def __init__(self, simulation_result, modifications, history):
-        self.simulation_result = simulation_result
-        self.modifications = modifications
-        self.history = history
-
-
-class OptimisationStrategyAbstract(metaclass=ABCMeta):
-
-    @abstractmethod
-    def optimise(self, model: WaveModel, task: OptimisationTask) -> OptimisationResults:
-        return
-
-
-class EmptyOptimisationStrategy(OptimisationStrategyAbstract):
-    def optimise(self, model: WaveModel, task: OptimisationTask):
-        modifications = task.possible_modifications
-
-        simulation_result = model.run_simulation_for_constructions(model.domain.base_breakers, modifications)
-
-        return OptimisationResults(simulation_result, modifications, [])
-
-
-class ManualOptimisationStrategy(OptimisationStrategyAbstract):
-    def optimise(self, model: WaveModel, task: OptimisationTask):
-        modifications = task.possible_modifications
-
-        # TODO: run all combinations and find best
-
-        simulation_result = model.run_simulation_for_constructions(model.domain.base_breakers, modifications)
-
-        return OptimisationResults(simulation_result, modifications, [])
+from EvoAlgs.SPEA2.DefaultSPEA2 import DefaultSPEA2
+from EvoAlgs.BreakersEvo.EvoOperators import calculate_objectives
+from EvoAlgs.SPEA2.Operators import default_operators
+from Optimisation.OptimisationStrategies.AbstractOptimisationStrategy import OptimisationStrategyAbstract, \
+    OptimisationResults
 
 
 class DifferentialOptimisationStrategy(OptimisationStrategyAbstract):
@@ -98,9 +71,9 @@ class DifferentialOptimisationStrategy(OptimisationStrategyAbstract):
                 # TODO expensive check can be missed? investigate
                 new_fitness = obj.get_obj_value(model.domain, proposed_breakers)
                 if new_fitness is None:
-                    print ('BAD CONF')
+                    print('BAD CONF')
                     return 9999
-                #if model.expensive and (new_fitness/ base_fintess[obj_ind])  > sum(base_fintess):
+                # if model.expensive and (new_fitness/ base_fintess[obj_ind])  > sum(base_fintess):
                 #   print ('TOO EXP')
                 #   return 9999
                 fitness_value += (new_fitness / base_fintess[obj_ind]) * obj.importance
@@ -204,7 +177,7 @@ class DifferentialOptimisationStrategy(OptimisationStrategyAbstract):
 
         optimisation_result = optimize.differential_evolution(self.calculate_fitness, coords_bounds,
                                                               args=(model, task, default_fitness),
-                                                              popsize=40, maxiter=80, mutation=0.2, recombination=0.6,
+                                                              popsize=20, maxiter=20, mutation=0.2, recombination=0.6,
                                                               seed=42, disp=True)
 
         best_genotype = optimisation_result.x

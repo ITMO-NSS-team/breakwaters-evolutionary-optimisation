@@ -20,10 +20,13 @@ class SimulationStrategyAbstract(metaclass=ABCMeta):
 class SimpleGeomSimulationStrategy(SimulationStrategyAbstract):
     def simulate(self, configuration_info):
 
-        # print(configuration_info.domain.fairways[0])
-
-        stop = 1
         hs = np.zeros(shape=(configuration_info.domain.model_grid.grid_y, configuration_info.domain.model_grid.grid_x))
+
+        stop = 2
+
+        if stop == 2:
+            return WaveSimulationResult(hs)
+
         self.heatmap2d(hs, configuration_info.info, configuration_info.domain.fairways)
 
         if stop == 1:
