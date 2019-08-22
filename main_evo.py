@@ -1,5 +1,5 @@
 from Configuration.Domains import SochiHarbor
-from Simulation.WaveModel import SimpleGeomWaveModel
+from Simulation.WaveModel import SimpleGeomWaveModel,SwanWaveModel
 from Optimisation.Optimiser import ManualOptimiser, StubOptimiser, DifferentialEvolutionaryOptimiser, \
     ParetoEvolutionaryOptimiser
 from Breakers.Breaker import xy_to_points, Breaker
@@ -15,7 +15,9 @@ random.seed(42)
 
 exp_domain = SochiHarbor()
 
-wave_model = SimpleGeomWaveModel(exp_domain)
+wave_model=SwanWaveModel(exp_domain)
+
+#wave_model = SimpleGeomWaveModel(exp_domain)
 
 optimiser = ParetoEvolutionaryOptimiser()
 
