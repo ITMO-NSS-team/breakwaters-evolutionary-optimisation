@@ -32,28 +32,6 @@ class ModelsVisualization():
         with sb.axes_style("white"):
             ax = sb.heatmap(hs, mask=mask,cmap='RdYlBu')
 
-
-        #plt.rcParams['figure.figsize'] = [20, 15]
-        #ax = plt.subplot()
-        #im = ax.imshow(hs)
-
-        #divider = make_axes_locatable(ax)
-        #cax = divider.append_axes("right", size="5%")
-
-        #plt.colorbar(im, cax=cax)
-
-
-
-        #plt.rcParams['figure.figsize'] = [20, 15]
-
-        #fig = plt.figure()
-        #ax = plt.gca()
-        #im = plt.imshow(hs, cmap='viridis')
-        #cax = fig.add_axes([ax.get_position().x1 + 0.01, ax.get_position().y0, 0.02, ax.get_position().height])
-        #plt.imshow(hs, cmap='viridis')
-        #plt.colorbar()
-
-
         breaker_points = []
         for i in range(len(all_breakers)):
             for j in range(1, len(all_breakers[i].points)):
