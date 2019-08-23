@@ -67,7 +67,7 @@ class StructuralObjective(Objective):
         is_self_intersection = any(
             [any([self._selfintersection(breaker1, breaker2) for breaker2 in breakers]) for breaker1 in breakers])
         if not is_self_intersection: return 1
-        return None
+        return 5
 
 
 class CostObjective(Objective):
@@ -114,7 +114,7 @@ class NavigationObjective(Objective):
         if min_dist_to_fairway > 0.1:
             navigation_difficultness = 1 / min_dist_to_fairway
             return navigation_difficultness
-        return None
+        return 20
 
 
 class WaveHeightObjective(Objective):

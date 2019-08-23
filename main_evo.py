@@ -26,7 +26,7 @@ base_modifications_for_tuning = [
     Breaker('mod2_bottom', list(map(xy_to_points, [[-1, -1], [-1, -1], [50, 39]])), 0, 'II'),
     Breaker('mod3long', list(map(xy_to_points, [[-1, -1], [-1, -1], [56, 32], [67, 35]])), 0.9, 'IIIa'),
     Breaker('mod3short', list(map(xy_to_points, [[-1, -1], [-1, -1], [63, 38], [67, 39]])), 0.9, 'IIIb'),
-    Breaker('mod_add', list(map(xy_to_points, [[-1, -1], [-1, -1], [56, 38]])), 0.9, '-'),
+    Breaker('mod_add', list(map(xy_to_points, [[-1, -1], [-1, -1], [56, 42]])), 0.9, '-'),
 ]
 
 mod_points_to_optimise = {  # order is important
