@@ -1,7 +1,8 @@
-import numpy as np
-from typing import List
-from Configuration.Grid import BreakerPoint
 from math import sqrt
+from typing import List
+
+from Configuration.Grid import BreakerPoint
+
 
 def xy_to_points(xy):
     return BreakerPoint(xy[0], xy[1])

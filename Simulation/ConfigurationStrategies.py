@@ -1,21 +1,22 @@
-from abc import ABCMeta, abstractmethod
-import numpy as np
-import sys
 import fileinput
-import re
 import os
+import re
 import shutil
+import sys
 import time
-import uuid
+from abc import ABCMeta, abstractmethod
 
-from Breakers.Obstacler import Obstacler
+import numpy as np
+
+from Breakers.BreakersUtils import BreakersUtils
 
 
 class ConfigurationInfo(object):
-    def __init__(self, info, domain, label):
-        self.info = info
+    def __init__(self, breakers, domain, label, file_name=None):
+        self.breakers = breakers
         self.domain = domain
         self.configuration_label = label
+        self.file_name = file_name
 
 
 class ConfigurationStrategyAbstract(metaclass=ABCMeta):
@@ -24,22 +25,49 @@ class ConfigurationStrategyAbstract(metaclass=ABCMeta):
     def configurate(self, domain, constructions_data, configuration_label):
         return
 
-    @abstractmethod
-    def build_constructions(self, model_grid, base_breakers, modifications):
-        return
-
 
 class GeomConfigurationStrategy(ConfigurationStrategyAbstract):
-    def configurate(self, domain, constructions_data, configuration_label):
-        return ConfigurationInfo(constructions_data, domain, configuration_label)
 
-    def build_constructions(self, model_grid, base_breakers, modifications):
-        obstacler = Obstacler(model_grid, index_mode=True)
-        return obstacler.merge_breakers_with_modifications(base_breakers, modifications)
+    def configurate(self, domain, modified_breakers, configuration_label):
+        all_breakers = BreakersUtils.merge_breakers_with_modifications(domain.base_breakers, modified_breakers)
+        return ConfigurationInfo(all_breakers, domain, configuration_label)
 
 
 class ConfigFileConfigurationStrategy(ConfigurationStrategyAbstract):
-    def configurate(self, domain, constructions_data, configuration_label):
+
+    def _get_obstacle_for_modification(self, grid, base_breakers, modifications):
+        final_obst = []
+        all_modified_base_breakers_ids = []
+
+        for modification in modifications:
+            all_modified_base_breakers_ids.append(modification.base_id)
+            final_obst.append(self._get_obst_for_breaker(grid, modification))
+
+        all_modified_base_breakers = np.unique(all_modified_base_breakers_ids)
+
+        for base_breaker in base_breakers:
+            if all_modified_base_breakers != [] and base_breaker.breaker_id not in all_modified_base_breakers:
+                final_obst.append(self._get_obst_for_breaker(grid, base_breaker))
+
+        final_obst = np.unique(final_obst)
+        return final_obst
+
+    def _get_obst_for_breaker(self, grid, breaker):
+        indices = breaker.points
+        obs_str = 'OBSTACLE TRANSM 0. REFL {} LINE '.format(breaker.reflection)
+        obs_ind_list = []
+        for i in range(0, len(indices)):
+            p_cur_ind = breaker.points[i]
+            obs_ind_list.append([p_cur_ind.x, p_cur_ind.y])
+
+            p_cur = grid.get_coords_meter(breaker.points[i])
+            obs_str += '{},{}'.format(int(round(p_cur[0])), int(round(p_cur[1])))
+            if i != len(indices) - 1:
+                obs_str += ','
+
+        return obs_str
+
+    def configurate(self, domain, modified_breakers, configuration_label):
         out_file_name = 'hs'
         base_name = 'CONFIG_opt.swn'
         os.chdir('D:\\SWAN_sochi\\')
@@ -47,9 +75,13 @@ class ConfigFileConfigurationStrategy(ConfigurationStrategyAbstract):
         if not os.path.isfile(
                 f'D:\\SWAN_sochi\\r\\hs{configuration_label}.d'):
 
+            all_obstacles = self._get_obstacle_for_modification(domain.model_grid, domain.base_breakers,
+                                                                modified_breakers)
+            all_breakers = BreakersUtils.merge_breakers_with_modifications(domain.base_breakers, modified_breakers)
+
             for i, line in enumerate(fileinput.input(base_name, inplace=1)):
                 if 'optline' in line:
-                    for obs_str in constructions_data:
+                    for obs_str in all_obstacles:
                         sys.stdout.write('{}\n'.format(obs_str))
                     sys.stdout.write('$optline\n')
                 elif 'OBSTACLE' in line:
@@ -70,8 +102,7 @@ class ConfigFileConfigurationStrategy(ConfigurationStrategyAbstract):
         else:
             new_config_name = None
 
-        return ConfigurationInfo(new_config_name, domain, configuration_label)
+        return ConfigurationInfo(all_breakers, domain, configuration_label, new_config_name)
 
     def build_constructions(self, model_grid, base_breakers, modifications):
-        obstacler = Obstacler(model_grid, index_mode=False)
-        return obstacler.get_obstacle_for_modification(base_breakers, modifications)
+        return self._get_obstacle_for_modification(model_grid, base_breakers, modifications)

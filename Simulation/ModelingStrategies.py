@@ -1,14 +1,14 @@
-from abc import ABCMeta, abstractmethod
-import numpy as np
 import os
-from more_itertools import numeric_range
-from sympy import Line, Point, Segment, intersection
 import re
+from abc import ABCMeta, abstractmethod
+
 import matplotlib.pyplot as plt
-from Simulation.Results import WaveSimulationResult
+import numpy as np
+from sympy import Line, Point, Segment, intersection
+
 from Simulation.ConfigurationStrategies import ConfigurationInfo
 from Simulation.ModelVisualization import ModelsVisualization
-
+from Simulation.Results import WaveSimulationResult
 
 
 class SimulationStrategyAbstract(metaclass=ABCMeta):
@@ -20,16 +20,14 @@ class SimulationStrategyAbstract(metaclass=ABCMeta):
 
 class SimpleGeomSimulationStrategy(SimulationStrategyAbstract):
 
+    def simulate(self, configuration_info: ConfigurationInfo):
 
-    def simulate(self, configuration_info):
-
-        # print(configuration_info.domain.fairways[0])
-        visualization = ModelsVisualization("SimpleGeomSimulationStrategyModelVisualuization")
+        visualiser = ModelsVisualization(configuration_info.configuration_label)
 
         stop = 0
         hs = np.zeros(shape=(configuration_info.domain.model_grid.grid_y, configuration_info.domain.model_grid.grid_x))
-        visualization.SimpleModelVisualization(hs, configuration_info.info, configuration_info.domain.fairways)
-        #self.heatmap2d(hs, configuration_info.info, configuration_info.domain.fairways)
+        # visualiser.SimpleModelVisualization(hs, configuration_info.breakers, configuration_info.domain.fairways)
+        # self.heatmap2d(hs, configuration_info.info, configuration_info.domain.fairways)
 
         if stop == 1:
             return WaveSimulationResult(hs)
@@ -48,34 +46,37 @@ class SimpleGeomSimulationStrategy(SimulationStrategyAbstract):
 
         wind_line = Line(Point(0, 0), p1)
 
-        num_of_iteration=0
+        num_of_iteration = 0
 
-        for i in numeric_range(0, configuration_info.domain.model_grid.grid_x):
+        points_to_simulate = configuration_info.domain.target_points
 
-            for j in numeric_range(0, configuration_info.domain.model_grid.grid_y):
+        # only for targt points
+        for pt in points_to_simulate:
+            i = pt.x
+            j = pt.y
+            if Point(i, j) in wind_line:
+                hs[j][i] = self.WaveHeight(wind_line, configuration_info.info, {"x": i, "y": j},
+                                           configuration_info.domain.wind_direction, \
+                                           configuration_info.domain.max_height_of_wave)
+            else:
+                parallel_line_of_wind = wind_line.parallel_line([i, j])
 
-                if Point(i, j) in wind_line:
-                    hs[j][i] = self.WaveHeight(wind_line, configuration_info.info, {"x": i, "y": j},
-                                               configuration_info.domain.wind_direction, \
-                                               configuration_info.domain.max_height_of_wave)
-                else:
-                    parallel_line_of_wind = wind_line.parallel_line([i, j])
+                hs[j][i] = self.WaveHeight(parallel_line_of_wind, configuration_info.breakers,
+                                           {"x": i, "y": j}, configuration_info.domain.wind_direction, \
+                                           configuration_info.domain.max_height_of_wave)
 
-                    hs[j][i] = self.WaveHeight(parallel_line_of_wind, configuration_info.info,
-                                               {"x": i, "y": j}, configuration_info.domain.wind_direction, \
-                                               configuration_info.domain.max_height_of_wave)
+            num_of_iteration += 1
+            # print(num_of_iteration)
 
-                num_of_iteration+=1
-                print(num_of_iteration)
+        if False:
+            with open('out.txt', 'w') as out:
+                for i in range(len(hs)):
+                    for j in range(len(hs[0])):
+                        out.write('{}    '.format(hs[i][j]))
+                    out.write("\r\n")
 
-        with open('out.txt', 'w') as out:
-            for i in range(len(hs)):
-                for j in range(len(hs[0])):
-                    out.write('{}    '.format(hs[i][j]))
-                out.write("\r\n")
-
-        #self.heatmap2d(hs, configuration_info.info, configuration_info.domain.fairways)
-        self.visualization.SimpleModelVisualization(hs,configuration_info.info,configuration_info.domain.fairways)
+        # self.heatmap2d(hs, configuration_info.info, configuration_info.domain.fairways)
+        visualiser.simple_visualise(hs, configuration_info.breakers, configuration_info.domain.fairways)
 
         return WaveSimulationResult(hs)
 
@@ -83,25 +84,24 @@ class SimpleGeomSimulationStrategy(SimulationStrategyAbstract):
         plt.imshow(arr, cmap='viridis')
         plt.colorbar()
 
-
-
         for i in range(len(base_breakers)):
             for j in range(1, len(base_breakers[i].points)):
                 p1, p2 = [base_breakers[i].points[j - 1].x, base_breakers[i].points[j].x], \
                          [base_breakers[i].points[j - 1].y, base_breakers[i].points[j].y]
                 plt.plot(p1, p2, c='r', linewidth=3, marker='.')
 
+                plt.annotate(
+                    "(" + str(base_breakers[i].points[j - 1].x) + "," + str(base_breakers[i].points[j - 1].y) + ")",
+                    (base_breakers[i].points[j - 1].x, base_breakers[i].points[j - 1].y))
 
-                plt.annotate("(" + str(base_breakers[i].points[j-1].x) + "," + str(base_breakers[i].points[j-1].y) + ")",
-                             (base_breakers[i].points[j-1].x, base_breakers[i].points[j-1].y))
+                if j == len(base_breakers[i].points) - 1:
+                    plt.annotate(
+                        "(" + str(base_breakers[i].points[j].x) + "," + str(base_breakers[i].points[j].y) + ")",
+                        (base_breakers[i].points[j].x, base_breakers[i].points[j].y))
 
-                if j==len(base_breakers[i].points)-1:
-                    plt.annotate("(" + str(base_breakers[i].points[j].x) + "," + str(base_breakers[i].points[j].y) + ")",
-                             (base_breakers[i].points[j].x, base_breakers[i].points[j].y))
-
-            #for j in range(len(base_breakers[i].points)):
-                #plt.annotate("(" + str(base_breakers[i].points[j].x) + "," + str(base_breakers[i].points[j].y) + ")",
-                             #(base_breakers[i].points[j].x, base_breakers[i].points[j].y))
+            # for j in range(len(base_breakers[i].points)):
+            # plt.annotate("(" + str(base_breakers[i].points[j].x) + "," + str(base_breakers[i].points[j].y) + ")",
+            # (base_breakers[i].points[j].x, base_breakers[i].points[j].y))
 
         for j in range(len(fairways)):
             p1, p2 = [fairways[j].x1, fairways[j].x2], [fairways[j].y1, fairways[j].y2]
@@ -133,17 +133,12 @@ class SimpleGeomSimulationStrategy(SimulationStrategyAbstract):
 
                         if Point(point["x"], point["y"]) in Segment(intersection_between_wind_and_breaker.points[0], \
                                                                     intersection_between_wind_and_breaker.points[1]):
-
                             heights_list.append(0)
-
-
                         else:
-                            print(breaker_line)
+                            # print(breaker_line)
                             if wind_direction == 0:
                                 if float(breaker_line.points[0].y) > point["y"]:
-
                                     heights_list.append(breaker_line.distance(Point(point["x"], point["y"])))
-
                                 else:
                                     heights_list.append(max_height_of_wave)
 
@@ -206,19 +201,18 @@ class SimpleGeomSimulationStrategy(SimulationStrategyAbstract):
 
 class SwanSimulationStrategy(SimulationStrategyAbstract):
 
-    def simulate(self, configuration_info):
+    def simulate(self, configuration_info: ConfigurationInfo):
         if not os.path.isfile(
                 'D:\\SWAN_sochi\\r\\hs{}.d'.format(configuration_info.configuration_label)):
             print("SWAN RUNNED")
-            os.system(r'swanrun.bat {}'.format(configuration_info.info))
+            os.system(r'swanrun.bat {}'.format(configuration_info.file_name))
             print("SWAN FINISHED")
-        # else:
-        # print("FILE {} EXISTS".format(configuration_info.configuration_label))
 
         hs = np.genfromtxt('D:\\SWAN_sochi\\r\\hs{}.d'.format(configuration_info.configuration_label))
 
-        visualization = ModelsVisualization("SwanSimulationStrategyModelVisualuization")
+        visualiser = ModelsVisualization(f'swan_{configuration_info.configuration_label}')
 
-        visualization.SimpleModelVisualization(hs,configuration_info.domain.base_breakers,configuration_info.domain.fairways)
+        visualiser.simple_visualise(hs, configuration_info.breakers,
+                                    configuration_info.domain.fairways)
 
         return WaveSimulationResult(hs)

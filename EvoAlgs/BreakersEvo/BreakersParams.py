@@ -1,7 +1,4 @@
-import random
-import numpy as np
-
-#TODO implement non-string genotype
+# TODO implement non-string genotype
 class BreakersParams:
 
     def __init__(self, genotype_string):

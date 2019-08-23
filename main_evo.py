@@ -1,5 +1,5 @@
 from Configuration.Domains import SochiHarbor
-from Simulation.WaveModel import SimpleGeomWaveModel,SwanWaveModel
+from Simulation.WaveModel import SimpleGeomWaveModel, SwanWaveModel
 from Optimisation.Optimiser import ManualOptimiser, StubOptimiser, DifferentialEvolutionaryOptimiser, \
     ParetoEvolutionaryOptimiser
 from Breakers.Breaker import xy_to_points, Breaker
@@ -9,15 +9,14 @@ from Optimisation.OptimisationTask import OptimisationTask
 import random
 import numpy as np
 
-
 np.random.seed(42)
 random.seed(42)
 
 exp_domain = SochiHarbor()
 
-wave_model=SwanWaveModel(exp_domain)
+wave_model = SimpleGeomWaveModel(exp_domain)
 
-#wave_model = SimpleGeomWaveModel(exp_domain)
+# wave_model = SimpleGeomWaveModel(exp_domain)
 
 optimiser = ParetoEvolutionaryOptimiser()
 
@@ -42,13 +41,13 @@ mod_points_to_optimise = {  # order is important
 selected_modifications_for_tuning = base_modifications_for_tuning
 selected_mod_points_to_optimise = [mod_points_to_optimise[mod.breaker_id] for mod in base_modifications_for_tuning]
 
-objectives = [#StructuralObjective(importance=1),
-              CostObjective(importance=3),
-              #NavigationObjective(importance=1),
-              WaveHeightObjective(importance=2)]
+objectives = [  # StructuralObjective(importance=1),
+    CostObjective(importance=3),
+    # NavigationObjective(importance=1),
+    WaveHeightObjective(importance=2)]
 
 task = OptimisationTask(objectives, selected_modifications_for_tuning, mod_points_to_optimise, )
 
 opt_result = optimiser.optimise(wave_model, task)
 
-#hs0 = opt_result.simulation_result.get_output_for_target_points(exp_domain.target_points[0])
+# hs0 = opt_result.simulation_result.get_output_for_target_points(exp_domain.target_points[0])

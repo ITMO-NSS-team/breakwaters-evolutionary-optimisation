@@ -36,7 +36,7 @@ class DifferentialOptimisationStrategy(OptimisationStrategyAbstract):
             chromosome.append(list(chain.from_iterable(points_to_encode)))
         return list(chain.from_iterable(chromosome))
 
-    def build_breakers_from_genotype(self, genotype, task):
+    def _build_breakers_from_genotype(self, genotype, task):
         gen_id = 0
 
         new_modifications = []
@@ -55,6 +55,15 @@ class DifferentialOptimisationStrategy(OptimisationStrategyAbstract):
                 anchor_point = modification.points[point_ind]
             new_modifications.append(modification)
         return new_modifications
+
+    def _generate_genotype_from_breakers(self, breakers):
+        txt = []
+        for pb in breakers:
+            for pbp in pb.points:
+                txt.append(str(int(pbp.x)))
+                txt.append(str(int(pbp.y)))
+        txt_genotype = ",".join(txt)
+        return txt_genotype
 
     def calculate_fitness(self, genotype, model, task, base_fintess):
         fitness_value = 0

@@ -29,7 +29,6 @@ class BreakerPoint(GridPoint):
 
     def from_polar(self, length, direction, anchor_point):
         rad_grad = 180 / np.pi
-
         x = int(round(length * np.sin(direction / rad_grad) + anchor_point.x))
         y = int(round(length * np.cos(direction / rad_grad) + anchor_point.y))
 
