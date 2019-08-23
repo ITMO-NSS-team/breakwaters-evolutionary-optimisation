@@ -30,7 +30,7 @@ class ModelsVisualization():
                     mask[i][j] = 0
 
         with sb.axes_style("white"):
-            ax = sb.heatmap(hs, mask=mask, vmax=.3,cmap='RdYlBu')
+            ax = sb.heatmap(hs, mask=mask,cmap='RdYlBu')
 
 
         #plt.rcParams['figure.figsize'] = [20, 15]
