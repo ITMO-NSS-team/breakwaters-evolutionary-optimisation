@@ -1,16 +1,58 @@
 import matplotlib.pyplot as plt
 import numpy as np
-
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+import seaborn as sb
 
 class ModelsVisualization():
 
     def __init__(self, configuration_label):
         self.configuration_label = configuration_label
 
-    def simple_visualise(self, hs: np.ndarray, all_breakers, fairways):
-        plt.rcParams['figure.figsize'] = [20, 15]
-        plt.imshow(hs, cmap='viridis')
-        plt.colorbar()
+    def simple_visualise(self, hs: np.ndarray, all_breakers, fairways,target_points):
+
+        plt.rcParams['figure.figsize'] = [15, 10]
+        ax = plt.subplot()
+
+        values = str(round(hs[target_points[0].y][target_points[0].x], 2))
+        for i in range(1, len(target_points)):
+            values += ', ' + str(round(hs[target_points[i].y][target_points[i].x], 2))
+
+        ax.set_title('Высота волны в целевых точках: ' + values)
+
+        map_of_place = np.loadtxt('map.txt')
+
+        mask = np.zeros_like(map_of_place)
+        for i in range(len(map_of_place)):
+            for j in range(len(map_of_place[0])):
+                if map_of_place[i][j] == -9.:
+                    mask[i][j] = 1
+                else:
+                    mask[i][j] = 0
+
+        with sb.axes_style("white"):
+            ax = sb.heatmap(hs, mask=mask, vmax=.3,cmap='RdYlBu')
+
+
+        #plt.rcParams['figure.figsize'] = [20, 15]
+        #ax = plt.subplot()
+        #im = ax.imshow(hs)
+
+        #divider = make_axes_locatable(ax)
+        #cax = divider.append_axes("right", size="5%")
+
+        #plt.colorbar(im, cax=cax)
+
+
+
+        #plt.rcParams['figure.figsize'] = [20, 15]
+
+        #fig = plt.figure()
+        #ax = plt.gca()
+        #im = plt.imshow(hs, cmap='viridis')
+        #cax = fig.add_axes([ax.get_position().x1 + 0.01, ax.get_position().y0, 0.02, ax.get_position().height])
+        #plt.imshow(hs, cmap='viridis')
+        #plt.colorbar()
+
 
         breaker_points = []
         for i in range(len(all_breakers)):
@@ -39,5 +81,5 @@ class ModelsVisualization():
 
         # plt.figure(figsize=(4, 5))
         plt.savefig(f'img/{self.configuration_label}.png')
-        # plt.show()
+        #plt.show()
         plt.clf()
