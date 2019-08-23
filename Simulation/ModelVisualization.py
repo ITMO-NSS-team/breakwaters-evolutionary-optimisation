@@ -30,14 +30,14 @@ class ModelsVisualization():
                     mask[i][j] = 0
 
         with sb.axes_style("white"):
-            ax = sb.heatmap(hs, mask=mask,cmap='RdYlBu')
+            ax = sb.heatmap(hs, mask=mask,vmax=1,cmap='RdYlBu')
 
         breaker_points = []
         for i in range(len(all_breakers)):
             for j in range(1, len(all_breakers[i].points)):
                 p1, p2 = [all_breakers[i].points[j - 1].x, all_breakers[i].points[j].x], \
                          [all_breakers[i].points[j - 1].y, all_breakers[i].points[j].y]
-                plt.plot(p1, p2, c='r', linewidth=3, marker='.')
+                plt.plot(p1, p2, c='r', linewidth=4, marker='o')
 
                 if [all_breakers[i].points[j - 1].x, all_breakers[i].points[j - 1].y] not in breaker_points:
                     breaker_points.append([all_breakers[i].points[j - 1].x, all_breakers[i].points[j - 1].y])
