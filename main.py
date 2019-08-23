@@ -1,23 +1,18 @@
-from Configuration.Domains import SochiHarbor
-from Simulation.WaveModel import SimpleGeomWaveModel
-from Optimisation.Optimiser import ManualOptimiser, StubOptimiser
-from Breakers.Breaker import xy_to_points, Breaker
+import winrm
 
-exp_domain = SochiHarbor()
+ps_script_1 = r"""Copy-Item \\192.168.13.1\share\Deeva\CONFIG_v0.{s} C:\\Users\\nano_user
+""".format(s="swn")
 
-wave_model = SimpleGeomWaveModel(exp_domain)
+ps_script_2 = r"""& D:\{SWAN}_sochi\swanrun.bat CONFIG_v0
+""".format(SWAN="SWAN")
 
-optimiser = StubOptimiser()
+ps_script_3 = r"""Copy-Item  C:\\Users\\{nano_user}\\results\\HSign_v0.dat \\192.168.13.1\share\Deeva
+""".format(nano_user="nano_user")
+script = ps_script_1 + ps_script_2 + ps_script_3
+s = winrm.Session('192.168.13.125', auth=('nano_user', 'uit2Zqhj4c'))
+r1 = s.run_ps(script)
 
-manual_modifications = {
-    'mod1': Breaker_descr(list(map(xy_to_points, [[30, 20], [33, 22], [42, 17]])), 0, 'Ia'),
-    'mod2': Breaker_descr(list(map(xy_to_points, [[24, 16], [33, 22], [42, 17]])), 0, 'Ia'),
-    'mod12': Breaker_descr(list(map(xy_to_points, [[50, 24], [50, 32], [50, 39]])), 0, 'II'),
-    'mod26': Breaker_descr(list(map(xy_to_points, [[56, 40], [56, 38]])), 0, '-'),
-}
-
-opt_result = optimiser.optimise(wave_model, manual_modifications, [])
-
-hs0 = opt_result.simulation_result.get_output_for_target_point(exp_domain.target_points[0])
-
-print(hs0)
+out = r1.std_out
+# s.run_ps(ps_script_3)
+print(out)
+print('end')

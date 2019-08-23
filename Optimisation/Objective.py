@@ -73,7 +73,7 @@ class StructuralObjective(Objective):
 class CostObjective(Objective):
 
     def get_obj_value(self, domain, breakers):
-        cost = sum([breaker.get_length() for breaker in breakers])
+        cost = sum([breaker.get_length() for breaker in breakers])*10
         return cost
 
 

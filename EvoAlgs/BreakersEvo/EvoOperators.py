@@ -46,7 +46,7 @@ task = OptimisationTask(objectives, selected_modifications_for_tuning, mod_point
 
 # TODO refactor
 NPARAMS = 24
-len_range = [0, 5]
+len_range = [0, 1]
 dir_range = [0, 360]
 
 exp_domain = SochiHarbor()
@@ -113,6 +113,7 @@ def calculate_objectives(model, task, pop):
                                                                            proposed_breakers)
                 new_obj = obj.get_obj_value(model.domain, proposed_breakers, simulation_result)
                 objectives.append(new_obj)
+        print(objectives)
         p.objective = objectives
 
 

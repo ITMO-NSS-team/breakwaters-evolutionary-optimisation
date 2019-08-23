@@ -32,8 +32,9 @@ class BreakerPoint(GridPoint):
         x = int(round(length * np.sin(direction / rad_grad) + anchor_point.x))
         y = int(round(length * np.cos(direction / rad_grad) + anchor_point.y))
 
-        self.x = x
-        self.y = y
+        #TODO real grid size
+        self.x = max(min(x, 84),0)
+        self.y = min(min(y, 59),0)
 
         return BreakerPoint(x, y)
 

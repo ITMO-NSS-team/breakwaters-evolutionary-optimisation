@@ -8,13 +8,16 @@ from Optimisation.Objective import CostObjective, NavigationObjective, WaveHeigh
 from Optimisation.OptimisationTask import OptimisationTask
 from Optimisation.Optimiser import ParetoEvolutionaryOptimiser
 from Simulation.WaveModel import SwanWaveModel
+from Simulation.СomputationalEnvironment import SwanWinRemoteComputationalManager
 
-np.random.seed(42)
-random.seed(42)
+seed = 42
+np.random.seed(seed)
+random.seed(seed)
 
 exp_domain = SochiHarbor()
 
-wave_model = SwanWaveModel(exp_domain)
+computational_manager = SwanWinRemoteComputationalManager(["125"])
+wave_model = SwanWaveModel(exp_domain, None)
 
 optimiser = ParetoEvolutionaryOptimiser()
 

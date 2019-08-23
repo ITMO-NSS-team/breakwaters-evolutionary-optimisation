@@ -9,18 +9,19 @@ from sympy import Line, Point, Segment, intersection
 from Simulation.ConfigurationStrategies import ConfigurationInfo
 from Simulation.ModelVisualization import ModelsVisualization
 from Simulation.Results import WaveSimulationResult
+from Simulation.СomputationalEnvironment import SwanComputationalManager, ComputationalManager
 
 
 class SimulationStrategyAbstract(metaclass=ABCMeta):
 
     @abstractmethod
-    def simulate(self, configuration_info: ConfigurationInfo):
+    def simulate(self, configuration_info: ConfigurationInfo, computational_manager: ComputationalManager):
         return
 
 
 class SimpleGeomSimulationStrategy(SimulationStrategyAbstract):
 
-    def simulate(self, configuration_info: ConfigurationInfo):
+    def simulate(self, configuration_info: ConfigurationInfo, computational_manager=None):
 
         visualiser = ModelsVisualization(configuration_info.configuration_label)
 
@@ -202,18 +203,24 @@ class SimpleGeomSimulationStrategy(SimulationStrategyAbstract):
 
 class SwanSimulationStrategy(SimulationStrategyAbstract):
 
-    def simulate(self, configuration_info: ConfigurationInfo):
-        if not os.path.isfile(
-                'D:\\SWAN_sochi\\r\\hs{}.d'.format(configuration_info.configuration_label)):
-            print("SWAN RUNNED")
-            os.system(r'swanrun.bat {}'.format(configuration_info.file_name))
-            print("SWAN FINISHED")
+    def simulate(self, configuration_info: ConfigurationInfo, computational_manager: SwanComputationalManager):
 
-        hs = np.genfromtxt('D:\\SWAN_sochi\\r\\hs{}.d'.format(configuration_info.configuration_label))
+        if computational_manager is None:
+            if not os.path.isfile(
+                    'D:\\SWAN_sochi\\r\\hs{}.d'.format(configuration_info.configuration_label)):
+                print("SWAN RUNNED")
+                os.system(r'swanrun.bat {}'.format(configuration_info.file_name))
+                print("SWAN FINISHED")
+
+            hs = np.genfromtxt('D:\\SWAN_sochi\\r\\hs{}.d'.format(configuration_info.configuration_label))
+        else:
+            out_file_name = f'hs{configuration_info.configuration_label}.d'
+            computational_manager.execute(configuration_info.file_name,out_file_name)
+            hs = np.genfromtxt(f'D:\\sim_results_storage\\{out_file_name}')
 
         visualiser = ModelsVisualization(f'swan_{configuration_info.configuration_label}')
 
         visualiser.simple_visualise(hs, configuration_info.breakers,
-                                    configuration_info.domain.fairways)
+                                    configuration_info.domain.fairways, configuration_info.domain.target_points)
 
         return WaveSimulationResult(hs)
