@@ -70,6 +70,8 @@ class ConfigFileConfigurationStrategy(ConfigurationStrategyAbstract):
     def configurate(self, domain, modified_breakers, configuration_label):
         out_file_name = 'hs'
         base_name = 'CONFIG_opt.swn'
+
+        saved_work_dir = os.getcwd()
         os.chdir('D:\\SWAN_sochi\\')
 
         if not os.path.isfile(
@@ -101,6 +103,8 @@ class ConfigFileConfigurationStrategy(ConfigurationStrategyAbstract):
             time.sleep(2)
         else:
             new_config_name = None
+
+        os.chdir(saved_work_dir)
 
         return ConfigurationInfo(all_breakers, domain, configuration_label, new_config_name)
 

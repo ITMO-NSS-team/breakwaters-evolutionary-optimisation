@@ -7,6 +7,7 @@ from EvoAlgs.BreakersEvo.BreakersEvoUtils import BreakersEvoUtils
 from Simulation.ConfigurationStrategies import GeomConfigurationStrategy, ConfigFileConfigurationStrategy, \
     ConfigurationInfo
 from Simulation.ModelingStrategies import SimpleGeomSimulationStrategy, SwanSimulationStrategy
+from Simulation.Results import SimulationResult
 from Simulation.СomputationalEnvironment import SwanComputationalManager, ComputationalManager
 
 
@@ -27,7 +28,7 @@ class WaveModel(object):
     def configurate(self, modifications, configuration_label: str):
         return self._configuration_strategy.configurate(self.domain, modifications, configuration_label)
 
-    def run_simulation_for_constructions(self, base_breakers, modifications):
+    def run_simulation_for_constructions(self, base_breakers, modifications) -> SimulationResult:
         configuration_label = uuid.uuid4().hex
 
         if self.expensive:

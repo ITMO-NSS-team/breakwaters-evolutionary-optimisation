@@ -8,8 +8,10 @@ class SimulationResult(object):
 
 
 class WaveSimulationResult(SimulationResult):
-    def __init__(self, hs):
+    def __init__(self, hs, configuration_label):
         self.hs = hs
+        #TODO move to parent
+        self.configuration_label = configuration_label
 
     def get_output_for_target_points(self, points):
         if isinstance(points, list):

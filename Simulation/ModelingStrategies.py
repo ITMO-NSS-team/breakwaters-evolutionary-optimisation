@@ -31,7 +31,7 @@ class SimpleGeomSimulationStrategy(SimulationStrategyAbstract):
         # self.heatmap2d(hs, configuration_info.info, configuration_info.domain.fairways)
 
         if stop == 1:
-            return WaveSimulationResult(hs)
+            return WaveSimulationResult(hs, configuration_info.configuration_label)
 
         if configuration_info.domain.wind_direction == 0 or configuration_info.domain.wind_direction == 180:
             p1 = Point(0, 1)
@@ -80,7 +80,7 @@ class SimpleGeomSimulationStrategy(SimulationStrategyAbstract):
         visualiser.simple_visualise(hs, configuration_info.breakers, configuration_info.domain.fairways,\
                                     configuration_info.domain.target_points)
 
-        return WaveSimulationResult(hs)
+        return WaveSimulationResult(hs, configuration_info.configuration_label)
 
     def heatmap2d(self, arr: np.ndarray, base_breakers, fairways):
         plt.imshow(arr, cmap='viridis')
@@ -209,7 +209,13 @@ class SwanSimulationStrategy(SimulationStrategyAbstract):
             if not os.path.isfile(
                     'D:\\SWAN_sochi\\r\\hs{}.d'.format(configuration_info.configuration_label)):
                 print("SWAN RUNNED")
+                saved_work_dir = os.getcwd()
+                os.chdir('D:\\SWAN_sochi\\')
+
                 os.system(r'swanrun.bat {}'.format(configuration_info.file_name))
+
+                os.chdir(saved_work_dir)
+
                 print("SWAN FINISHED")
 
             hs = np.genfromtxt('D:\\SWAN_sochi\\r\\hs{}.d'.format(configuration_info.configuration_label))
@@ -218,9 +224,4 @@ class SwanSimulationStrategy(SimulationStrategyAbstract):
             computational_manager.execute(configuration_info.file_name,out_file_name)
             hs = np.genfromtxt(f'D:\\sim_results_storage\\{out_file_name}')
 
-        visualiser = ModelsVisualization(f'swan_{configuration_info.configuration_label}')
-
-        visualiser.simple_visualise(hs, configuration_info.breakers,
-                                    configuration_info.domain.fairways, configuration_info.domain.target_points)
-
-        return WaveSimulationResult(hs)
+        return WaveSimulationResult(hs, configuration_info.configuration_label)

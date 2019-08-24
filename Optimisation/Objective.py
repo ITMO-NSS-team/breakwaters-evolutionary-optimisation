@@ -64,10 +64,10 @@ class StructuralObjective(Objective):
 
     def get_obj_value(self, domain, breakers):
 
-        is_self_intersection = any(
-            [any([self._selfintersection(breaker1, breaker2) for breaker2 in breakers]) for breaker1 in breakers])
-        if not is_self_intersection: return 1
-        return 5
+        num_self_intersection = sum(
+            [sum([int(self._selfintersection(breaker1, breaker2)) for breaker2 in breakers]) for breaker1 in breakers])
+
+        return num_self_intersection*100
 
 
 class CostObjective(Objective):
@@ -112,9 +112,9 @@ class NavigationObjective(Objective):
              fairway in
              domain.fairways])
         if min_dist_to_fairway > 0.1:
-            navigation_difficultness = 1 / min_dist_to_fairway
+            navigation_difficultness = 100 / min_dist_to_fairway
             return navigation_difficultness
-        return 20
+        return 1000
 
 
 class WaveHeightObjective(Objective):
@@ -122,9 +122,11 @@ class WaveHeightObjective(Objective):
     def get_obj_value(self, domain, breakers, simulation_result: WaveSimulationResult):
         hs_vals = simulation_result.get_output_for_target_points(domain.target_points)
 
+        hs_vals = [hs if hs>0.01 else 9 for hs in hs_vals]
+
         hs_weigtened = [hs * pt.weight for hs, pt in zip(hs_vals, domain.target_points)]
 
-        return np.mean(hs_weigtened) + 0.05  # to avoid zero
+        return (np.mean(hs_weigtened) + 0.05)*100  # to avoid zero
 
 
 class WaveHeightMultivariateObjective(Objective):

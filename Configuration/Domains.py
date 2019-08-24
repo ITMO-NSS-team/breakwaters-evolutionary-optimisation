@@ -1,7 +1,5 @@
 from Breakers.Breaker import xy_to_points, Breaker
-from Configuration.Grid import GridPoint, BreakerPoint, TargetPoint, Grid
-
-import numpy as np
+from Configuration.Grid import GridPoint, TargetPoint, Grid
 
 
 class Fairway:
@@ -39,7 +37,7 @@ class SochiHarbor(Domain):
             Breaker('IIIb', list(map(xy_to_points, [[67, 39], [63, 38]])), 0.9, '')
         ]
 
-        self.target_points = [TargetPoint(x=62, y=37, weight=1),
+        self.target_points = [TargetPoint(x=64, y=39, weight=1),
                               TargetPoint(x=60, y=32, weight=0.5),
                               TargetPoint(x=57, y=18, weight=0.25)]
 
@@ -63,5 +61,5 @@ class SochiHarbor(Domain):
                          # internal
                          Fairway(GridPoint(50, 24), GridPoint(51, 30), importance=1),
                          Fairway(GridPoint(51, 30), GridPoint(71, 49), importance=0.7),
-                         Fairway(GridPoint(71, 49), GridPoint(71, 55), importance=0.7)]
-
+                         Fairway(GridPoint(71, 49), GridPoint(71, 55), importance=0.7),
+                         Fairway(GridPoint(55, 34), GridPoint(65, 37), importance=0.7)]

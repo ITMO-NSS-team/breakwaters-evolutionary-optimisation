@@ -11,9 +11,16 @@ from EvoAlgs.BreakersEvo.BreakersEvoUtils import BreakersEvoUtils
 from EvoAlgs.BreakersEvo.BreakersParams import BreakersParams
 from Optimisation.Objective import CostObjective, NavigationObjective, WaveHeightObjective, StructuralObjective
 from Optimisation.OptimisationTask import OptimisationTask
-from Utils.MathUtils import average_angles
+from CommonUtils.MathUtils import average_angles
 
-# hack
+from Simulation.ConfigurationStrategies import ConfigurationInfo
+from Simulation.ModelVisualization import ModelsVisualization
+from Simulation.Results import WaveSimulationResult
+from Simulation.СomputationalEnvironment import SwanComputationalManager, ComputationalManager
+
+from Breakers.BreakersUtils import BreakersUtils
+
+#TODO remove hack
 
 exp_domain = SochiHarbor()
 
@@ -111,9 +118,16 @@ def calculate_objectives(model, task, pop):
             if isinstance(obj, WaveHeightObjective):
                 simulation_result = model.run_simulation_for_constructions(model.domain.base_breakers,
                                                                            proposed_breakers)
+
                 new_obj = obj.get_obj_value(model.domain, proposed_breakers, simulation_result)
                 objectives.append(new_obj)
         print(objectives)
+        all_breakers = BreakersUtils.merge_breakers_with_modifications(model.domain.base_breakers, proposed_breakers)
+
+        visualiser = ModelsVisualization(f'swan_{simulation_result.configuration_label}')
+
+        visualiser.simple_visualise(simulation_result.hs, all_breakers,
+                                    exp_domain.fairways, exp_domain.target_points, objectives)
         p.objective = objectives
 
 
