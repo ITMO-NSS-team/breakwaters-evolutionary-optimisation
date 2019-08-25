@@ -20,8 +20,8 @@ class ModelsVisualization():
             fit_str = ",".join(
                 [str(round(f)) if not isinstance(f, list) else ",".join([str(int(round(hs))) for hs in f]) for f in
                  fitness])
-        ax.set_title(f'Высоты волн с 5%-ной обеспеченносью в целевых точках: {values}, \r\n'
-                     f'fitness {fit_str}')
+            ax.set_title(f'Высоты волн с 5%-ной обеспеченносью в целевых точках: {values}, \r\n'
+                         f'fitness {fit_str}')
 
         map_of_place = hs
 
