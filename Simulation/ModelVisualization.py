@@ -17,8 +17,11 @@ class ModelsVisualization():
         for i in range(1, len(target_points)):
             values += ', ' + str(round(hs[target_points[i].y][target_points[i].x], 2))
         if fitness is not None:
-            fit_str = ",".join([str(round(_)) for _ in fitness])
-        ax.set_title(f'Высоты волн с 5%-ной обеспеченносью в целевых точках: {values}, fitness {fit_str}')
+            fit_str = ",".join(
+                [str(round(f)) if not isinstance(f, list) else ",".join([str(int(round(hs))) for hs in f]) for f in
+                 fitness])
+        ax.set_title(f'Высоты волн с 5%-ной обеспеченносью в целевых точках: {values}, \r\n'
+                     f'fitness {fit_str}')
 
         map_of_place = hs
 

@@ -38,8 +38,8 @@ class SochiHarbor(Domain):
         ]
 
         self.target_points = [TargetPoint(x=64, y=39, weight=1),
-                              TargetPoint(x=60, y=32, weight=0.5),
-                              TargetPoint(x=57, y=18, weight=0.25)]
+                              TargetPoint(x=60, y=32, weight=1),
+                              TargetPoint(x=57, y=18, weight=1)]
 
         self.base_grid = Grid(grid_x=84,
                               grid_y=59,

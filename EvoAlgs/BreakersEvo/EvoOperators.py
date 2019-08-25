@@ -17,6 +17,8 @@ from Simulation.ModelVisualization import ModelsVisualization
 from Simulation.Results import WaveSimulationResult
 import copy
 
+import itertools
+
 # TODO remove hack
 
 exp_domain = SochiHarbor()
@@ -110,13 +112,13 @@ def calculate_objectives(model, task, pop):
                 if new_obj is None:
                     objectives = ([9999] * 4)
                     break
-                objectives.append(new_obj)
+                objectives.append([new_obj])
 
             if isinstance(obj, WaveHeightObjective):
                 simulation_result = model.run_simulation_for_constructions(model.domain.base_breakers,
                                                                            proposed_breakers)
 
-                new_obj = np.mean(obj.get_obj_value(model.domain, proposed_breakers, simulation_result))
+                new_obj = (obj.get_obj_value(model.domain, proposed_breakers, simulation_result))
                 objectives.append(new_obj)
             else:
                 simulation_result = WaveSimulationResult(
@@ -132,7 +134,7 @@ def calculate_objectives(model, task, pop):
 
             visualiser.simple_visualise(simulation_result.hs, all_breakers,
                                         exp_domain.fairways, exp_domain.target_points, objectives)
-        p.objectives = objectives
+        p.objectives = list(itertools.chain(*objectives))
 
 
 def crossover(p1, p2, rate):
