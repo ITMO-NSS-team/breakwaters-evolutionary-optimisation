@@ -3,26 +3,31 @@ from abc import abstractmethod
 
 import winrm  # install as pip install pywinrm==0.2.2
 import shutil
+import os
 
 from multiprocessing import Process
 
 
 class ComputationalResourceDescription(object):
     def __init__(self, resources_config_name):
-        config_file = open(resources_config_name)
-        json_str = config_file.read()
-        self.config_dict = json.loads(json_str)
+        if os.path.isfile(resources_config_name):
+            config_file = open(resources_config_name)
+            json_str = config_file.read()
+            self.config_dict = json.loads(json_str)
+        else:
+            self.config_dict = None
 
 
 class ComputationalManager(object):
     def __init__(self, resources_names):
         self.resources_names = resources_names
         self.resources_description = ComputationalResourceDescription("remotes_config.json")
-        self.resources_description = [desc for desc in self.resources_description.config_dict if
-                                      desc['name'] in resources_names]
+        if self.resources_description.config_dict is not None:
+            self.resources_description = [desc for desc in self.resources_description.config_dict if
+                                          desc['name'] in resources_names]
 
-        for rd in self.resources_description:
-            rd["is_free"] = True
+            for rd in self.resources_description:
+                rd["is_free"] = True
 
     @abstractmethod
     def execute(self, config_file_name, out_file_name):
@@ -38,6 +43,8 @@ class SwanComputationalManager(ComputationalManager):
 # TODO implement as strategy pattern
 class SwanWinRemoteComputationalManager(SwanComputationalManager):
     def execute(self, config_file_name, out_file_name):
+        if self.resources_description is None:
+            FileNotFoundError("Remote configuration config not found")
         resource_description = self.resources_description[0]
 
         shutil.copy(f'D:\\SWAN_sochi\\{config_file_name}.swn', 'Z:/share_with_blades/125')
