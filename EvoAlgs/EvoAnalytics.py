@@ -6,6 +6,11 @@ class EvoAnalytics:
     run_id = "opt_0"
 
     @staticmethod
+    def clear():
+        hist_file_name = f'history_{EvoAnalytics.run_id}.csv'
+        os.remove(hist_file_name)
+
+    @staticmethod
     def save_cantidate(pop_num, objs, genotype):
         hist_file_name = f'history_{EvoAnalytics.run_id}.csv'
         if not os.path.isfile(hist_file_name):

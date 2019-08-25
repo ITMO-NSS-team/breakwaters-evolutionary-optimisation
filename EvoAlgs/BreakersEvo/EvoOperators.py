@@ -132,7 +132,7 @@ def calculate_objectives(model, task, pop):
 
             visualiser.simple_visualise(simulation_result.hs, all_breakers,
                                         exp_domain.fairways, exp_domain.target_points, objectives)
-        p.objective = objectives
+        p.objectives = objectives
 
 
 def crossover(p1, p2, rate):
