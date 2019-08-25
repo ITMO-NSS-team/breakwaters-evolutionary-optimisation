@@ -124,7 +124,7 @@ def calculate_objectives(model, task, pop):
                     configuration_label=uuid.uuid4().hex)
 
         print(objectives)
-        if False:
+        if True:
             all_breakers = BreakersUtils.merge_breakers_with_modifications(model.domain.base_breakers,
                                                                            proposed_breakers)
 

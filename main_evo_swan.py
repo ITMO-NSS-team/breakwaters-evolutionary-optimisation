@@ -49,7 +49,8 @@ objectives = [StructuralObjective(importance=1),
               NavigationObjective(importance=1),
               WaveHeightObjective(importance=2)]
 
-#EvoAnalytics.run_id = 'run_{date:%Y_%m_%d_%H_%M_%S}'.format(date=datetime.datetime.now())
+EvoAnalytics.clear()
+EvoAnalytics.run_id = 'run_{date:%Y_%m_%d_%H_%M_%S}'.format(date=datetime.datetime.now())
 
 task = OptimisationTask(objectives, selected_modifications_for_tuning, mod_points_to_optimise, )
 
