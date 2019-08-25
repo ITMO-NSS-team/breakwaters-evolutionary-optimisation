@@ -1,7 +1,7 @@
 import json
 from abc import abstractmethod
 
-import winrm
+import winrm  # install as pip install pywinrm==0.2.2
 import shutil
 
 from multiprocessing import Process
@@ -41,21 +41,19 @@ class SwanWinRemoteComputationalManager(SwanComputationalManager):
         resource_description = self.resources_description[0]
 
         shutil.copy(f'D:\\SWAN_sochi\\{config_file_name}.swn', 'Z:/share_with_blades/125')
-                    #resource_description['transfer_folder'])
-
-
+        # resource_description['transfer_folder'])
 
         ps_script_1 = r"""Copy-Item {source}\\{config_file_name}.swn {target}
 """.format(source=resource_description['transfer_folder'], target=resource_description['model_folder'],
-                   config_file_name=config_file_name)
+           config_file_name=config_file_name)
 
         ps_script_2 = r"""& {model_folder}swanrun.bat {config_name}.swn
 """.format(model_folder=resource_description['model_folder'], config_name=config_file_name)
 
         ps_script_3 = r"""Copy-Item  {source}\\results\\{out_file_name} {target}
 """.format(target=resource_description['transfer_folder'],
-                   source=resource_description['model_folder'],
-                   out_file_name=out_file_name)
+           source=resource_description['model_folder'],
+           out_file_name=out_file_name)
 
         ps_script_1 = r"""Copy-Item \\192.168.13.1\share\Deeva\CONFIG_v0.{s} C:\\Users\\nano_user
         """.format(s="swn")
@@ -69,7 +67,6 @@ class SwanWinRemoteComputationalManager(SwanComputationalManager):
         script = ps_script_1 + ps_script_2 + ps_script_3
         s = winrm.Session(resource_description['url'],
                           auth=(resource_description['login'], resource_description['password']))
-
 
         r1 = s.run_ps(script)
 
