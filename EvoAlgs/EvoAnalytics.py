@@ -8,7 +8,8 @@ class EvoAnalytics:
     @staticmethod
     def clear():
         hist_file_name = f'history_{EvoAnalytics.run_id}.csv'
-        os.remove(hist_file_name)
+        if os.path.isfile(hist_file_name):
+            os.remove(hist_file_name)
 
     @staticmethod
     def save_cantidate(pop_num, objs, genotype):

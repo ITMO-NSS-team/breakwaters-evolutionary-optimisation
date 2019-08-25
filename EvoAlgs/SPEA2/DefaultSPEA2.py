@@ -16,7 +16,7 @@ class DefaultSPEA2(SPEA2):
         while gen < self.params.max_gens:
             self.fitness()
 
-            [EvoAnalytics.save_cantidate(gen, ind.objectives, ind.genotype.genotype_string) for ind in self._pop]
+            [EvoAnalytics.save_cantidate(gen, ind.objectives, ind.genotype.genotype_array) for ind in self._pop]
 
             self._archive = self.environmental_selection(self._pop, self._archive)
             best = sorted(self._archive, key=lambda p: mean_obj(p))[0]
@@ -31,8 +31,7 @@ class DefaultSPEA2(SPEA2):
                     else:
                         print_new_best_individ(best, gen)
 
-                history.add_new(best_gens, gen, mean_obj(best),
-                                rmse(best))
+                history.add_new(best_gens, gen, mean_obj(best), 0)
 
             selected = self.selected(self.params.pop_size, self._archive)
             self._pop = self.reproduce(selected, self.params.pop_size)
@@ -46,13 +45,6 @@ class DefaultSPEA2(SPEA2):
         return history, archive_history
 
 
-def rmse(individ):
-    result = 0.0
-    for obj in individ.objectives:
-        result += pow(obj, 2)
-    return sqrt(result / len(individ.objectives))
-
-
 def mean_obj(individ):
     return np.mean(individ.objectives)
 
@@ -61,6 +53,6 @@ def print_new_best_individ(best, gen_index):
     print("new best: ", round(best.fitness(), 5), round(best.genotype.drf, 2),
           round(best.genotype.cfw, 6),
           round(best.genotype.stpm, 6),
-          round(rmse(best), 4),
+          0,
           mean_obj(best))
     print(gen_index)

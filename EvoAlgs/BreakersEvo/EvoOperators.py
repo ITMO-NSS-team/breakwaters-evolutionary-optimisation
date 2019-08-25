@@ -99,7 +99,7 @@ def _build_breakers_from_genotype(genotype, task):
 def calculate_objectives(model, task, pop):
     for p_ind, p in enumerate(pop):
 
-        genotype = [int(round(g, 0)) for g in p.genotype.genotype_string]
+        genotype = [int(round(g, 0)) for g in p.genotype.genotype_array]
 
         proposed_breakers = _build_breakers_from_genotype(genotype, task)
         objectives = []
@@ -146,27 +146,27 @@ def crossover(p1, p2, rate):
     angle_parent_id = random.randint(0, 1)
     part1_rate = abs(random.random())
     part2_rate = 1 - part1_rate
-    individ = BreakersParams(p1.genotype_string)
-    for gen_ind in range(0, len(p1.genotype_string), 2):
+    new_individ = BreakersParams(copy.deepcopy(p1.genotype_array))
+    for gen_ind in range(0, len(p1.genotype_array), 2):
         len_ind = gen_ind
         dir_ind = gen_ind + 1
-        individ.genotype_string[len_ind] = round(p1.genotype_string[len_ind] * part1_rate + p2.genotype_string[
+        new_individ.genotype_array[len_ind] = round(p1.genotype_array[len_ind] * part1_rate + p2.genotype_array[
             len_ind] * part2_rate)
 
         # av_angle = average_angles(
-        #    [(p1.genotype_string[dir_ind] + 360) % 360, (p2.genotype_string[dir_ind] + 360) % 360])
+        #    [(p1.genotype_array[dir_ind] + 360) % 360, (p2.genotype_array[dir_ind] + 360) % 360])
         # if av_angle != 0:
-        #    individ.genotype_string[dir_ind] = round(av_angle)
+        #    individ.genotype_array[dir_ind] = round(av_angle)
         # else:
         if angle_parent_id == 0:
-            individ.genotype_string[dir_ind] = round((p1.genotype_string[dir_ind] + 360) % 360)
+            new_individ.genotype_array[dir_ind] = round((p1.genotype_array[dir_ind] + 360) % 360)
         if angle_parent_id == 1:
-            individ.genotype_string[dir_ind] = round((p2.genotype_string[dir_ind] + 360) % 360)
+            new_individ.genotype_array[dir_ind] = round((p2.genotype_array[dir_ind] + 360) % 360)
     # is_bad = False
     # for objective in strict_objectives:
     #    obj_val = objective.get_obj_value(exp_domain,
     #                                      BreakersEvoUtils.build_breakers_from_genotype(
-    #                                          individ.genotype_string,
+    #                                          individ.genotype_array,
     #                                         task))
     #   if obj_val is None:
     #       is_bad = True
@@ -174,9 +174,9 @@ def crossover(p1, p2, rate):
     #       break
     # iter += 1
     # if iter > 25:
-    #    return individ
+    return new_individ
 
-    return individ
+    return p1
 
 
 def mutation(individ, rate, mutation_value_rate):
@@ -184,39 +184,40 @@ def mutation(individ, rate, mutation_value_rate):
         strict_objectives = [NavigationObjective(), StructuralObjective()]
         is_bad = True
         iter = 0
-        new_individ = BreakersParams(individ.genotype_string)
+        # new_individ = BreakersParams(individ.genotype_array)
 
         # while is_bad:
-        param_to_mutate = random.randint(0, int(round(len(new_individ.genotype_string) / 2 - 1)))
+        param_to_mutate = random.randint(0, int(round(len(individ.genotype_array) / 2 - 1)))
         mutation_ratio = abs(np.random.RandomState().normal(1, 0.5, 1)[0])
         mutation_ratio_dir = abs(np.random.RandomState().normal(10, 5, 1)[0])
 
         sign = 1 if random.random() < 0.5 else -1
 
-        child_params = BreakersParams(new_individ.genotype_string)
+        child_params = BreakersParams(copy.deepcopy(individ.genotype_array))
         len_ind = param_to_mutate * 2
         dir_ind = param_to_mutate * 2 + 1
-        child_params.genotype_string[len_ind] += sign * mutation_ratio
-        child_params.genotype_string[len_ind] = abs(child_params.genotype_string[len_ind])
-        child_params.genotype_string[dir_ind] += sign * mutation_ratio_dir
-        child_params.genotype_string[dir_ind] = round((child_params.genotype_string[dir_ind] + 360) % 360)
-        new_individ.genotype = child_params
+        child_params.genotype_array[len_ind] += sign * mutation_ratio
+        child_params.genotype_array[len_ind] = abs(child_params.genotype_array[len_ind])
+        child_params.genotype_array[dir_ind] += sign * mutation_ratio_dir
+        child_params.genotype_array[dir_ind] = round((child_params.genotype_array[dir_ind] + 360) % 360)
+
+        # new_individ.genotype = child_params
 
         # is_bad = False
         # for objective in strict_objectives:
         #   obj_val = objective.get_obj_value(exp_domain,
         #                                      BreakersEvoUtils.build_breakers_from_genotype(
-        #                                          new_individ.genotype.genotype_string,
+        #                                          new_individ.genotype.genotype_array,
         #                                          task))
         ##    if obj_val is None:
         #        is_bad = True
         #        print("Unsuccesful mutation")
-        #        print(child_params.genotype_string)
+        #        print(child_params.genotype_array)
         #        break
         # iter += 1
 
         # if iter > 25:
-        #    return new_individ
+        return child_params
 
     return individ
 
@@ -245,7 +246,7 @@ def initial_pop_lhs(size, **kwargs):
         bad = False
         for objective in strict_objectives:
             obj_val = objective.get_obj_value(exp_domain,
-                                              BreakersEvoUtils.build_breakers_from_genotype(ind.genotype_string,
+                                              BreakersEvoUtils.build_breakers_from_genotype(ind.genotype_array,
                                                                                             task))
             if obj_val is None:
                 bad = True
