@@ -23,15 +23,12 @@ class SPEA2OptimisationStrategy(OptimisationStrategyAbstract):
         operators = default_operators()
 
         _, archive_history = DefaultSPEA2(
-            params=DefaultSPEA2.Params(max_gens=250, pop_size=300, archive_size=5,
-                                       crossover_rate=0.5, mutation_rate=0.5,
+            params=DefaultSPEA2.Params(max_gens=250, pop_size=30, archive_size=15,
+                                       crossover_rate=0.7, mutation_rate=0.05,
                                        mutation_value_rate=[]),
             objectives=partial(calculate_objectives, model, task),
             evolutionary_operators=operators).solution(verbose=False)
 
         best = archive_history[-1][1]
-
-        #simulation_result = model.run_simulation_for_constructions(model.domain.base_breakers, best,
-        #                                                           ''.join(str(int(round(g))) for g in best.genotype.genotype_string))
 
         return OptimisationResults(None, best, archive_history)

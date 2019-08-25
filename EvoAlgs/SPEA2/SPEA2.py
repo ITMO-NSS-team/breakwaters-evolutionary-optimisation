@@ -63,8 +63,8 @@ class SPEA2:
         def fitness(self):
             return self.raw_fitness + self.density
 
-        def weighted_sum(self):
-            return sum(list(self.objectives))
+        #def weighted_sum(self):
+            #return sum(list(self.objectives))
 
     class ErrorHistory:
         class Point:

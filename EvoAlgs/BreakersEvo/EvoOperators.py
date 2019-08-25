@@ -1,4 +1,5 @@
 import random
+import uuid
 from itertools import chain
 
 import numpy as np
@@ -6,21 +7,17 @@ from pyDOE import lhs
 from scipy.stats.distributions import norm
 
 from Breakers.Breaker import xy_to_points, Breaker
+from Breakers.BreakersUtils import BreakersUtils
 from Configuration.Domains import SochiHarbor
 from EvoAlgs.BreakersEvo.BreakersEvoUtils import BreakersEvoUtils
 from EvoAlgs.BreakersEvo.BreakersParams import BreakersParams
 from Optimisation.Objective import CostObjective, NavigationObjective, WaveHeightObjective, StructuralObjective
 from Optimisation.OptimisationTask import OptimisationTask
-from CommonUtils.MathUtils import average_angles
-
-from Simulation.ConfigurationStrategies import ConfigurationInfo
 from Simulation.ModelVisualization import ModelsVisualization
 from Simulation.Results import WaveSimulationResult
-from Simulation.СomputationalEnvironment import SwanComputationalManager, ComputationalManager
+import copy
 
-from Breakers.BreakersUtils import BreakersUtils
-
-#TODO remove hack
+# TODO remove hack
 
 exp_domain = SochiHarbor()
 
@@ -30,7 +27,7 @@ base_modifications_for_tuning = [
     Breaker('mod2_bottom', list(map(xy_to_points, [[-1, -1], [-1, -1], [50, 39]])), 0, 'II'),
     Breaker('mod3long', list(map(xy_to_points, [[-1, -1], [-1, -1], [56, 32], [67, 35]])), 0.9, 'IIIa'),
     Breaker('mod3short', list(map(xy_to_points, [[-1, -1], [-1, -1], [63, 38], [67, 39]])), 0.9, 'IIIb'),
-    Breaker('mod_add', list(map(xy_to_points, [[-1, -1], [-1, -1], [56, 38]])), 0.9, '-'),
+    Breaker('mod_add', list(map(xy_to_points, [[-1, -1], [-1, -1], [56, 42]])), 0.9, '-'),
 ]
 
 mod_points_to_optimise = {  # order is important
@@ -100,7 +97,7 @@ def _build_breakers_from_genotype(genotype, task):
 
 
 def calculate_objectives(model, task, pop):
-    for p in pop:
+    for p_ind, p in enumerate(pop):
 
         genotype = [int(round(g, 0)) for g in p.genotype.genotype_string]
 
@@ -119,26 +116,32 @@ def calculate_objectives(model, task, pop):
                 simulation_result = model.run_simulation_for_constructions(model.domain.base_breakers,
                                                                            proposed_breakers)
 
-                new_obj = obj.get_obj_value(model.domain, proposed_breakers, simulation_result)
+                new_obj = np.mean(obj.get_obj_value(model.domain, proposed_breakers, simulation_result))
                 objectives.append(new_obj)
+            else:
+                simulation_result = WaveSimulationResult(
+                    hs=np.zeros(shape=(model.domain.model_grid.grid_y, model.domain.model_grid.grid_x)),
+                    configuration_label=uuid.uuid4().hex)
+
         print(objectives)
         all_breakers = BreakersUtils.merge_breakers_with_modifications(model.domain.base_breakers, proposed_breakers)
 
         visualiser = ModelsVisualization(f'swan_{simulation_result.configuration_label}')
 
         visualiser.simple_visualise(simulation_result.hs, all_breakers,
-                                    exp_domain.fairways, exp_domain.target_points, objectives)
+                                   exp_domain.fairways, exp_domain.target_points, objectives)
         p.objective = objectives
 
 
+
 def crossover(p1, p2, rate):
-    if random.random() >= rate:
+    if random.random() >= 1 - rate:
         return p1
 
     strict_objectives = [NavigationObjective(), StructuralObjective()]
     is_bad = True
     iter = 0
-    #while is_bad:
+    # while is_bad:
     angle_parent_id = random.randint(0, 1)
     part1_rate = abs(random.random())
     part2_rate = 1 - part1_rate
@@ -146,8 +149,8 @@ def crossover(p1, p2, rate):
     for gen_ind in range(0, len(p1.genotype_string), 2):
         len_ind = gen_ind
         dir_ind = gen_ind + 1
-        individ.genotype_string[len_ind] = p1.genotype_string[len_ind] * part1_rate + p2.genotype_string[
-            len_ind] * part2_rate
+        individ.genotype_string[len_ind] = round(p1.genotype_string[len_ind] * part1_rate + p2.genotype_string[
+            len_ind] * part2_rate)
 
         # av_angle = average_angles(
         #    [(p1.genotype_string[dir_ind] + 360) % 360, (p2.genotype_string[dir_ind] + 360) % 360])
@@ -155,36 +158,36 @@ def crossover(p1, p2, rate):
         #    individ.genotype_string[dir_ind] = round(av_angle)
         # else:
         if angle_parent_id == 0:
-            individ.genotype_string[dir_ind] = round(p1.genotype_string[dir_ind])
+            individ.genotype_string[dir_ind] = round((p1.genotype_string[dir_ind] + 360) % 360)
         if angle_parent_id == 1:
-            individ.genotype_string[dir_ind] = round(p2.genotype_string[dir_ind])
-    is_bad = False
-    for objective in strict_objectives:
-        obj_val = objective.get_obj_value(exp_domain,
-                                          BreakersEvoUtils.build_breakers_from_genotype(
-                                              individ.genotype_string,
-                                              task))
-        if obj_val is None:
-            is_bad = True
-            print("Unsuccesful crossover")
-            break
-    iter += 1
-    if iter > 25:
-        return individ
+            individ.genotype_string[dir_ind] = round((p2.genotype_string[dir_ind] + 360) % 360)
+    # is_bad = False
+    # for objective in strict_objectives:
+    #    obj_val = objective.get_obj_value(exp_domain,
+    #                                      BreakersEvoUtils.build_breakers_from_genotype(
+    #                                          individ.genotype_string,
+    #                                         task))
+    #   if obj_val is None:
+    #       is_bad = True
+    #       print("Unsuccesful crossover")
+    #       break
+    # iter += 1
+    # if iter > 25:
+    #    return individ
 
     return individ
 
 
 def mutation(individ, rate, mutation_value_rate):
-    if random.random() >= rate:
+    if random.random() >= 1 - rate:
         strict_objectives = [NavigationObjective(), StructuralObjective()]
         is_bad = True
         iter = 0
         new_individ = BreakersParams(individ.genotype_string)
 
-        #while is_bad:
+        # while is_bad:
         param_to_mutate = random.randint(0, int(round(len(new_individ.genotype_string) / 2 - 1)))
-        mutation_ratio = abs(np.random.RandomState().normal(1, 1, 1)[0])
+        mutation_ratio = abs(np.random.RandomState().normal(1, 0.5, 1)[0])
         mutation_ratio_dir = abs(np.random.RandomState().normal(10, 5, 1)[0])
 
         sign = 1 if random.random() < 0.5 else -1
@@ -195,25 +198,24 @@ def mutation(individ, rate, mutation_value_rate):
         child_params.genotype_string[len_ind] += sign * mutation_ratio
         child_params.genotype_string[len_ind] = abs(child_params.genotype_string[len_ind])
         child_params.genotype_string[dir_ind] += sign * mutation_ratio_dir
-
-        child_params.genotype_string[dir_ind] = abs((child_params.genotype_string[dir_ind] + 360) % 360)
+        child_params.genotype_string[dir_ind] = round((child_params.genotype_string[dir_ind] + 360) % 360)
         new_individ.genotype = child_params
 
-        is_bad = False
-        for objective in strict_objectives:
-            obj_val = objective.get_obj_value(exp_domain,
-                                              BreakersEvoUtils.build_breakers_from_genotype(
-                                                  new_individ.genotype.genotype_string,
-                                                  task))
-            if obj_val is None:
-                is_bad = True
-                print("Unsuccesful mutation")
-                print(child_params.genotype_string)
-                break
-        iter += 1
+        # is_bad = False
+        # for objective in strict_objectives:
+        #   obj_val = objective.get_obj_value(exp_domain,
+        #                                      BreakersEvoUtils.build_breakers_from_genotype(
+        #                                          new_individ.genotype.genotype_string,
+        #                                          task))
+        ##    if obj_val is None:
+        #        is_bad = True
+        #        print("Unsuccesful mutation")
+        #        print(child_params.genotype_string)
+        #        break
+        # iter += 1
 
-        if iter > 25:
-            return new_individ
+        # if iter > 25:
+        #    return new_individ
 
     return individ
 
@@ -250,5 +252,19 @@ def initial_pop_lhs(size, **kwargs):
         if not bad:
             population_new.append(ind)
         if len(population_new) == size: break
+
+    return population_new
+
+
+def initial_pop_random(size, **kwargs):
+    population_new = []
+    for i in range(0, size):
+        genotype = np.zeros(NPARAMS)
+        for j, g in enumerate(genotype):
+            if j % 2 == 0:
+                genotype[j] = random.randint(0, 3)
+            else:
+                genotype[j] = random.randint(0, 359)
+        population_new.append(BreakersParams(copy.deepcopy(genotype)))
 
     return population_new

@@ -4,6 +4,7 @@ from math import sqrt
 import numpy as np
 
 from EvoAlgs.SPEA2.SPEA2 import SPEA2
+from EvoAlgs.EvoAnalytics import EvoAnalytics
 
 
 class DefaultSPEA2(SPEA2):
@@ -14,6 +15,9 @@ class DefaultSPEA2(SPEA2):
         gen = 0
         while gen < self.params.max_gens:
             self.fitness()
+
+            [EvoAnalytics.save_cantidate(gen, ind.objective, ind.genotype.genotype_string) for ind in self._pop]
+
             self._archive = self.environmental_selection(self._pop, self._archive)
             best = sorted(self._archive, key=lambda p: mean_obj(p))[0]
 

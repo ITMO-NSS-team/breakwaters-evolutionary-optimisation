@@ -112,9 +112,8 @@ class NavigationObjective(Objective):
              fairway in
              domain.fairways])
         if min_dist_to_fairway > 0.1:
-            navigation_difficultness = 100 / min_dist_to_fairway
-            return navigation_difficultness
-        return 1000
+            return -min_dist_to_fairway*100
+        return 0
 
 
 class WaveHeightObjective(Objective):
@@ -126,7 +125,7 @@ class WaveHeightObjective(Objective):
 
         hs_weigtened = [hs * pt.weight for hs, pt in zip(hs_vals, domain.target_points)]
 
-        return (np.mean(hs_weigtened) + 0.05)*100  # to avoid zero
+        return [(hs + 0.05)*100 for hs in hs_weigtened] # to avoid zero
 
 
 class WaveHeightMultivariateObjective(Objective):
