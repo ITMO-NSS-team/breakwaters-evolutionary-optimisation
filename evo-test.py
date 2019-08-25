@@ -44,10 +44,10 @@ mod_points_to_optimise = {  # order is important
 selected_modifications_for_tuning = base_modifications_for_tuning
 selected_mod_points_to_optimise = [mod_points_to_optimise[mod.breaker_id] for mod in base_modifications_for_tuning]
 
-objectives = [StructuralObjective(importance=1),
-              CostObjective(importance=3),
-              NavigationObjective(importance=1),
-              WaveHeightObjective(importance=2)]
+objectives = [#StructuralObjective(importance=1),
+              CostObjective(importance=3)]
+              #NavigationObjective(importance=1),]
+              #WaveHeightObjective(importance=2)]
 
 #EvoAnalytics.run_id = 'run_{date:%Y_%m_%d_%H_%M_%S}'.format(date=datetime.datetime.now())
 

@@ -24,7 +24,7 @@ class SPEA2OptimisationStrategy(OptimisationStrategyAbstract):
 
         _, archive_history = DefaultSPEA2(
             params=DefaultSPEA2.Params(max_gens=250, pop_size=30, archive_size=15,
-                                       crossover_rate=0.7, mutation_rate=0.05,
+                                       crossover_rate=0.7, mutation_rate=0.4,
                                        mutation_value_rate=[]),
             objectives=partial(calculate_objectives, model, task),
             evolutionary_operators=operators).solution(verbose=False)

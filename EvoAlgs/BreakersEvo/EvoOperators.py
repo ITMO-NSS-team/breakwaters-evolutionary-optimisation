@@ -124,14 +124,15 @@ def calculate_objectives(model, task, pop):
                     configuration_label=uuid.uuid4().hex)
 
         print(objectives)
-        all_breakers = BreakersUtils.merge_breakers_with_modifications(model.domain.base_breakers, proposed_breakers)
+        if False:
+            all_breakers = BreakersUtils.merge_breakers_with_modifications(model.domain.base_breakers,
+                                                                           proposed_breakers)
 
-        visualiser = ModelsVisualization(f'swan_{simulation_result.configuration_label}')
+            visualiser = ModelsVisualization(f'swan_{simulation_result.configuration_label}')
 
-        visualiser.simple_visualise(simulation_result.hs, all_breakers,
-                                   exp_domain.fairways, exp_domain.target_points, objectives)
+            visualiser.simple_visualise(simulation_result.hs, all_breakers,
+                                        exp_domain.fairways, exp_domain.target_points, objectives)
         p.objective = objectives
-
 
 
 def crossover(p1, p2, rate):
