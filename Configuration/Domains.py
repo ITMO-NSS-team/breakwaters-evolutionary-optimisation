@@ -62,4 +62,6 @@ class SochiHarbor(Domain):
                          Fairway(GridPoint(50, 24), GridPoint(51, 30), importance=1),
                          Fairway(GridPoint(51, 30), GridPoint(71, 49), importance=0.7),
                          Fairway(GridPoint(71, 49), GridPoint(71, 55), importance=0.7),
-                         Fairway(GridPoint(55, 34), GridPoint(65, 37), importance=0.7)]
+                         Fairway(GridPoint(55, 34), GridPoint(65, 37), importance=0.7),
+                         Fairway(GridPoint(59, 38), GridPoint(64, 39), importance=0.8),#
+                         Fairway(GridPoint(51, 30), GridPoint(65, 33), importance=0.78)]#

@@ -67,22 +67,22 @@ class StructuralObjective(Objective):
         num_self_intersection = sum(
             [sum([int(self._selfintersection(breaker1, breaker2)) for breaker2 in breakers]) for breaker1 in breakers])
 
-        return num_self_intersection*100
+        return round(num_self_intersection * 100, -1)
 
 
 class CostObjective(Objective):
 
     def get_obj_value(self, domain, breakers):
-        cost = sum([breaker.get_length() for breaker in breakers])*10
-        return cost
+        cost = sum([breaker.get_length() for breaker in breakers]) * 10
+        return round(cost, -1)
 
 
 class NavigationObjective(Objective):
 
     def _dist_from_fairway_to_breaker(self, fairway: Fairway, breaker: Breaker):
-        def _intersection(fairway, breaker):
+        def intersections_count(fairway, breaker):
             fairway_line = LineString([(fairway.x1, fairway.y1), (fairway.x2, fairway.y2)])
-
+            int_num = 0
             for i in range(1, len(breaker.points)):
                 prev = breaker.points[i - 1]
                 cur = breaker.points[i]
@@ -92,11 +92,12 @@ class NavigationObjective(Objective):
                 breaker_line = LineString([(prev.x, prev.y), (cur.x, cur.y)])
 
                 if fairway_line.crosses(breaker_line):
-                    return True
-            return False
-
-        if _intersection(fairway, breaker):
+                    int_num
             return 0
+
+        int_count = intersections_count(fairway, breaker)
+        if int_count > 0:
+            return -int_count
         p1 = np.asarray([fairway.x1, fairway.y1])
         p2 = np.asarray([fairway.x2, fairway.y2])
         dist = min([np.linalg.norm(np.cross(p2 - p1, p1 - np.asarray([p3.x, p3.y]))) / np.linalg.norm(p2 - p1) for p3 in
@@ -107,13 +108,12 @@ class NavigationObjective(Objective):
     def get_obj_value(self, domain, breakers):
 
         min_dist_to_fairway = min(
-            [min([(self._dist_from_fairway_to_breaker(fairway, breaker) / fairway.importance) for breaker in breakers])
+            [min([(self._dist_from_fairway_to_breaker(fairway, breaker)) for breaker in breakers])
              for
              fairway in
              domain.fairways])
-        if min_dist_to_fairway > 0.1:
-            return -min_dist_to_fairway*100
-        return 0
+
+        return -round(min_dist_to_fairway * 100, -1)
 
 
 class WaveHeightObjective(Objective):
@@ -121,11 +121,11 @@ class WaveHeightObjective(Objective):
     def get_obj_value(self, domain, breakers, simulation_result: WaveSimulationResult):
         hs_vals = simulation_result.get_output_for_target_points(domain.target_points)
 
-        hs_vals = [hs if hs>0.01 else 9 for hs in hs_vals]
+        hs_vals = [hs if hs > 0.01 else 9 for hs in hs_vals]
 
         hs_weigtened = [hs * pt.weight for hs, pt in zip(hs_vals, domain.target_points)]
 
-        return [(hs + 0.05)*100 for hs in hs_weigtened] # to avoid zero
+        return [round((hs + 0.05) * 100, -1) for hs in hs_weigtened]  # to avoid zero
 
 
 class WaveHeightMultivariateObjective(Objective):
@@ -135,4 +135,4 @@ class WaveHeightMultivariateObjective(Objective):
 
         hs_weigtened = [hs * pt.weight for hs, pt in zip(hs_vals, domain.target_points)]
 
-        return [(hs + 0.05) for hs in hs_weigtened]  # to avoid zero
+        return [round((hs + 0.05) * 100, -1) for hs in hs_weigtened]  # to avoid zero

@@ -145,11 +145,13 @@ def crossover(p1, p2, rate):
     is_bad = True
     iter = 0
     # while is_bad:
-    angle_parent_id = random.randint(0, 1)
-    part1_rate = abs(random.random())
-    part2_rate = 1 - part1_rate
     new_individ = BreakersParams(copy.deepcopy(p1.genotype_array))
     for gen_ind in range(0, len(p1.genotype_array), 2):
+        angle_parent_id = random.randint(0, 1)
+
+        part1_rate = abs(random.random())
+        part2_rate = 1 - part1_rate
+
         len_ind = gen_ind
         dir_ind = gen_ind + 1
         new_individ.genotype_array[len_ind] = round(p1.genotype_array[len_ind] * part1_rate + p2.genotype_array[
@@ -188,37 +190,40 @@ def mutation(individ, rate, mutation_value_rate):
         iter = 0
         # new_individ = BreakersParams(individ.genotype_array)
 
-        # while is_bad:
-        param_to_mutate = random.randint(0, int(round(len(individ.genotype_array) / 2 - 1)))
-        mutation_ratio = abs(np.random.RandomState().normal(1, 0.5, 1)[0])
-        mutation_ratio_dir = abs(np.random.RandomState().normal(10, 5, 1)[0])
-
-        sign = 1 if random.random() < 0.5 else -1
-
         child_params = BreakersParams(copy.deepcopy(individ.genotype_array))
-        len_ind = param_to_mutate * 2
-        dir_ind = param_to_mutate * 2 + 1
-        child_params.genotype_array[len_ind] += sign * mutation_ratio
-        child_params.genotype_array[len_ind] = abs(child_params.genotype_array[len_ind])
-        child_params.genotype_array[dir_ind] += sign * mutation_ratio_dir
-        child_params.genotype_array[dir_ind] = round((child_params.genotype_array[dir_ind] + 360) % 360)
 
-        # new_individ.genotype = child_params
+        # while is_bad:
 
-        # is_bad = False
-        # for objective in strict_objectives:
-        #   obj_val = objective.get_obj_value(exp_domain,
-        #                                      BreakersEvoUtils.build_breakers_from_genotype(
-        #                                          new_individ.genotype.genotype_array,
-        #                                          task))
-        ##    if obj_val is None:
-        #        is_bad = True
-        #        print("Unsuccesful mutation")
-        #        print(child_params.genotype_array)
-        #        break
-        # iter += 1
+        for _ in (1, int(round(len(individ.genotype_array) / 2 - 1))):  # number of mutations
+            param_to_mutate = random.randint(0, int(round(len(individ.genotype_array) / 2 - 1)))
+            mutation_ratio = abs(np.random.RandomState().normal(2, 1, 1)[0])
+            mutation_ratio_dir = abs(np.random.RandomState().normal(10, 5, 1)[0])
 
-        # if iter > 25:
+            sign = 1 if random.random() < 0.5 else -1
+
+            len_ind = param_to_mutate * 2
+            dir_ind = param_to_mutate * 2 + 1
+            child_params.genotype_array[len_ind] += sign * mutation_ratio
+            child_params.genotype_array[len_ind] = abs(child_params.genotype_array[len_ind])
+            child_params.genotype_array[dir_ind] += sign * mutation_ratio_dir
+            child_params.genotype_array[dir_ind] = round((child_params.genotype_array[dir_ind] + 360) % 360)
+
+            # new_individ.genotype = child_params
+
+            # is_bad = False
+            # for objective in strict_objectives:
+            #   obj_val = objective.get_obj_value(exp_domain,
+            #                                      BreakersEvoUtils.build_breakers_from_genotype(
+            #                                          new_individ.genotype.genotype_array,
+            #                                          task))
+            ##    if obj_val is None:
+            #        is_bad = True
+            #        print("Unsuccesful mutation")
+            #        print(child_params.genotype_array)
+            #        break
+            # iter += 1
+
+            # if iter > 25:
         return child_params
 
     return individ
