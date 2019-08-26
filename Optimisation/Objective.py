@@ -90,10 +90,9 @@ class NavigationObjective(Objective):
                         prev.y == cur.y:
                     continue
                 breaker_line = LineString([(prev.x, prev.y), (cur.x, cur.y)])
-
                 if fairway_line.crosses(breaker_line):
-                    int_num
-            return 0
+                    int_num = int_num + 1
+            return int_num
 
         int_count = intersections_count(fairway, breaker)
         if int_count > 0:

@@ -1,12 +1,14 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sb
+import os
 
 
 class ModelsVisualization():
 
-    def __init__(self, configuration_label):
+    def __init__(self, configuration_label, exp_name):
         self.configuration_label = configuration_label
+        self.exp_name = exp_name
 
     def simple_visualise(self, hs: np.ndarray, all_breakers, fairways, target_points, fitness=None):
 
@@ -66,6 +68,9 @@ class ModelsVisualization():
             plt.annotate(f'[№{point_ind},{point.x+2},{point.y+2}]', (point.x, point.y), color='black')
 
         # plt.figure(figsize=(4, 5))
-        plt.savefig(f'img/{self.configuration_label}.png')
+        if not os.path.isdir(f'img/{self.exp_name}'):
+            os.mkdir(f'img/{self.exp_name}')
+
+        plt.savefig(f'img/{self.exp_name}/{self.configuration_label}.png')
         # plt.show()
         plt.clf()

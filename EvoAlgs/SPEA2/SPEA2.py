@@ -59,6 +59,7 @@ class SPEA2:
             self.dominators = []
             self.raw_fitness = 0
             self.density = 0
+            self.referenced_dataset = None
 
         def fitness(self):
             return self.raw_fitness + self.density

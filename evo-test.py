@@ -47,13 +47,13 @@ selected_mod_points_to_optimise = [mod_points_to_optimise[mod.breaker_id] for mo
 objectives = [StructuralObjective(importance=1),
               CostObjective(importance=3),
               NavigationObjective(importance=1)]
-              #WaveHeightObjective(importance=2)]
+            # WaveHeightObjective(importance=2)]
 
 EvoAnalytics.clear()
-#EvoAnalytics.run_id = 'run_{date:%Y_%m_%d_%H_%M_%S}'.format(date=datetime.datetime.now())
+# EvoAnalytics.run_id = 'run_{date:%Y_%m_%d_%H_%M_%S}'.format(date=datetime.datetime.now())
 
 task = OptimisationTask(objectives, selected_modifications_for_tuning, mod_points_to_optimise, )
 
 opt_result = optimiser.optimise(wave_model, task)
 
-#hs0 =.simulation_result.get_output_for_target_points(exp_domain.target_points[0])
+# hs0 =.simulation_result.get_output_for_target_points(exp_domain.target_points[0])

@@ -15,6 +15,7 @@ from Optimisation.Objective import CostObjective, NavigationObjective, WaveHeigh
 from Optimisation.OptimisationTask import OptimisationTask
 from Simulation.ModelVisualization import ModelsVisualization
 from Simulation.Results import WaveSimulationResult
+from EvoAlgs.EvoAnalytics import EvoAnalytics
 import copy
 
 import itertools
@@ -100,7 +101,7 @@ def _build_breakers_from_genotype(genotype, task):
 
 def calculate_objectives(model, task, pop):
     for p_ind, p in enumerate(pop):
-
+        label_to_reference = None
         genotype = [int(round(g, 0)) for g in p.genotype.genotype_array]
 
         proposed_breakers = _build_breakers_from_genotype(genotype, task)
@@ -117,24 +118,27 @@ def calculate_objectives(model, task, pop):
             if isinstance(obj, WaveHeightObjective):
                 simulation_result = model.run_simulation_for_constructions(model.domain.base_breakers,
                                                                            proposed_breakers)
-
+                label_to_reference = simulation_result.configuration_label
                 new_obj = (obj.get_obj_value(model.domain, proposed_breakers, simulation_result))
                 objectives.append(new_obj)
             else:
+                label=uuid.uuid4().hex
                 simulation_result = WaveSimulationResult(
                     hs=np.zeros(shape=(model.domain.model_grid.grid_y, model.domain.model_grid.grid_x)),
-                    configuration_label=uuid.uuid4().hex)
+                    configuration_label=label)
+                label_to_reference = label
 
         print(objectives)
         if True:
             all_breakers = BreakersUtils.merge_breakers_with_modifications(model.domain.base_breakers,
                                                                            proposed_breakers)
 
-            visualiser = ModelsVisualization(f'swan_{simulation_result.configuration_label}')
+            visualiser = ModelsVisualization(f'swan_{simulation_result.configuration_label}', EvoAnalytics.run_id)
 
             visualiser.simple_visualise(simulation_result.hs, all_breakers,
                                         exp_domain.fairways, exp_domain.target_points, objectives)
         p.objectives = list(itertools.chain(*objectives))
+        p.referenced_dataset=label_to_reference
 
 
 def crossover(p1, p2, rate):
