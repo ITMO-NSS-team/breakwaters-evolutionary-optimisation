@@ -74,7 +74,7 @@ class CostObjective(Objective):
 
     def get_obj_value(self, domain, breakers):
         cost = sum([breaker.get_length() for breaker in breakers]) * 10
-        return round(cost, -1)
+        return round(cost, 0)
 
 
 class NavigationObjective(Objective):
@@ -121,16 +121,6 @@ class WaveHeightObjective(Objective):
         hs_vals = simulation_result.get_output_for_target_points(domain.target_points)
 
         hs_vals = [hs if hs > 0.01 else 9 for hs in hs_vals]
-
-        hs_weigtened = [hs * pt.weight for hs, pt in zip(hs_vals, domain.target_points)]
-
-        return [round((hs + 0.05) * 100, -1) for hs in hs_weigtened]  # to avoid zero
-
-
-class WaveHeightMultivariateObjective(Objective):
-
-    def get_obj_value(self, domain, breakers, simulation_result: WaveSimulationResult):
-        hs_vals = simulation_result.get_output_for_target_points(domain.target_points)
 
         hs_weigtened = [hs * pt.weight for hs, pt in zip(hs_vals, domain.target_points)]
 
