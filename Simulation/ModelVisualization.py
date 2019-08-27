@@ -10,7 +10,7 @@ class ModelsVisualization():
         self.configuration_label = configuration_label
         self.exp_name = exp_name
 
-    def simple_visualise(self, hs: np.ndarray, all_breakers, fairways, target_points, fitness=None):
+    def simple_visualise(self, hs: np.ndarray, all_breakers, base_breakers, fairways, target_points, fitness=None):
 
         plt.rcParams['figure.figsize'] = [15, 10]
         ax = plt.subplot()
@@ -57,6 +57,12 @@ class ModelsVisualization():
                         plt.annotate(
                             f'({all_breakers[i].points[j].x},{all_breakers[i].points[j].y})',
                             (all_breakers[i].points[j].x, all_breakers[i].points[j].y))
+
+        for i in range(len(base_breakers)):
+            for j in range(1, len(base_breakers[i].points)):
+                p1, p2 = [base_breakers[i].points[j - 1].x, base_breakers[i].points[j].x], \
+                         [base_breakers[i].points[j - 1].y, base_breakers[i].points[j].y]
+                plt.plot(p1, p2, c='b', linewidth=4, marker='o')
 
         for j in range(len(fairways)):
             p1, p2 = [fairways[j].x1, fairways[j].x2], [fairways[j].y1, fairways[j].y2]

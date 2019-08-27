@@ -77,7 +77,8 @@ class SimpleGeomSimulationStrategy(SimulationStrategyAbstract):
                     out.write("\r\n")
 
         # self.heatmap2d(hs, configuration_info.info, configuration_info.domain.fairways)
-        visualiser.simple_visualise(hs, configuration_info.breakers, configuration_info.domain.fairways,\
+        visualiser.simple_visualise(hs, configuration_info.breakers, model.domain.base_breakers,
+                                    configuration_info.domain.fairways,\
                                     configuration_info.domain.target_points)
 
         return WaveSimulationResult(hs, configuration_info.configuration_label)
