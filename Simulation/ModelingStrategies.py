@@ -224,5 +224,6 @@ class SwanSimulationStrategy(SimulationStrategyAbstract):
             out_file_name = f'hs{configuration_info.configuration_label}.d'
             computational_manager.execute(configuration_info.file_name,out_file_name)
             hs = np.genfromtxt(f'D:\\sim_results_storage\\{out_file_name}')
+            hs = hs * 1.22#13% to 5%
 
         return WaveSimulationResult(hs, configuration_info.configuration_label)
