@@ -120,7 +120,7 @@ class WaveHeightObjective(Objective):
     def get_obj_value(self, domain, breakers, simulation_result: WaveSimulationResult):
         hs_vals = simulation_result.get_output_for_target_points(domain.target_points)
 
-        hs_vals = [hs if hs > 0.01 else 9 for hs in hs_vals]
+        hs_vals = [hs if hs > 0.05 else 9 for hs in hs_vals]
 
         hs_weigtened = [hs * pt.weight for hs, pt in zip(hs_vals, domain.target_points)]
 

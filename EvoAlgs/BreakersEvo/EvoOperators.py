@@ -220,7 +220,7 @@ def mutation(individ, rate, mutation_value_rate):
                 print(f'MUTATION{iter}')
 
                 param_to_mutate = random.randint(0, int(round(len(individ.genotype_array) / 2 - 1)))
-                mutation_ratio = abs(np.random.RandomState().normal(2, 1, 1)[0])
+                mutation_ratio = abs(np.random.RandomState().normal(5, 1.5, 1)[0])
                 mutation_ratio_dir = abs(np.random.RandomState().normal(10, 5, 1)[0])
 
                 sign = 1 if random.random() < 0.5 else -1
