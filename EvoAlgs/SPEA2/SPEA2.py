@@ -37,7 +37,9 @@ class SPEA2:
         def __init__(self, max_gens, pop_size, archive_size, crossover_rate, mutation_rate, mutation_value_rate):
             self.max_gens = max_gens
             self.pop_size = pop_size
+
             self.archive_size = archive_size
+
             self.crossover_rate = crossover_rate
             self.mutation_rate = mutation_rate
             self.mutation_value_rate = mutation_value_rate
