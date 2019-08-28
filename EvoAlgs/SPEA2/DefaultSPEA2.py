@@ -40,9 +40,10 @@ class DefaultSPEA2(SPEA2):
             self.objectives(to_add)
             archive_history.append(to_add)
 
+
             gen += 1
 
-        EvoAnalytics.chart_series_creator(f="history_run_2019_08_26_10_12_05.csv")
+        EvoAnalytics.chart_series_creator()
 
         return history, archive_history
 

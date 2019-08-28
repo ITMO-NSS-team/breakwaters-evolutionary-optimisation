@@ -56,9 +56,10 @@ class EvoAnalytics:
             f.write(txt)
 
     @staticmethod
-    def chart_series_creator(f, chart_type='boxplot', data_for_analyze='gen_len'):
+    def chart_series_creator(f=None, chart_type='boxplot', data_for_analyze='gen_len'): #gen_len,obj and so on
 
-        f=f'history_{EvoAnalytics.run_id}.csv'
+        if not f:
+            f=f'history_{EvoAnalytics.run_id}.csv'
 
         EvoAnalytics.change_symbol_in_file(f)
         df = pd.read_csv(f, header=0)
