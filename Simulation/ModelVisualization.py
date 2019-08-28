@@ -36,7 +36,7 @@ class ModelsVisualization():
                     mask[i][j] = 0
 
         with sb.axes_style("white"):
-            ax = sb.heatmap(hs, mask=mask, vmax=2, vmin=0, cmap='RdYlBu')
+            ax = sb.heatmap(hs, mask=mask, vmax=6, vmin=0, cmap='RdYlBu')
 
         breaker_points = []
         for i in range(len(all_breakers)):

@@ -12,7 +12,7 @@ from Simulation.СomputationalEnvironment import SwanWinRemoteComputationalManag
 from EvoAlgs.EvoAnalytics import EvoAnalytics
 import datetime
 
-seed = 42
+seed = 421
 np.random.seed(seed)
 random.seed(seed)
 

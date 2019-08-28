@@ -7,7 +7,7 @@ from Configuration.Domains import SochiHarbor
 from Optimisation.Objective import CostObjective, NavigationObjective, WaveHeightObjective, StructuralObjective
 from Optimisation.OptimisationTask import OptimisationTask
 from Optimisation.Optimiser import ParetoEvolutionaryOptimiser
-from Simulation.WaveModel import SwanWaveModel
+from Simulation.WaveModel import SwanWaveModel, WaveModel
 from Simulation.СomputationalEnvironment import SwanWinRemoteComputationalManager
 from EvoAlgs.EvoAnalytics import EvoAnalytics
 from CommonUtils.StaticStorage import StaticStorage
@@ -48,7 +48,11 @@ mod_points_to_optimise = {  # order is important
 selected_modifications_for_tuning = base_modifications_for_tuning
 selected_mod_points_to_optimise = [mod_points_to_optimise[mod.breaker_id] for mod in base_modifications_for_tuning]
 
+mod_id = "f421fdc533cf41fc9cce7554410e7055-2"
 
+
+
+res=wave_model._load_simulation_result_reference_by_id(mod_id)
 
 
 #hs0 = opt_result.simulation_result.get_output_for_target_points(exp_domain.target_points[0])

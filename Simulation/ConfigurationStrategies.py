@@ -55,17 +55,23 @@ class ConfigFileConfigurationStrategy(ConfigurationStrategyAbstract):
     def _get_obst_for_breaker(self, grid, breaker):
         indices = breaker.points
         obs_str = 'OBSTACLE TRANSM 0. REFL {} LINE '.format(breaker.reflection)
-        obs_ind_list = []
+        old_x = -10
+        old_y = -10
+        real_len = 0
         for i in range(0, len(indices)):
-            p_cur_ind = breaker.points[i]
-            obs_ind_list.append([p_cur_ind.x, p_cur_ind.y])
-
             p_cur = grid.get_coords_meter(breaker.points[i])
-            obs_str += '{},{}'.format(int(round(p_cur[0])), int(round(p_cur[1])))
-            if i != len(indices) - 1:
-                obs_str += ','
-
-        return obs_str
+            new_x = int(round(p_cur[0]))
+            new_y = int(round(p_cur[1]))
+            if old_x == -10 or (new_x != old_x or new_y != old_y):
+                obs_str += '{},{}'.format(new_x, new_y)
+                if i != len(indices) - 1:
+                    obs_str += ','
+                real_len += 1
+            old_x = new_x
+            old_y = new_y
+        if real_len > 1:
+            return obs_str
+        return ""
 
     def configurate(self, domain, modified_breakers, configuration_label):
         out_file_name = 'hs'

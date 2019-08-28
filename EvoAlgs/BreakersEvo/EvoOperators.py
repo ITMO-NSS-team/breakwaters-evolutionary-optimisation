@@ -19,13 +19,13 @@ from EvoAlgs.EvoAnalytics import EvoAnalytics
 import copy
 import abc
 import itertools
+import os
 
 from CommonUtils.StaticStorage import StaticStorage
 
 # TODO refactor
 len_range = [0, 1]
 dir_range = [0, 360]
-
 
 
 def obtain_numerical_chromosome(task):
@@ -124,7 +124,8 @@ def calculate_objectives(model, task, pop):
             visualiser = ModelsVisualization(f'swan_{simulation_result.configuration_label}', EvoAnalytics.run_id)
 
             visualiser.simple_visualise(simulation_result.hs, all_breakers, model.domain.base_breakers,
-                                        StaticStorage.exp_domain.fairways, StaticStorage.exp_domain.target_points, objectives)
+                                        StaticStorage.exp_domain.fairways, StaticStorage.exp_domain.target_points,
+                                        objectives)
         p.objectives = list(itertools.chain(*objectives))
 
         p.referenced_dataset = label_to_reference
@@ -145,6 +146,11 @@ def _calculate_reference_objectives(model, task):
                                                                        model.domain.base_breakers)
             new_obj = (obj.get_obj_value(model.domain, model.domain.base_breakers, simulation_result))
             objectives.append(new_obj)
+
+    if not os.path.isdir(f'img/{EvoAnalytics.run_id}/swan_default.png'):
+        visualiser = ModelsVisualization(f'swan_default', EvoAnalytics.run_id)
+        visualiser.simple_visualise(simulation_result.hs, model.domain.base_breakers, model.domain.base_breakers,
+                                    StaticStorage.exp_domain.fairways, StaticStorage.exp_domain.target_points, objectives)
     return objectives
 
 

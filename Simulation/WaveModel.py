@@ -67,6 +67,13 @@ class WaveModel(object):
         configuration_label = responce
         return configuration_label
 
+    def _load_simulation_result_reference_by_id(self, id):
+        db = pickledb.load(self.model_results_file_name, False)
+        for key in db.db:
+            if db.db[key]==id:
+                print(key)
+                return key
+        return None
 
 class SimpleGeomWaveModel(WaveModel):
 
