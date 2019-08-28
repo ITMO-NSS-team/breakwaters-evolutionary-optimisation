@@ -55,6 +55,8 @@ objectives = [StructuralObjective(importance=1),
 
 EvoAnalytics.clear()
 EvoAnalytics.run_id = 'run_{date:%Y_%m_%d_%H_%M_%S}'.format(date=datetime.datetime.now())
+#print(EvoAnalytics.run_id)
+#EvoAnalytics.chart_series_creator(f="history_run_2019_08_26_10_12_05.csv")
 
 task = OptimisationTask(objectives, selected_modifications_for_tuning, mod_points_to_optimise, )
 

@@ -42,6 +42,8 @@ class DefaultSPEA2(SPEA2):
 
             gen += 1
 
+        EvoAnalytics.chart_series_creator(f="history_run_2019_08_26_10_12_05.csv")
+
         return history, archive_history
 
 
