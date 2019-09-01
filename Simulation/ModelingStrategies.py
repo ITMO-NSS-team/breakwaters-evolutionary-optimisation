@@ -7,9 +7,9 @@ import numpy as np
 from sympy import Line, Point, Segment, intersection
 
 from Simulation.ConfigurationStrategies import ConfigurationInfo
-from Simulation.ModelVisualization import ModelsVisualization
+from Visualisation.ModelVisualization import ModelsVisualization
 from Simulation.Results import WaveSimulationResult
-from Simulation.СomputationalEnvironment import SwanComputationalManager, ComputationalManager
+from Computation.СomputationalEnvironment import SwanComputationalManager, ComputationalManager
 
 
 class SimulationStrategyAbstract(metaclass=ABCMeta):

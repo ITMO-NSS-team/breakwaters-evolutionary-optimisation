@@ -4,16 +4,14 @@ import numpy as np
 
 from Breakers.Breaker import xy_to_points, Breaker
 from Configuration.Domains import SochiHarbor
-from Optimisation.Objective import CostObjective, NavigationObjective, WaveHeightObjective, StructuralObjective
-from Optimisation.OptimisationTask import OptimisationTask
 from Optimisation.Optimiser import ParetoEvolutionaryOptimiser
 from Simulation.WaveModel import SwanWaveModel
-from Simulation.СomputationalEnvironment import SwanWinRemoteComputationalManager
+from Computation.СomputationalEnvironment import SwanWinRemoteComputationalManager
 from EvoAlgs.EvoAnalytics import EvoAnalytics
 from CommonUtils.StaticStorage import StaticStorage
-from EvoAlgs.BreakersEvo import EvoOperators
+from Optimisation.Objective import CostObjective, NavigationObjective, WaveHeightObjective, StructuralObjective
+from Optimisation.OptimisationTask import OptimisationTask
 import datetime
-from EvoAlgs.BreakersEvo.BreakersEvoUtils import BreakersEvoUtils
 
 seed = 42
 np.random.seed(seed)
@@ -28,13 +26,15 @@ wave_model = SwanWaveModel(exp_domain, None)
 optimiser = ParetoEvolutionaryOptimiser()
 
 base_modifications_for_tuning = [
-    Breaker('mod1', list(map(xy_to_points, [[-1, -1], [33, 22], [42, 17]])), 0, 'Ia'),
-    Breaker('mod2_top', list(map(xy_to_points, [[-1, -1], [50, 32], [50, 39]])), 0, 'II')
+    Breaker('mod1', list(map(xy_to_points, [[-1, -1], [-1, -1], [33, 22], [42, 17]])), 0, 'Ia'),
+    Breaker('mod2_top', list(map(xy_to_points, [[-1, -1], [-1, -1], [50, 32], [50, 39]])), 0, 'II'),
+    Breaker('mod2_bottom', list(map(xy_to_points, [[-1, -1], [-1, -1], [50, 39], [50, 32]])), 0, '-')
 ]
 
 mod_points_to_optimise = {  # order is important
-    'mod1': [0],
-    'mod2_top': [0],
+    'mod1': [1, 0],
+    'mod2_top': [1, 0],
+    'mod2_bottom': [1, 0],
 }
 
 selected_modifications_for_tuning = base_modifications_for_tuning
@@ -43,7 +43,7 @@ selected_mod_points_to_optimise = [mod_points_to_optimise[mod.breaker_id] for mo
 objectives = [StructuralObjective(importance=1),
               CostObjective(importance=3),
               NavigationObjective(importance=1),
-                WaveHeightObjective(importance=2)]
+              WaveHeightObjective(importance=2)]
 
 EvoAnalytics.clear()
 EvoAnalytics.run_id = 'run_{date:%Y_%m_%d_%H_%M_%S}'.format(date=datetime.datetime.now())
@@ -51,7 +51,7 @@ EvoAnalytics.run_id = 'run_{date:%Y_%m_%d_%H_%M_%S}'.format(date=datetime.dateti
 task = OptimisationTask(objectives, selected_modifications_for_tuning, mod_points_to_optimise, )
 
 StaticStorage.task = task
-StaticStorage.genotype_length = len(selected_mod_points_to_optimise)*2
+StaticStorage.genotype_length = sum([len(_) * 2 for _ in selected_mod_points_to_optimise])
 
 opt_result = optimiser.optimise(wave_model, task)
 

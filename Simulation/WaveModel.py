@@ -8,7 +8,7 @@ from Simulation.ConfigurationStrategies import GeomConfigurationStrategy, Config
     ConfigurationInfo
 from Simulation.ModelingStrategies import SimpleGeomSimulationStrategy, SwanSimulationStrategy
 from Simulation.Results import SimulationResult
-from Simulation.СomputationalEnvironment import SwanComputationalManager, ComputationalManager
+from Computation.СomputationalEnvironment import SwanComputationalManager, ComputationalManager
 
 
 class WaveModel(object):

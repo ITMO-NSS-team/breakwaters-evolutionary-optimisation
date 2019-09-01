@@ -1,6 +1,10 @@
+from Optimisation.OptimisationTask import OptimisationTask
+from Configuration import Grid
+
+
 class BreakersEvoUtils:
     @staticmethod
-    def build_breakers_from_genotype(genotype, task):
+    def build_breakers_from_genotype(genotype, task, grid):
         gen_id = 0
 
         new_modifications = []
@@ -10,12 +14,18 @@ class BreakersEvoUtils:
             point_ids_to_optimise_in_modification = task.mod_points_to_optimise[modification.breaker_id]
 
             anchor_point = modification.points[max(point_ids_to_optimise_in_modification) + 1]
+            prev_anchor = modification.points[max(point_ids_to_optimise_in_modification) + 2]
 
             for point_ind in point_ids_to_optimise_in_modification:
-                modification.points[point_ind] = modification.points[point_ind].from_polar(genotype[gen_id],
-                                                                                           genotype[gen_id + 1],
-                                                                                           anchor_point)
+                anchor_angle = anchor_point.point_to_relative_polar(prev_anchor)["angle"]
+                length = genotype[gen_id]
+                direction = (genotype[gen_id + 1] + anchor_angle + 360) % 360
+
+                modification.points[point_ind] = modification.points[point_ind].from_polar(length,
+                                                                                           direction,
+                                                                                           anchor_point, grid)
                 gen_id += 2
+                prev_anchor = anchor_point
                 anchor_point = modification.points[point_ind]
             new_modifications.append(modification)
         return new_modifications

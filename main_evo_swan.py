@@ -8,7 +8,7 @@ from Optimisation.Objective import CostObjective, NavigationObjective, WaveHeigh
 from Optimisation.OptimisationTask import OptimisationTask
 from Optimisation.Optimiser import ParetoEvolutionaryOptimiser
 from Simulation.WaveModel import SwanWaveModel
-from Simulation.СomputationalEnvironment import SwanWinRemoteComputationalManager
+from Computation.СomputationalEnvironment import SwanWinRemoteComputationalManager
 from EvoAlgs.EvoAnalytics import EvoAnalytics
 import datetime
 

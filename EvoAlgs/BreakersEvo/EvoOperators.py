@@ -15,12 +15,12 @@ from EvoAlgs.BreakersEvo.BreakersEvoUtils import BreakersEvoUtils
 from EvoAlgs.BreakersEvo.BreakersParams import BreakersParams
 from EvoAlgs.EvoAnalytics import EvoAnalytics
 from Optimisation.Objective import CostObjective, NavigationObjective, WaveHeightObjective, StructuralObjective
-from Simulation.ModelVisualization import ModelsVisualization
+from Visualisation.ModelVisualization import ModelsVisualization
 from Simulation.Results import WaveSimulationResult
 
 # TODO refactor
-len_range = [0, 1]
-dir_range = [0, 360]
+len_range = [0, 3]
+dir_range = [-50, 50]
 
 
 def obtain_numerical_chromosome(task):
@@ -28,39 +28,24 @@ def obtain_numerical_chromosome(task):
     for modification in task.possible_modifications:
         points_to_opt = task.mod_points_to_optimise[modification.breaker_id]
         points_to_encode = []
+        prev_anchor = None
         for i in points_to_opt:
             anchor = modification.points[i + 1]
+            prev_anchor = modification.points[i + 2]
+
             polar_coords = modification.points[i].point_to_relative_polar(anchor)
 
-            # fill '-1' point for next anchor
+            # fill '-1' point to obtain next anchor
             modification.points[i].x = anchor.x + modification.points[i].x
             modification.points[i].y = anchor.y + modification.points[i].y
 
-            points_to_encode.append([polar_coords["length"], polar_coords["angle"]])
+            real_angle = polar_coords["angle"]
+            anchor_angle = anchor.point_to_relative_polar(prev_anchor)["angle"]
+            relative_angle = ((real_angle - anchor_angle) + 360) % 360
+            points_to_encode.append([polar_coords["length"], relative_angle])
 
         chromosome.append(list(chain.from_iterable(points_to_encode)))
     return list(chain.from_iterable(chromosome))
-
-
-def _build_breakers_from_genotype(genotype, task):
-    gen_id = 0
-
-    new_modifications = []
-
-    for modification in task.possible_modifications:
-
-        point_ids_to_optimise_in_modification = task.mod_points_to_optimise[modification.breaker_id]
-
-        anchor_point = modification.points[max(point_ids_to_optimise_in_modification) + 1]
-
-        for point_ind in point_ids_to_optimise_in_modification:
-            modification.points[point_ind] = modification.points[point_ind].from_polar(genotype[gen_id],
-                                                                                       genotype[gen_id + 1],
-                                                                                       anchor_point)
-            gen_id += 2
-            anchor_point = modification.points[point_ind]
-        new_modifications.append(modification)
-    return new_modifications
 
 
 def calculate_objectives(model, task, pop):
@@ -68,7 +53,7 @@ def calculate_objectives(model, task, pop):
         label_to_reference = None
         genotype = [int(round(g, 0)) for g in p.genotype.genotype_array]
 
-        proposed_breakers = _build_breakers_from_genotype(genotype, task)
+        proposed_breakers = BreakersEvoUtils.build_breakers_from_genotype(genotype, task, model.domain.model_grid)
         objectives = []
 
         base_objectives = _calculate_reference_objectives(model, task)
@@ -141,11 +126,14 @@ def _calculate_reference_objectives(model, task):
                                                                        model.domain.base_breakers)
             new_obj = (obj.get_obj_value(model.domain, model.domain.base_breakers, simulation_result))
             objectives.append(new_obj)
+        else:
+            simulation_result = None
 
-    if not os.path.isdir(f'img/{EvoAnalytics.run_id}/swan_default.png'):
+    if not os.path.isdir(f'img/{EvoAnalytics.run_id}/swan_default.png') and simulation_result is not None:
         visualiser = ModelsVisualization(f'swan_default', EvoAnalytics.run_id)
         visualiser.simple_visualise(simulation_result.hs, model.domain.base_breakers, model.domain.base_breakers,
-                                    StaticStorage.exp_domain.fairways, StaticStorage.exp_domain.target_points, objectives)
+                                    StaticStorage.exp_domain.fairways, StaticStorage.exp_domain.target_points,
+                                    objectives)
     return objectives
 
 
@@ -189,7 +177,7 @@ def crossover(p1, p2, rate):
                 obj_val = objective.get_obj_value(StaticStorage.exp_domain,
                                                   BreakersEvoUtils.build_breakers_from_genotype(
                                                       genotype_array,
-                                                      StaticStorage.task))
+                                                      StaticStorage.task, StaticStorage.exp_domain.model_grid))
                 if obj_val >= 0 and isinstance(objective, NavigationObjective):
                     is_bad = True
                     print("Unsuccesful crossover N")
@@ -214,7 +202,7 @@ def mutation(individ, rate, mutation_value_rate):
         iter = 0
 
         for _ in range(0,
-                       random.randint(1, int(round(len(individ.genotype_array) / 2 - 1)))):  # number of mutations
+                       random.randint(1, int(round(len(individ.genotype_array) / 2)))):  # number of mutations
             is_bad = True
             while is_bad and iter < 50:
                 print(f'MUTATION{iter}')
@@ -232,14 +220,15 @@ def mutation(individ, rate, mutation_value_rate):
                 genotype_array[len_ind] += sign * mutation_ratio
                 genotype_array[len_ind] = abs(genotype_array[len_ind])
                 genotype_array[dir_ind] += sign * mutation_ratio_dir
-                genotype_array[dir_ind] = round((genotype_array[dir_ind] + 360) % 360)
+                genotype_array[dir_ind] = min(genotype_array[dir_ind], dir_range[0])
+                genotype_array[dir_ind] = max(genotype_array[dir_ind], - dir_range[1])
 
                 is_bad = False
                 for objective in strict_objectives:
                     obj_val = objective.get_obj_value(StaticStorage.exp_domain,
                                                       BreakersEvoUtils.build_breakers_from_genotype(
-                                                          genotype_array,
-                                                          StaticStorage.task))
+                                                          genotype_array, StaticStorage.task,
+                                                          StaticStorage.exp_domain.model_grid))
 
                     if obj_val >= 0 and isinstance(objective, NavigationObjective):
                         is_bad = True
@@ -265,7 +254,7 @@ def initial_pop_lhs(size, **kwargs):
             par_scale = 1
         else:
             par_range = dir_range
-            par_scale = 120
+            par_scale = 50
 
         # TODO better sampling
         samples_grid[:, i] = (norm(loc=np.mean(par_range), scale=par_scale).ppf(samples_grid[:, i]))
@@ -301,13 +290,14 @@ def initial_pop_random(size, **kwargs):
                 if j % 2 == 0:
                     genotype[j] = random.randint(0, 3)
                 else:
-                    genotype[j] = random.randint(0, 359)
+                    genotype[j] = random.randint(-3, 3) * 15
 
             is_bad = False
             for objective in strict_objectives:
                 obj_val = objective.get_obj_value(StaticStorage.exp_domain,
                                                   BreakersEvoUtils.build_breakers_from_genotype(genotype,
-                                                                                                StaticStorage.task))
+                                                                                                StaticStorage.task,
+                                                                                                StaticStorage.exp_domain.model_grid))
                 if obj_val >= 0 and isinstance(objective, NavigationObjective):
                     is_bad = True
                     # print("Unsuccesful init N")

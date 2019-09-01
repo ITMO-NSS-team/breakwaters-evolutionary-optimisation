@@ -23,47 +23,25 @@ class DifferentialOptimisationStrategy(OptimisationStrategyAbstract):
         for modification in task.possible_modifications:
             points_to_opt = task.mod_points_to_optimise[modification.breaker_id]
             points_to_encode = []
+            prev_anchor = None
             for i in points_to_opt:
                 anchor = modification.points[i + 1]
+                prev_anchor = modification.points[i + 2]
+
                 polar_coords = modification.points[i].point_to_relative_polar(anchor)
 
-                # fill '-1' point for next anchor
+                # fill '-1' point to obtain next anchor
                 modification.points[i].x = anchor.x + modification.points[i].x
                 modification.points[i].y = anchor.y + modification.points[i].y
 
-                points_to_encode.append([polar_coords["length"], polar_coords["angle"]])
+                real_angle = polar_coords["angle"]
+                anchor_angle = anchor.point_to_relative_polar(prev_anchor)
+                relative_angle = ((real_angle - anchor_angle) + 360 ) % 360
+                points_to_encode.append([polar_coords["length"], relative_angle])
 
             chromosome.append(list(chain.from_iterable(points_to_encode)))
         return list(chain.from_iterable(chromosome))
 
-    def _build_breakers_from_genotype(self, genotype, task):
-        gen_id = 0
-
-        new_modifications = []
-
-        for modification in task.possible_modifications:
-
-            point_ids_to_optimise_in_modification = task.mod_points_to_optimise[modification.breaker_id]
-
-            anchor_point = modification.points[max(point_ids_to_optimise_in_modification) + 1]
-
-            for point_ind in point_ids_to_optimise_in_modification:
-                modification.points[point_ind] = modification.points[point_ind].from_polar(genotype[gen_id],
-                                                                                           genotype[gen_id + 1],
-                                                                                           anchor_point)
-                gen_id += 2
-                anchor_point = modification.points[point_ind]
-            new_modifications.append(modification)
-        return new_modifications
-
-    def _generate_genotype_from_breakers(self, breakers):
-        txt = []
-        for pb in breakers:
-            for pbp in pb.points:
-                txt.append(str(int(pbp.x)))
-                txt.append(str(int(pbp.y)))
-        txt_genotype = ",".join(txt)
-        return txt_genotype
 
     def calculate_fitness(self, genotype, model, task, base_fintess):
         fitness_value = 0

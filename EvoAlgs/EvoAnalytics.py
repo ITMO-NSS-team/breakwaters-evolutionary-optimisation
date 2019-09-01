@@ -47,6 +47,7 @@ class EvoAnalytics:
                        range(0, len(genotype))])])
 
     @staticmethod
+    #TODO move to file creation method
     def change_symbol_in_file(file=None, symbol=',', symbol_for_change=';'):
         if not file:
             file = f'history_{EvoAnalytics.run_id}.csv'

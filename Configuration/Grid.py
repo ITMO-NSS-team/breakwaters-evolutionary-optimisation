@@ -27,14 +27,14 @@ class BreakerPoint(GridPoint):
     def __init__(self, x, y):
         super(BreakerPoint, self).__init__(x, y)
 
-    def from_polar(self, length, direction, anchor_point):
+    def from_polar(self, length, direction, anchor_point, grid):
         rad_grad = 180 / np.pi
         x = int(round(length * np.sin(direction / rad_grad) + anchor_point.x))
         y = int(round(length * np.cos(direction / rad_grad) + anchor_point.y))
 
-        #TODO real grid size
-        self.x = max(min(x, 84),0)
-        self.y = min(min(y, 59),0)
+        # TODO real grid size
+        self.x = max(min(x, grid.grid_x), 0)
+        self.y = min(min(y, grid.grid_y), 0)
 
         return BreakerPoint(x, y)
 

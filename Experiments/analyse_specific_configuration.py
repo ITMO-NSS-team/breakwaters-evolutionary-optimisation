@@ -4,16 +4,10 @@ import numpy as np
 
 from Breakers.Breaker import xy_to_points, Breaker
 from Configuration.Domains import SochiHarbor
-from Optimisation.Objective import CostObjective, NavigationObjective, WaveHeightObjective, StructuralObjective
-from Optimisation.OptimisationTask import OptimisationTask
 from Optimisation.Optimiser import ParetoEvolutionaryOptimiser
-from Simulation.WaveModel import SwanWaveModel, WaveModel
-from Simulation.СomputationalEnvironment import SwanWinRemoteComputationalManager
-from EvoAlgs.EvoAnalytics import EvoAnalytics
+from Simulation.WaveModel import SwanWaveModel
+from Computation.СomputationalEnvironment import SwanWinRemoteComputationalManager
 from CommonUtils.StaticStorage import StaticStorage
-from EvoAlgs.BreakersEvo import EvoOperators
-import datetime
-from EvoAlgs.BreakersEvo.BreakersEvoUtils import BreakersEvoUtils
 
 seed = 42
 np.random.seed(seed)
