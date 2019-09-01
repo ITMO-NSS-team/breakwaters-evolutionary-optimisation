@@ -16,8 +16,6 @@ exp_domain = SochiHarbor()
 
 wave_model = SimpleGeomWaveModel(exp_domain)
 
-# wave_model = SimpleGeomWaveModel(exp_domain)
-
 optimiser = ParetoEvolutionaryOptimiser()
 
 base_modifications_for_tuning = [
@@ -49,5 +47,3 @@ objectives = [  # StructuralObjective(importance=1),
 task = OptimisationTask(objectives, selected_modifications_for_tuning, mod_points_to_optimise, )
 
 opt_result = optimiser.optimise(wave_model, task)
-
-# hs0 = opt_result.simulation_result.get_output_for_target_points(exp_domain.target_points[0])

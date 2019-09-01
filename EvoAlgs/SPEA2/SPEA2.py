@@ -113,7 +113,7 @@ class SPEA2:
         distances_to_src = sorted(distances_to_src)
 
         k = int(sqrt(self.params.pop_size + self.params.archive_size))
-        # k = 1
+
         density = 1.0 / (distances_to_src[k] + 2.0)
         return density
 

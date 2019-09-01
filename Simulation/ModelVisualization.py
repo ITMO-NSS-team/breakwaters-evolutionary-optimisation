@@ -1,10 +1,11 @@
+import os
+
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sb
-import os
 
 
-class ModelsVisualization():
+class ModelsVisualization:
 
     def __init__(self, configuration_label, exp_name):
         self.configuration_label = configuration_label
@@ -48,15 +49,15 @@ class ModelsVisualization():
                 if [all_breakers[i].points[j - 1].x, all_breakers[i].points[j - 1].y] not in breaker_points:
                     breaker_points.append([all_breakers[i].points[j - 1].x, all_breakers[i].points[j - 1].y])
                     plt.annotate(
-                        f'({all_breakers[i].points[j-1].x},{all_breakers[i].points[j-1].y})',
+                        f'({all_breakers[i].points[j - 1].x},{all_breakers[i].points[j - 1].y})',
                         (all_breakers[i].points[j - 1].x, all_breakers[i].points[j - 1].y))
 
-                if j == len(all_breakers[i].points) - 1:
-                    if [all_breakers[i].points[j].x, all_breakers[i].points[j].y] not in breaker_points:
-                        breaker_points.append([all_breakers[i].points[j].x, all_breakers[i].points[j].y])
-                        plt.annotate(
-                            f'({all_breakers[i].points[j].x},{all_breakers[i].points[j].y})',
-                            (all_breakers[i].points[j].x, all_breakers[i].points[j].y))
+                if j == len(all_breakers[i].points) - 1 and \
+                        [all_breakers[i].points[j].x, all_breakers[i].points[j].y] not in breaker_points:
+                    breaker_points.append([all_breakers[i].points[j].x, all_breakers[i].points[j].y])
+                    plt.annotate(
+                        f'({all_breakers[i].points[j].x},{all_breakers[i].points[j].y})',
+                        (all_breakers[i].points[j].x, all_breakers[i].points[j].y))
 
         for i in range(len(base_breakers)):
             for j in range(1, len(base_breakers[i].points)):
@@ -71,7 +72,7 @@ class ModelsVisualization():
 
         for point_ind, point in enumerate(target_points):
             plt.scatter(point.x, point.y, color='black', marker='o')
-            plt.annotate(f'[№{point_ind},{point.x+2},{point.y+2}]', (point.x, point.y), color='black')
+            plt.annotate(f'[№{point_ind},{point.x + 2},{point.y + 2}]', (point.x, point.y), color='black')
 
         # plt.figure(figsize=(4, 5))
         if not os.path.isdir(f'img/{self.exp_name}'):

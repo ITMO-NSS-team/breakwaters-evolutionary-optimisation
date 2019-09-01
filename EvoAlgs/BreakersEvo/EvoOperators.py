@@ -217,10 +217,9 @@ def mutation(individ, rate, mutation_value_rate):
         strict_objectives = [NavigationObjective(), StructuralObjective()]
         is_bad = True
         iter = 0
-        # new_individ = BreakersParams(individ.genotype_array)
 
         for _ in range(0,
-                       random.randint(1, int(round(len(individ.genotype_array) / 2 - 1) / 2))):  # number of mutations
+                       random.randint(1, int(round(len(individ.genotype_array) / 2 - 1)))):  # number of mutations
             is_bad = True
             while is_bad and iter < 50:
                 print(f'MUTATION{iter}')
@@ -263,8 +262,6 @@ def mutation(individ, rate, mutation_value_rate):
 
 
 def initial_pop_lhs(size, **kwargs):
-    all_correct = False
-
     samples_grid = lhs(StaticStorage.genotype_length, size * 3, 'center')
 
     for i in range(0, StaticStorage.genotype_length):
@@ -300,7 +297,7 @@ def initial_pop_lhs(size, **kwargs):
 
 def initial_pop_random(size, **kwargs):
     population_new = []
-    for i in range(0, size):
+    for _ in range(0, size):
 
         strict_objectives = [NavigationObjective(), StructuralObjective()]
         while len(population_new) < size:

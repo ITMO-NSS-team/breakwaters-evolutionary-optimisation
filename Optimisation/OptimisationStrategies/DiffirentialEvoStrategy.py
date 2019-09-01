@@ -141,8 +141,6 @@ class DifferentialOptimisationStrategy(OptimisationStrategyAbstract):
             if isinstance(obj, WaveHeightObjective):
                 # TODO read if already simulated
 
-                # configuration_label = ''.join(str(g) for g in genotype)
-
                 txt = []
                 for pb in proposed_breakers:
                     for pbp in pb.points:
