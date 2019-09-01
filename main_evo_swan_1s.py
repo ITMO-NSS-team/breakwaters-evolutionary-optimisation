@@ -29,20 +29,12 @@ optimiser = ParetoEvolutionaryOptimiser()
 
 base_modifications_for_tuning = [
     Breaker('mod1', list(map(xy_to_points, [[-1, -1], [33, 22], [42, 17]])), 0, 'Ia'),
-    Breaker('mod2_top', list(map(xy_to_points, [[-1, -1], [50, 32], [50, 39]])), 0, 'II'),
-    Breaker('mod2_bottom', list(map(xy_to_points, [[-1, -1], [50, 39]])), 0, '--'),
-    Breaker('mod3long', list(map(xy_to_points, [[-1, -1], [56, 32], [67, 35]])), 0.9, 'IIIa'),
-    Breaker('mod3short', list(map(xy_to_points, [[-1, -1], [63, 38], [67, 39]])), 0.9, 'IIIb'),
-    Breaker('mod_add', list(map(xy_to_points, [[-1, -1], [56, 42]])), 0.9, '-'),
+    Breaker('mod2_top', list(map(xy_to_points, [[-1, -1], [50, 32], [50, 39]])), 0, 'II')
 ]
 
 mod_points_to_optimise = {  # order is important
     'mod1': [0],
     'mod2_top': [0],
-    'mod2_bottom': [0],
-    'mod3long': [0],
-    'mod3short': [0],
-    'mod_add': [0],
 }
 
 selected_modifications_for_tuning = base_modifications_for_tuning
@@ -55,8 +47,6 @@ objectives = [StructuralObjective(importance=1),
 
 EvoAnalytics.clear()
 EvoAnalytics.run_id = 'run_{date:%Y_%m_%d_%H_%M_%S}'.format(date=datetime.datetime.now())
-#print(EvoAnalytics.run_id)
-EvoAnalytics.chart_series_creator(f="history_run_2019_08_26_10_12_05.csv")
 
 task = OptimisationTask(objectives, selected_modifications_for_tuning, mod_points_to_optimise, )
 

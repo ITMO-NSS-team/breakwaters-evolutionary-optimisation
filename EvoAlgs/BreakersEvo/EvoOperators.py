@@ -1,3 +1,6 @@
+import copy
+import itertools
+import os
 import random
 import uuid
 from itertools import chain
@@ -6,22 +9,14 @@ import numpy as np
 from pyDOE import lhs
 from scipy.stats.distributions import norm
 
-from Breakers.Breaker import xy_to_points, Breaker
 from Breakers.BreakersUtils import BreakersUtils
-from Configuration.Domains import SochiHarbor
+from CommonUtils.StaticStorage import StaticStorage
 from EvoAlgs.BreakersEvo.BreakersEvoUtils import BreakersEvoUtils
 from EvoAlgs.BreakersEvo.BreakersParams import BreakersParams
+from EvoAlgs.EvoAnalytics import EvoAnalytics
 from Optimisation.Objective import CostObjective, NavigationObjective, WaveHeightObjective, StructuralObjective
-from Optimisation.OptimisationTask import OptimisationTask
 from Simulation.ModelVisualization import ModelsVisualization
 from Simulation.Results import WaveSimulationResult
-from EvoAlgs.EvoAnalytics import EvoAnalytics
-import copy
-import abc
-import itertools
-import os
-
-from CommonUtils.StaticStorage import StaticStorage
 
 # TODO refactor
 len_range = [0, 1]
