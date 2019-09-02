@@ -13,7 +13,7 @@ from Optimisation.Objective import CostObjective, NavigationObjective, WaveHeigh
 from Optimisation.OptimisationTask import OptimisationTask
 import datetime
 
-seed = 42
+seed = 421
 np.random.seed(seed)
 random.seed(seed)
 

@@ -6,6 +6,7 @@ class StaticStorage:
     task = None
     genotype_length = 0
     exp_domain = None
+    is_custom_conditions = False
 
     def init(self):
         #todo implement

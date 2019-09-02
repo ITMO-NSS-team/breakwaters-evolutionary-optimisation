@@ -15,7 +15,7 @@ class ModelsVisualization:
 
         fig = plt.figure()
         plt.rcParams['figure.figsize'] = [15, 10]
-        #fig = plt.figure(figsize=(15, 10))
+        # fig = plt.figure(figsize=(15, 10))
         ax = plt.subplot()
         ax.axes.set_aspect('equal')
 
@@ -40,7 +40,7 @@ class ModelsVisualization:
                     mask[i][j] = 0
 
         with sb.axes_style("white"):
-            ax = sb.heatmap(hs, mask=mask, vmax=6, vmin=0, cmap='RdYlBu')
+            ax = sb.heatmap(hs, mask=mask, vmax=6, vmin=0, cmap='RdYlBu_r')
 
         breaker_points = []
         for i in range(len(all_breakers)):
@@ -81,26 +81,28 @@ class ModelsVisualization:
         if not os.path.isdir(f'img/{self.exp_name}'):
             os.mkdir(f'img/{self.exp_name}')
 
-        plt.savefig(f'img/{self.exp_name}/{self.configuration_label}.png',bbox_inches='tight')
+        plt.savefig(f'img/{self.exp_name}/{self.configuration_label}.png', bbox_inches='tight')
         # plt.show()
         plt.clf()
 
     def experimental_visualise(self, hs: np.ndarray, all_breakers, base_breakers, fairways, target_points,
-                               title_mod, vmax, order_id, is_wind):
+                               title_mod, vmax, order_id, is_wind, rep_info, dir_info):
 
+        fig = plt.figure()
         plt.rcParams['figure.figsize'] = [15, 10]
         ax = plt.subplot()
+        ax.axes.set_aspect('equal')
 
         values = str(round(hs[target_points[0].y][target_points[0].x], 2))
         for i in range(1, len(target_points)):
             values += ', ' + str(round(hs[target_points[i].y][target_points[i].x], 2))
 
-        wind_str = "Без учета локального ветра."
+        wind_str = "без учета локального ветра."
         if is_wind:
-            wind_str = "С учетом локального ветра."
+            wind_str = "с учетом локального ветра."
 
         ax.set_title(
-            f'{order_id} Высоты волн с {title_mod}% обеспеченностью в целевых точках: {values} м. \n {wind_str}')
+            f'{order_id} Высоты волн с {title_mod}% обеспеченностью в целевых точках: {values} м. \n Направление волнения {dir_info} для повторяемости раз в  {rep_info} лет, {wind_str}')
 
         map_of_place = hs
 
@@ -113,7 +115,7 @@ class ModelsVisualization:
                     mask[i][j] = 0
 
         with sb.axes_style("white"):
-            ax = sb.heatmap(hs, mask=mask, vmax=vmax, vmin=0, cmap='RdYlBu')
+            ax = sb.heatmap(hs, mask=mask, vmax=vmax, vmin=0, cmap='RdYlBu_r')
 
         # ax.set_aspect('auto')
 
@@ -152,11 +154,14 @@ class ModelsVisualization:
             plt.scatter(point.x, point.y, color='black', marker='o')
             plt.annotate(f'[№{point_ind},{point.x+2},{point.y+2}]', (point.x, point.y), color='black')
 
+        plt.arrow(9, 3, 5, 5, length_includes_head=True,
+                  head_width=0.5, head_length=0.5, color="black")
+        plt.annotate('N', (15, 9), color='black')
+
         # plt.figure(figsize=(4, 5))
         if not os.path.isdir(f'img/{self.exp_name}'):
             os.mkdir(f'img/{self.exp_name}')
         # plt.set_size_inches(4.1,2.9)
-        plt.savefig(f'img/{self.exp_name}/{self.configuration_label}.png')
+        plt.savefig(f'img/{self.exp_name}/{self.configuration_label}.png', bbox_inches='tight')
         # plt.show()
         plt.clf()
-

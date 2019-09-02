@@ -28,19 +28,27 @@ class WaveModel(object):
     def configurate(self, modifications, configuration_label: str):
         return self._configuration_strategy.configurate(self.domain, modifications, configuration_label)
 
-    def run_simulation_for_constructions(self, base_breakers, modifications) -> SimulationResult:
-        configuration_label = uuid.uuid4().hex
+    def run_simulation_for_constructions(self, base_breakers, modifications, forced_label=None) -> SimulationResult:
+
+        if forced_label is None:
+            configuration_label = uuid.uuid4().hex
+        else:
+            configuration_label = forced_label
 
         if self.expensive:
             serialised_breakers = BreakersEvoUtils.generate_genotype_from_breakers(modifications)
 
-            loaded_configuration_reference = self._load_simulation_result_reference(serialised_breakers)
+            if forced_label is None:
+                loaded_configuration_reference = self._load_simulation_result_reference(serialised_breakers)
+            else:
+                loaded_configuration_reference = None
 
             if loaded_configuration_reference is None:
                 configuration_info = self.configurate(modifications, configuration_label)
                 results = self.run_simulation(configuration_info, computational_manager=self.computational_manager)
-                self._save_simulation_result_reference(serialised_breakers,
-                                                       configuration_label)
+                if not forced_label:
+                    self._save_simulation_result_reference(serialised_breakers,
+                                                           configuration_label)
             else:
                 print("Historical SWAN found")
                 configuration_label = loaded_configuration_reference

@@ -15,7 +15,6 @@ import datetime
 from EvoAlgs.BreakersEvo.BreakersEvoUtils import BreakersEvoUtils
 from Visualisation.ModelVisualization import ModelsVisualization
 
-
 seed = 42
 np.random.seed(seed)
 random.seed(seed)
@@ -120,8 +119,8 @@ bcond_values = [
     "5.4 8.7 270.0 30",
 
 ]
-ord = 0
-for i in range(0,len(bcond_values)):
+ord = 1
+for i in range(0, len(bcond_values)):
     for wi in [0, 1]:
         StaticStorage.is_custom_conditions = True
         if wi == 0:
@@ -137,7 +136,10 @@ for i in range(0,len(bcond_values)):
         visualiser = ModelsVisualization(f'{mod_id}_p{year_periodicity_labels[i]}_w{wi}', "experiments")
         visualiser.experimental_visualise(simulation_result.hs, brks, wave_model.domain.base_breakers,
                                           StaticStorage.exp_domain.fairways, StaticStorage.exp_domain.target_points, 5,
-                                          [2, 6][i], ['а)', 'б)', 'а)', 'б)'][ord], wi == 1)
+                                          [2, 2, 2, 2, 2, 2, 6, 6, 6, 6, 6, 6][i],
+                                          f'{ord})',
+                                          wi == 1, [1, 1, 1, 1, 1, 1, 50, 50, 50, 50, 50, 50][i],
+                                          ['ЮЮВ', 'Ю', 'ЮЮЗ', 'ЮЗ', 'ЗЮЗ', 'З','ЮЮВ', 'Ю', 'ЮЮЗ', 'ЮЗ', 'ЗЮЗ', 'З'][i])
 
         hs0 = simulation_result.get_output_for_target_points(exp_domain.target_points[0])
         hs1 = simulation_result.get_output_for_target_points(exp_domain.target_points[1])

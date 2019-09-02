@@ -5,6 +5,7 @@ import shutil
 import sys
 import time
 from abc import ABCMeta, abstractmethod
+from CommonUtils.StaticStorage import StaticStorage
 
 import numpy as np
 
@@ -80,12 +81,13 @@ class ConfigFileConfigurationStrategy(ConfigurationStrategyAbstract):
         saved_work_dir = os.getcwd()
         os.chdir('D:\\SWAN_sochi\\')
 
+        all_breakers = BreakersUtils.merge_breakers_with_modifications(domain.base_breakers, modified_breakers)
+
         if not os.path.isfile(
                 f'D:\\SWAN_sochi\\r\\hs{configuration_label}.d'):
 
             all_obstacles = self._get_obstacle_for_modification(domain.model_grid, domain.base_breakers,
                                                                 modified_breakers)
-            all_breakers = BreakersUtils.merge_breakers_with_modifications(domain.base_breakers, modified_breakers)
 
             for i, line in enumerate(fileinput.input(base_name, inplace=1)):
                 if 'optline' in line:
@@ -98,8 +100,15 @@ class ConfigFileConfigurationStrategy(ConfigurationStrategyAbstract):
                     sys.stdout.write(
                         re.sub(r'{}.*.d'.format(out_file_name), '{}{}.d'.format(out_file_name, configuration_label),
                                line))
+                elif StaticStorage.is_custom_conditions and ('BOUndspec SEGMENT IJ 0 58 83 58 CON PAR' in line):
+                    sys.stdout.write(f'BOUndspec SEGMENT IJ 0 58 83 58 CON PAR {StaticStorage.bdy}\n')
+                elif StaticStorage.is_custom_conditions and ('BOUndspec SEGMENT IJ 0 0 0 58 CON PAR' in line):
+                    sys.stdout.write(f'BOUndspec SEGMENT IJ 0 0 0 58 CON PAR {StaticStorage.bdy}\n')
+                elif StaticStorage.is_custom_conditions and ('WIND' in line):
+                    sys.stdout.write(f'WIND {StaticStorage.wind}\n')
                 else:
-                    sys.stdout.write(line)
+                    if line != '' and line !='\n':
+                        sys.stdout.write(line)
 
             # time.sleep(2)
             new_config_name = 'CONFIG_opt_id{}'.format(configuration_label)

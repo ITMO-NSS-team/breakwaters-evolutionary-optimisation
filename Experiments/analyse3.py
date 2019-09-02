@@ -4,10 +4,16 @@ import numpy as np
 
 from Breakers.Breaker import xy_to_points, Breaker
 from Configuration.Domains import SochiHarbor
+from Optimisation.Objective import CostObjective, NavigationObjective, WaveHeightObjective, StructuralObjective
+from Optimisation.OptimisationTask import OptimisationTask
 from Optimisation.Optimiser import ParetoEvolutionaryOptimiser
-from Simulation.WaveModel import SwanWaveModel
-from Computation.СomputationalEnvironment import SwanWinRemoteComputationalManager
+from Simulation.WaveModel import SwanWaveModel, WaveModel
+from Simulation.СomputationalEnvironment import SwanWinRemoteComputationalManager
+from EvoAlgs.EvoAnalytics import EvoAnalytics
 from CommonUtils.StaticStorage import StaticStorage
+from EvoAlgs.BreakersEvo import EvoOperators
+import datetime
+from EvoAlgs.BreakersEvo.BreakersEvoUtils import BreakersEvoUtils
 
 from Simulation.ModelVisualization import ModelsVisualization
 
@@ -26,19 +32,13 @@ optimiser = ParetoEvolutionaryOptimiser()
 base_modifications_for_tuning = [
     Breaker('mod1', list(map(xy_to_points, [[-1, -1], [33, 22], [42, 17]])), 0, 'Ia'),
     Breaker('mod2_top', list(map(xy_to_points, [[-1, -1], [50, 32], [50, 39]])), 0, 'II'),
-    Breaker('mod2_bottom', list(map(xy_to_points, [[-1, -1], [50, 39]])), 0, '--'),
-    Breaker('mod3long', list(map(xy_to_points, [[-1, -1], [56, 32], [67, 35]])), 0.9, 'IIIa'),
-    Breaker('mod3short', list(map(xy_to_points, [[-1, -1], [63, 38], [67, 39]])), 0.9, 'IIIb'),
-    Breaker('mod_add', list(map(xy_to_points, [[-1, -1], [56, 42]])), 0.9, '-'),
+   # Breaker('mod_add', list(map(xy_to_points, [[-1, -1], [57, 40]])), 0.9, '-'),
 ]
 
 mod_points_to_optimise = {  # order is important
     'mod1': [0],
     'mod2_top': [0],
-    'mod2_bottom': [0],
-    'mod3long': [0],
-    'mod3short': [0],
-    'mod_add': [0],
+    #'mod_add': [0]
 }
 
 selected_modifications_for_tuning = base_modifications_for_tuning
@@ -51,35 +51,19 @@ objectives = [StructuralObjective(importance=1),
 
 task = OptimisationTask(objectives, selected_modifications_for_tuning, mod_points_to_optimise, )
 
-# mod_id = "2bae29f1bf1d4b21a7c0fc45c1f48d43"
-# mod_id = '9b3a1e81cd694d8a892ec1aa69391a9b'
-mod_id = '15cfec8f704f4d3b96fe64a89d270a2a'
-#mod_id = 'f5ceed9e0b86467bbdf88b948582cd31'
+mod_id = '15cfec8f704f4d3b96fe64a89d270a2a-baseb'  # custom 1
 
-res = wave_model._load_simulation_result_reference_by_id(mod_id)
+#newg = [29, 25, 51, 31, 57, 39]
+newg = [29, 25, 51, 31]
 
-geno_from_res = [int(_) for _ in res.split(',')]
-
-newg = []
-ord_ind = 0
-for m in base_modifications_for_tuning:
-    for p in m.points:
-        if p.x == -1:
-            newg.append(geno_from_res[ord_ind * 2])
-            newg.append(geno_from_res[ord_ind * 2 + 1])
-        ord_ind += 1
-
-if mod_id == '15cfec8f704f4d3b96fe64a89d270a2a':
-    newg[8] = 63
-    newg[9] = 38
-
-    newg[4] = 50
-    newg[5] = 39
 
 brks = BreakersEvoUtils.build_breakers_from_coords(newg, task)
 
 cost = sum([breaker.get_length() for breaker in brks])
-print(cost)
+costb = sum([breaker.get_length() for breaker in exp_domain.base_breakers])
+costa = exp_domain.base_breakers[3].get_length() + exp_domain.base_breakers[4].get_length()
+
+print((cost) * 30 - (costb - costa) * 30)
 
 wind_walues = [
     "15.0 200", "25.0 200"
