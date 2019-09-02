@@ -13,8 +13,11 @@ class ModelsVisualization:
 
     def simple_visualise(self, hs: np.ndarray, all_breakers, base_breakers, fairways, target_points, fitness=None):
 
+        fig = plt.figure()
         plt.rcParams['figure.figsize'] = [15, 10]
+        #fig = plt.figure(figsize=(15, 10))
         ax = plt.subplot()
+        ax.axes.set_aspect('equal')
 
         values = str(round(hs[target_points[0].y][target_points[0].x], 2))
         for i in range(1, len(target_points)):
@@ -78,6 +81,6 @@ class ModelsVisualization:
         if not os.path.isdir(f'img/{self.exp_name}'):
             os.mkdir(f'img/{self.exp_name}')
 
-        plt.savefig(f'img/{self.exp_name}/{self.configuration_label}.png')
+        plt.savefig(f'img/{self.exp_name}/{self.configuration_label}.png',bbox_inches='tight')
         # plt.show()
         plt.clf()

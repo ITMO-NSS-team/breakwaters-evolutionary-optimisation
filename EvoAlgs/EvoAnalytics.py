@@ -64,6 +64,7 @@ class EvoAnalytics:
             f = f'history_{EvoAnalytics.run_id}.csv'
 
         EvoAnalytics.change_symbol_in_file(f)
+
         df = pd.read_csv(f, header=0)
         indexes_of_new_launches = df[df['pop_num'] == 'pop_num'].index  # Начала строк для разделений
         num_of_launches = len(indexes_of_new_launches) + 1
