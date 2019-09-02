@@ -1,5 +1,4 @@
-from Optimisation.OptimisationTask import OptimisationTask
-from Configuration import Grid
+from Configuration.Grid import BreakerPoint
 
 
 class BreakersEvoUtils:
@@ -39,3 +38,19 @@ class BreakersEvoUtils:
                 txt.append(str(int(pbp.y)))
         txt_genotype = ",".join(txt)
         return txt_genotype
+
+    @staticmethod
+    def build_breakers_from_coords(coords_genotype, task):
+        gen_id = 0
+
+        new_modifications = []
+
+        for modification in task.possible_modifications:
+
+            point_ids_to_optimise_in_modification = task.mod_points_to_optimise[modification.breaker_id]
+
+            for point_ind in point_ids_to_optimise_in_modification:
+                modification.points[point_ind] = BreakerPoint(coords_genotype[gen_id], coords_genotype[gen_id + 1])
+                gen_id += 2
+            new_modifications.append(modification)
+        return new_modifications
