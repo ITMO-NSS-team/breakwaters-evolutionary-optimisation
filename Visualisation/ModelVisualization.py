@@ -3,7 +3,6 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sb
-import math
 
 
 class ModelsVisualization:
@@ -12,21 +11,15 @@ class ModelsVisualization:
         self.configuration_label = configuration_label
         self.exp_name = exp_name
 
-        #to clear to plot
-        fig = plt.figure()
-        plt.rcParams['figure.figsize'] = [15, 10]
-        ax = plt.subplot()
-        ax.axes.set_aspect('equal')
-        plt.savefig('dump.png')
-
-
     def simple_visualise(self, hs: np.ndarray, all_breakers, base_breakers, fairways, target_points, fitness=None):
 
-        fig = plt.figure()
-        plt.rcParams['figure.figsize'] = [15, 10]
-        # fig = plt.figure(figsize=(15, 10))
-        ax = plt.subplot()
+        #fig = plt.figure(figsize=(15, 10))
+        fig, ax = plt.subplots(figsize=(15, 10))
+        #plt.rcParams['figure.figsize'] = [15, 10]
+        #fig = plt.figure(figsize=(15, 10))
+        #ax = plt.subplot()
         ax.axes.set_aspect('equal')
+
 
         values = str(round(hs[target_points[0].y][target_points[0].x], 2))
         for i in range(1, len(target_points)):
@@ -49,7 +42,7 @@ class ModelsVisualization:
                     mask[i][j] = 0
 
         with sb.axes_style("white"):
-            ax = sb.heatmap(hs, mask=mask, vmax=6, vmin=0, cmap='RdYlBu_r')
+            ax = sb.heatmap(hs, mask=mask, vmax=6, vmin=0, cmap='RdYlBu',cbar_kws={"shrink": 0.85})
 
         breaker_points = []
         for i in range(len(all_breakers)):
@@ -90,30 +83,26 @@ class ModelsVisualization:
         if not os.path.isdir(f'img/{self.exp_name}'):
             os.mkdir(f'img/{self.exp_name}')
 
-        plt.savefig(f'img/{self.exp_name}/{self.configuration_label}.png', bbox_inches='tight')
+        plt.savefig(f'img/{self.exp_name}/{self.configuration_label}.png',bbox_inches='tight')
         # plt.show()
         plt.clf()
 
     def experimental_visualise(self, hs: np.ndarray, all_breakers, base_breakers, fairways, target_points,
-                               title_mod, vmax, order_id, is_wind, rep_info, dir_info, real_ang):
+                               title_mod, vmax, order_id, is_wind):
 
-
-
-        fig = plt.figure()
         plt.rcParams['figure.figsize'] = [15, 10]
         ax = plt.subplot()
-        ax.axes.set_aspect('equal')
 
         values = str(round(hs[target_points[0].y][target_points[0].x], 2))
         for i in range(1, len(target_points)):
             values += ', ' + str(round(hs[target_points[i].y][target_points[i].x], 2))
 
-        wind_str = "без учета локального ветра."
+        wind_str = "Без учета локального ветра."
         if is_wind:
-            wind_str = "с учетом локального ветра."
+            wind_str = "С учетом локального ветра."
 
         ax.set_title(
-            f'{order_id} Высоты волн с {title_mod}% обеспеченностью в целевых точках: {values} м. \n Направление волнения {dir_info} для повторяемости раз в  {rep_info} лет, {wind_str}')
+            f'{order_id} Высоты волн с {title_mod}% обеспеченностью в целевых точках: {values} м. \n {wind_str}')
 
         map_of_place = hs
 
@@ -126,7 +115,7 @@ class ModelsVisualization:
                     mask[i][j] = 0
 
         with sb.axes_style("white"):
-            ax = sb.heatmap(hs, mask=mask, vmax=vmax, vmin=0, cmap='RdYlBu_r')
+            ax = sb.heatmap(hs, mask=mask, vmax=vmax, vmin=0, cmap='RdYlBu',cbar_kws={"shrink": 0.5})
 
         # ax.set_aspect('auto')
 
@@ -165,36 +154,11 @@ class ModelsVisualization:
             plt.scatter(point.x, point.y, color='black', marker='o')
             plt.annotate(f'[№{point_ind},{point.x+2},{point.y+2}]', (point.x, point.y), color='black')
 
-        wind_names = ["С", "СВ", "В", "ЮВ", "Ю", "ЮЗ", "З", "СЗ"]
-
-        base_x = 9
-        base_y = 9
-        k = 5
-        for ang_ind, ang in enumerate([0, 45, 90, 135, 180, 225, 270, 315]):
-            ang2 = (ang + 120) % 360
-            new_x = np.sin(ang2 / 180 * math.pi) * k
-            new_y = np.cos(ang2 / 180 * math.pi) * k
-
-            plt.plot([base_x, base_x+new_x], [base_y, base_x+new_y], color="black")
-
-            new_x = np.sin(ang2 / 180 * math.pi) * (k+2)
-            new_y = np.cos(ang2 / 180 * math.pi) * (k+2)
-
-            plt.annotate(wind_names[ang_ind], (base_x + new_x, base_y + new_y), color='black')
-
-        real_ang = (real_ang + 120 + 180) % 360
-
-        new_x = np.sin(real_ang / 180 * math.pi) * (k+2)
-        new_y = np.cos(real_ang / 180 * math.pi) * (k+2)
-
-        plt.arrow(base_x, base_y, new_x, new_y, length_includes_head=True,
-                  head_width=0.5, head_length=0.5, color="cyan", width=0.2,zorder=10)
-
-
         # plt.figure(figsize=(4, 5))
         if not os.path.isdir(f'img/{self.exp_name}'):
             os.mkdir(f'img/{self.exp_name}')
         # plt.set_size_inches(4.1,2.9)
-        plt.savefig(f'img/{self.exp_name}/{self.configuration_label}.png', bbox_inches='tight')
+        plt.savefig(f'img/{self.exp_name}/{self.configuration_label}.png')
         # plt.show()
         plt.clf()
+
