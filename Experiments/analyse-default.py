@@ -56,30 +56,12 @@ task = OptimisationTask(objectives, selected_modifications_for_tuning, mod_point
 
 # mod_id = "2bae29f1bf1d4b21a7c0fc45c1f48d43"
 # mod_id = '9b3a1e81cd694d8a892ec1aa69391a9b'
-#mod_id = '15cfec8f704f4d3b96fe64a89d270a2a'
-mod_id = 'f5ceed9e0b86467bbdf88b948582cd31'
+##mod_id = '15cfec8f704f4d3b96fe64a89d270a2a'
+# mod_id = 'f5ceed9e0b86467bbdf88b948582cd31'
+mod_id="default"
 
-res = wave_model._load_simulation_result_reference_by_id(mod_id)
 
-geno_from_res = [int(_) for _ in res.split(',')]
-
-newg = []
-ord_ind = 0
-for m in base_modifications_for_tuning:
-    for p in m.points:
-        if p.x == -1:
-            newg.append(geno_from_res[ord_ind * 2])
-            newg.append(geno_from_res[ord_ind * 2 + 1])
-        ord_ind += 1
-
-if mod_id == '15cfec8f704f4d3b96fe64a89d270a2a':
-    newg[8] = 63
-    newg[9] = 38
-
-    newg[4] = 50
-    newg[5] = 39
-
-brks = BreakersEvoUtils.build_breakers_from_coords(newg, task)
+brks = wave_model.domain.base_breakers
 
 cost = sum([breaker.get_length() for breaker in brks])
 print(cost)
