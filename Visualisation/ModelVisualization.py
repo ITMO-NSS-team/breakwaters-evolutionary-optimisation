@@ -3,6 +3,7 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sb
+import math
 
 
 class ModelsVisualization:
@@ -10,6 +11,14 @@ class ModelsVisualization:
     def __init__(self, configuration_label, exp_name):
         self.configuration_label = configuration_label
         self.exp_name = exp_name
+
+        #to clear to plot
+        fig = plt.figure()
+        plt.rcParams['figure.figsize'] = [15, 10]
+        ax = plt.subplot()
+        ax.axes.set_aspect('equal')
+        plt.savefig('dump.png')
+
 
     def simple_visualise(self, hs: np.ndarray, all_breakers, base_breakers, fairways, target_points, fitness=None):
 
@@ -86,7 +95,9 @@ class ModelsVisualization:
         plt.clf()
 
     def experimental_visualise(self, hs: np.ndarray, all_breakers, base_breakers, fairways, target_points,
-                               title_mod, vmax, order_id, is_wind, rep_info, dir_info):
+                               title_mod, vmax, order_id, is_wind, rep_info, dir_info, real_ang):
+
+
 
         fig = plt.figure()
         plt.rcParams['figure.figsize'] = [15, 10]
@@ -154,9 +165,31 @@ class ModelsVisualization:
             plt.scatter(point.x, point.y, color='black', marker='o')
             plt.annotate(f'[№{point_ind},{point.x+2},{point.y+2}]', (point.x, point.y), color='black')
 
-        plt.arrow(9, 3, 5, 5, length_includes_head=True,
-                  head_width=0.5, head_length=0.5, color="black")
-        plt.annotate('N', (15, 9), color='black')
+        wind_names = ["С", "СВ", "В", "ЮВ", "Ю", "ЮЗ", "З", "СЗ"]
+
+        base_x = 9
+        base_y = 9
+        k = 5
+        for ang_ind, ang in enumerate([0, 45, 90, 135, 180, 225, 270, 315]):
+            ang2 = (ang + 120) % 360
+            new_x = np.sin(ang2 / 180 * math.pi) * k
+            new_y = np.cos(ang2 / 180 * math.pi) * k
+
+            plt.plot([base_x, base_x+new_x], [base_y, base_x+new_y], color="black")
+
+            new_x = np.sin(ang2 / 180 * math.pi) * (k+2)
+            new_y = np.cos(ang2 / 180 * math.pi) * (k+2)
+
+            plt.annotate(wind_names[ang_ind], (base_x + new_x, base_y + new_y), color='black')
+
+        real_ang = (real_ang + 120 + 180) % 360
+
+        new_x = np.sin(real_ang / 180 * math.pi) * (k+2)
+        new_y = np.cos(real_ang / 180 * math.pi) * (k+2)
+
+        plt.arrow(base_x, base_y, new_x, new_y, length_includes_head=True,
+                  head_width=0.5, head_length=0.5, color="cyan", width=0.2,zorder=10)
+
 
         # plt.figure(figsize=(4, 5))
         if not os.path.isdir(f'img/{self.exp_name}'):

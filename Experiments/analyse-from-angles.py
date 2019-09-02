@@ -139,7 +139,9 @@ for i in range(0, len(bcond_values)):
                                           [2, 2, 2, 2, 2, 2, 6, 6, 6, 6, 6, 6][i],
                                           f'{ord})',
                                           wi == 1, [1, 1, 1, 1, 1, 1, 50, 50, 50, 50, 50, 50][i],
-                                          ['ЮЮВ', 'Ю', 'ЮЮЗ', 'ЮЗ', 'ЗЮЗ', 'З','ЮЮВ', 'Ю', 'ЮЮЗ', 'ЮЗ', 'ЗЮЗ', 'З'][i])
+                                          ['ЮЮВ', 'Ю', 'ЮЮЗ', 'ЮЗ', 'ЗЮЗ', 'З', 'ЮЮВ', 'Ю', 'ЮЮЗ', 'ЮЗ', 'ЗЮЗ', 'З'][i],
+                                          [157.5, 180, 202.5, 225.0, 247.0, 270.0,
+                                           157.5, 180, 202.5, 225.0, 247.0, 270.0][i])
 
         hs0 = simulation_result.get_output_for_target_points(exp_domain.target_points[0])
         hs1 = simulation_result.get_output_for_target_points(exp_domain.target_points[1])
