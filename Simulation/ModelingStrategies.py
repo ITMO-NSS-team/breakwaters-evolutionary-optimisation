@@ -78,7 +78,7 @@ class SimpleGeomSimulationStrategy(SimulationStrategyAbstract):
 
         # self.heatmap2d(hs, configuration_info.info, configuration_info.domain.fairways)
         visualiser.simple_visualise(hs, configuration_info.breakers, model.domain.base_breakers,
-                                    configuration_info.domain.fairways,\
+                                    configuration_info.domain.fairways, \
                                     configuration_info.domain.target_points)
 
         return WaveSimulationResult(hs, configuration_info.configuration_label)
@@ -222,8 +222,9 @@ class SwanSimulationStrategy(SimulationStrategyAbstract):
             hs = np.genfromtxt('D:\\SWAN_sochi\\r\\hs{}.d'.format(configuration_info.configuration_label))
         else:
             out_file_name = f'hs{configuration_info.configuration_label}.d'
-            computational_manager.execute(configuration_info.file_name,out_file_name)
-            hs = np.genfromtxt(f'D:\\sim_results_storage\\{out_file_name}')
-            hs = hs * 1.22#13% to 5%
+            computational_manager.execute(configuration_info.file_name, out_file_name)
+            hs = np.genfromtxt(f'D:\\SWAN_sochi\\r\\{out_file_name}')
+
+        hs[hs != -9] = hs[hs != -9] * 1.22  # 13% to 5%
 
         return WaveSimulationResult(hs, configuration_info.configuration_label)

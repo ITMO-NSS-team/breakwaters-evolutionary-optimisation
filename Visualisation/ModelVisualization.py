@@ -188,9 +188,9 @@ class ModelsVisualization:
                   head_width=0.5, head_length=0.5, color="cyan", width=0.2, zorder=10)
 
         # plt.figure(figsize=(4, 5))
-        if not os.path.isdir(f'img/{self.exp_name}'):
-            os.mkdir(f'img/{self.exp_name}')
+        if not os.path.isdir(f'img/experiments/{self.exp_name}'):
+            os.mkdir(f'img/experiments/{self.exp_name}')
         # plt.set_size_inches(4.1,2.9)
-        plt.savefig(f'img/{self.exp_name}/{self.configuration_label}.png', bbox_inches='tight')
+        plt.savefig(f'img/experiments/{self.exp_name}/{self.configuration_label}.png', bbox_inches='tight')
         # plt.show()
         plt.clf()

@@ -13,15 +13,19 @@ from Optimisation.Objective import CostObjective, NavigationObjective, WaveHeigh
 from Optimisation.OptimisationTask import OptimisationTask
 import datetime
 
-seed = 421
+seed = 42101
 np.random.seed(seed)
 random.seed(seed)
 
 exp_domain = SochiHarbor()
 StaticStorage.exp_domain = exp_domain
 
+StaticStorage.is_custom_conditions = True
+StaticStorage.wind = "23.1 135"
+StaticStorage.bdy = "5.3 9.1 200 30"
+
 computational_manager = SwanWinRemoteComputationalManager(["125"])
-wave_model = SwanWaveModel(exp_domain, None)
+wave_model = SwanWaveModel(exp_domain, computational_manager)
 
 optimiser = ParetoEvolutionaryOptimiser()
 

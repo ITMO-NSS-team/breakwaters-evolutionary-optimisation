@@ -1,18 +1,16 @@
+import csv
 import random
 
 import numpy as np
 
 from Breakers.Breaker import xy_to_points, Breaker
+from CommonUtils.StaticStorage import StaticStorage
 from Configuration.Domains import SochiHarbor
+from EvoAlgs.BreakersEvo.BreakersEvoUtils import BreakersEvoUtils
 from Optimisation.Objective import CostObjective, NavigationObjective, WaveHeightObjective, StructuralObjective
 from Optimisation.OptimisationTask import OptimisationTask
 from Optimisation.Optimiser import ParetoEvolutionaryOptimiser
-from Simulation.WaveModel import SwanWaveModel, WaveModel
-from EvoAlgs.EvoAnalytics import EvoAnalytics
-from CommonUtils.StaticStorage import StaticStorage
-from EvoAlgs.BreakersEvo import EvoOperators
-import datetime
-from EvoAlgs.BreakersEvo.BreakersEvoUtils import BreakersEvoUtils
+from Simulation.WaveModel import SwanWaveModel
 from Visualisation.ModelVisualization import ModelsVisualization
 
 seed = 42
@@ -26,23 +24,43 @@ wave_model = SwanWaveModel(exp_domain, None)
 
 optimiser = ParetoEvolutionaryOptimiser()
 
-base_modifications_for_tuning = [
-    Breaker('mod1', list(map(xy_to_points, [[-1, -1], [33, 22], [42, 17]])), 0, 'Ia'),
-    Breaker('mod2_top', list(map(xy_to_points, [[-1, -1], [50, 32], [50, 39]])), 0, 'II'),
-    Breaker('mod2_bottom', list(map(xy_to_points, [[-1, -1], [50, 39]])), 0, '--'),
-    Breaker('mod3long', list(map(xy_to_points, [[-1, -1], [56, 32], [67, 35]])), 0.9, 'IIIa'),
-    Breaker('mod3short', list(map(xy_to_points, [[-1, -1], [63, 38], [67, 39]])), 0.9, 'IIIb'),
-    Breaker('mod_add', list(map(xy_to_points, [[-1, -1], [56, 42]])), 0.9, '-'),
-]
+# mod_id = "2bae29f1bf1d4b21a7c0fc45c1f48d43"
+# mod_id = '9b3a1e81cd694d8a892ec1aa69391a9b'
+# mod_id = '15cfec8f704f4d3b96fe64a89d270a2a'
+# mod_id = 'f5ceed9e0b86467bbdf88b948582cd31'
 
-mod_points_to_optimise = {  # order is important
-    'mod1': [0],
-    'mod2_top': [0],
-    'mod2_bottom': [0],
-    'mod3long': [0],
-    'mod3short': [0],
-    'mod_add': [0],
-}
+#mod_id = '904dff5a-6946-434d-8d1d-aaa4e553e6cc'
+mod_id = '53b30020-35a1-49aa-a4fd-b4d68e240c23'
+
+if mod_id == '53b30020-35a1-49aa-a4fd-b4d68e240c23':
+    base_modifications_for_tuning = [
+        Breaker('mod1', list(map(xy_to_points, [[-1, -1], [33, 22], [42, 17]])), 0, 'Ia'),
+        Breaker('mod2_bottom', list(map(xy_to_points, [[-1, -1], [50, 39]])), 0, '--'),
+        Breaker('mod3long', list(map(xy_to_points, [[-1, -1], [-1, -1], [56, 32], [67, 35]])), 0.9, 'IIIa')]
+
+    mod_points_to_optimise = {  # order is important
+        'mod1': [0],
+        'mod2_bottom': [0],
+        'mod3long': [1, 0]
+    }
+
+    newg = [30, 30, 57, 41, 56, 30, 58, 29]
+
+
+
+elif mod_id == '904dff5a-6946-434d-8d1d-aaa4e553e6cc':
+    base_modifications_for_tuning = [
+        Breaker('mod1', list(map(xy_to_points, [[-1, -1], [-1, -1], [33, 22], [42, 17]])), 0, 'Ia'),
+        Breaker('mod2_bottom', list(map(xy_to_points, [[-1, -1], [50, 39]])), 0, '--'),
+        Breaker('mod3long', list(map(xy_to_points, [[-1, -1], [56, 32], [67, 35]])), 0.9, 'IIIa')]
+
+    mod_points_to_optimise = {  # order is important
+        'mod1': [1, 0],
+        'mod2_bottom': [0],
+        'mod3long': [0]
+    }
+
+    newg = [33, 25, 36, 26, 57, 41, 56, 29]
 
 selected_modifications_for_tuning = base_modifications_for_tuning
 selected_mod_points_to_optimise = [mod_points_to_optimise[mod.breaker_id] for mod in base_modifications_for_tuning]
@@ -53,13 +71,6 @@ objectives = [StructuralObjective(importance=1),
               WaveHeightObjective(importance=2)]
 
 task = OptimisationTask(objectives, selected_modifications_for_tuning, mod_points_to_optimise, )
-
-# mod_id = "2bae29f1bf1d4b21a7c0fc45c1f48d43"
-# mod_id = '9b3a1e81cd694d8a892ec1aa69391a9b'
-# mod_id = '15cfec8f704f4d3b96fe64a89d270a2a'
-# mod_id = 'f5ceed9e0b86467bbdf88b948582cd31'
-
-mod_id = '904dff5a-6946-434d-8d1d-aaa4e553e6cc'
 
 is_cust = True
 if not is_cust:
@@ -75,15 +86,6 @@ if not is_cust:
                 newg.append(geno_from_res[ord_ind * 2])
                 newg.append(geno_from_res[ord_ind * 2 + 1])
             ord_ind += 1
-
-    if mod_id == '15cfec8f704f4d3b96fe64a89d270a2a':
-        newg[8] = 63
-        newg[9] = 38
-
-        newg[4] = 50
-        newg[5] = 39
-else:
-    newg = [33, 25, 36, 26, 57, 41, 56, 29]
 
 brks = BreakersEvoUtils.build_breakers_from_coords(newg, task)
 
@@ -126,8 +128,24 @@ bcond_values = [
 
 ]
 ord = 1
-for i in range(0, len(bcond_values)):
-    for wi in [0, 1]:
+import os
+
+if not os.path.isdir(f'img/experiments/{mod_id}'):
+    os.mkdir(f'img/experiments/{mod_id}')
+
+with open(f'img/experiments/{mod_id}/{mod_id}.csv', 'w', newline='') as csvfile:
+    writer = csv.writer(csvfile, delimiter=' ',
+                        quotechar='|', quoting=csv.QUOTE_MINIMAL)
+    writer.writerow(['is_wind', 'rep', 'dir', 'hs1', 'hs2', 'hs3'])
+
+    with open(f'img/experiments/{mod_id}/{mod_id}-fortab.csv', 'w', newline='') as csvfile:
+        writer = csv.writer(csvfile, delimiter='\t',
+                            quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        writer.writerow(['hs1', 'hs2', 'hs3'])
+
+for wi in [0, 1]:
+    for i in range(0, len(bcond_values)):
+
         StaticStorage.is_custom_conditions = True
         if wi == 0:
             StaticStorage.wind = "0 0"
@@ -138,8 +156,7 @@ for i in range(0, len(bcond_values)):
         label_to_reference = f'{mod_id}_w{wi}p{year_periodicity_labels[i]}'
         simulation_result = wave_model.run_simulation_for_constructions(wave_model.domain.base_breakers, brks,
                                                                         label_to_reference)
-
-        visualiser = ModelsVisualization(f'{mod_id}_p{year_periodicity_labels[i]}_w{wi}', "experiments")
+        visualiser = ModelsVisualization(f'{mod_id}_p{year_periodicity_labels[i]}_w{wi}', mod_id)
         visualiser.experimental_visualise(simulation_result.hs, brks, wave_model.domain.base_breakers,
                                           StaticStorage.exp_domain.fairways, StaticStorage.exp_domain.target_points, 5,
                                           [2, 2, 2, 2, 2, 2, 6, 6, 6, 6, 6, 6][i],
@@ -155,3 +172,16 @@ for i in range(0, len(bcond_values)):
 
         print(f'{hs0},{hs1},{hs2}')
         ord += 1
+
+        with open(f'img/experiments/{mod_id}/{mod_id}.csv', 'a', newline='') as csvfile:
+            writer = csv.writer(csvfile, delimiter=' ',
+                                quotechar='|', quoting=csv.QUOTE_MINIMAL)
+            writer.writerow([wi, [1, 1, 1, 1, 1, 1, 50, 50, 50, 50, 50, 50][i],
+                             ['ЮЮВ', 'Ю', 'ЮЮЗ', 'ЮЗ', 'ЗЮЗ', 'З', 'ЮЮВ',
+                              'Ю', 'ЮЮЗ', 'ЮЗ', 'ЗЮЗ', 'З'][i], round(hs0,2), round(hs1,2), round(hs2,2)])
+
+            with open(f'img/experiments/{mod_id}/{mod_id}-fortab.csv', 'a', newline='') as csvfile:
+                writer = csv.writer(csvfile, delimiter='\t',
+                                    quotechar='|', quoting=csv.QUOTE_MINIMAL)
+                writer.writerow([round(hs0, 2), round(hs1, 2), round(hs2, 2)])
+

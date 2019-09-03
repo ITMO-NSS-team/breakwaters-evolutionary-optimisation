@@ -47,29 +47,25 @@ class SwanWinRemoteComputationalManager(SwanComputationalManager):
             FileNotFoundError("Remote configuration config not found")
         resource_description = self.resources_description[0]
 
-        shutil.copy(f'D:\\SWAN_sochi\\{config_file_name}.swn', 'Z:/share_with_blades/125')
-        # resource_description['transfer_folder'])
+        # from local SWAN to share
+        shutil.copy(f'D:\\SWAN_sochi\\{config_file_name}.swn', resource_description["transfer_folder_localname"])
 
-        ps_script_1 = r"""Copy-Item {source}\\{config_file_name}.swn {target}
-""".format(source=resource_description['transfer_folder'], target=resource_description['model_folder'],
-           config_file_name=config_file_name)
+        transfer_folder = resource_description['transfer_folder']  # '\\\\192.168.13.1\\share\share_with_blades\\125'
 
-        ps_script_2 = r"""& {model_folder}swanrun.bat {config_name}.swn
-""".format(model_folder=resource_description['model_folder'], config_name=config_file_name)
+        config_name = config_file_name  # "CONFIG_v1"
 
-        ps_script_3 = r"""Copy-Item  {source}\\results\\{out_file_name} {target}
-""".format(target=resource_description['transfer_folder'],
-           source=resource_description['model_folder'],
-           out_file_name=out_file_name)
+        swan_remote_path = resource_description['remote_model_folder']  # 'C:\\Users\\nano_user'
 
-        ps_script_1 = r"""Copy-Item \\192.168.13.1\share\Deeva\CONFIG_v0.{s} C:\\Users\\nano_user
-        """.format(s="swn")
+        ps_script_1 = r"""Copy-Item %s\%s.swn %s
+        """ % (transfer_folder, config_name, swan_remote_path)
 
-        ps_script_2 = r"""& D:\{SWAN}_sochi\swanrun.bat CONFIG_v0
-        """.format(SWAN="SWAN")
+        ps_script_2 = r"""& %s\swanrun.bat %s\\%s
+        """ % (swan_remote_path, swan_remote_path, config_name)
 
-        ps_script_3 = r"""Copy-Item  C:\\Users\\{nano_user}\\results\\HSign_v0.dat \\192.168.13.1\share\Deeva
-        """.format(nano_user="nano_user")
+        swan_remote_path_results = '%s\\r' % swan_remote_path
+        result_name = out_file_name  # 'HSign_v0.dat'
+        ps_script_3 = r"""Copy-Item  %s\\%s %s
+        """ % (swan_remote_path_results, result_name, transfer_folder)
 
         script = ps_script_1 + ps_script_2 + ps_script_3
         s = winrm.Session(resource_description['url'],
@@ -81,6 +77,6 @@ class SwanWinRemoteComputationalManager(SwanComputationalManager):
         print(out)
         print('end')
 
-        shutil.copy(resource_description['transfer_folder'] + f"{out_file_name}", "D:\sim_results_storage")
+        shutil.copy(resource_description['transfer_folder_localname'] + f"//{out_file_name}", "D:\\SWAN_sochi\\r")
 
         return

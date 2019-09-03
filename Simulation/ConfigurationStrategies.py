@@ -11,6 +11,9 @@ import numpy as np
 
 from Breakers.BreakersUtils import BreakersUtils
 
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
+
 
 class ConfigurationInfo(object):
     def __init__(self, breakers, domain, label, file_name=None):
@@ -107,7 +110,7 @@ class ConfigFileConfigurationStrategy(ConfigurationStrategyAbstract):
                 elif StaticStorage.is_custom_conditions and ('WIND' in line):
                     sys.stdout.write(f'WIND {StaticStorage.wind}\n')
                 else:
-                    if line != '' and line !='\n':
+                    if line != '' and line != '\n':
                         sys.stdout.write(line)
 
             # time.sleep(2)
