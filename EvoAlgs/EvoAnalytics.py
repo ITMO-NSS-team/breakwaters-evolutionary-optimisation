@@ -70,7 +70,7 @@ class EvoAnalytics:
         if chart_type == 'boxplot':
             EvoAnalytics.axs[EvoAnalytics.gener[num_of_generation][0]][EvoAnalytics.gener[num_of_generation][1]].set_title("Population " + str(num_of_generation))
             sns.boxplot(data=df, palette="Blues",ax=EvoAnalytics.axs[EvoAnalytics.gener[num_of_generation][0]][EvoAnalytics.gener[num_of_generation][1]], linewidth=2)
-            EvoAnalytics.fig.savefig(data_for_analyze + "boxplots.png")
+            EvoAnalytics.fig.savefig(data_for_analyze + "_boxplots.png")
 
     @staticmethod
     def clear():
