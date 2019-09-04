@@ -10,6 +10,67 @@ import re
 
 class EvoAnalytics:
     run_id = "opt_0"
+    num_of_cols = 6
+    num_of_generations=0
+    num_of_rows = math.ceil(num_of_generations / num_of_cols)
+
+    #plt.rcParams['figure.figsize'] = [100, 400]
+    #plt.rcParams['xtick.labelsize'] = 20
+    fig, axs = plt.subplots(ncols=num_of_cols, nrows=num_of_rows)
+    pop_size=None
+    gener=None
+
+    @staticmethod
+    def set_params():
+
+        plt.rcParams['figure.figsize'] = [40, 4*EvoAnalytics.num_of_rows]
+        plt.rcParams['xtick.labelsize'] = 10
+        plt.rcParams['ytick.labelsize'] = 10
+        EvoAnalytics.fig,EvoAnalytics.axs=plt.subplots(ncols=EvoAnalytics.num_of_cols, nrows=EvoAnalytics.num_of_rows)
+        EvoAnalytics.gener = [[j, k] for j in range(EvoAnalytics.num_of_rows) for k in range(EvoAnalytics.num_of_cols)]
+
+
+    @staticmethod
+    def create_chart(num_of_generation, f=None, chart_type='boxplot', data_for_analyze='gen_len'):
+
+        if not f:
+            f = f'history_{EvoAnalytics.run_id}.csv'
+
+        EvoAnalytics.change_symbol_in_file(f)
+        df = pd.read_csv(f, header=0)
+        Indexes_of_new_launches = df[df['pop_num'] == 'pop_num'].index  # Начала строк для разделений
+        num_of_launches = len(Indexes_of_new_launches) + 1
+        # Разделение
+        if num_of_launches > 1:
+            df = df[Indexes_of_new_launches[len(Indexes_of_new_launches) - 1] + 1:]
+
+        df['pop_num'] = pd.to_numeric(df['pop_num'])
+
+        num_of_generations = df['pop_num'].max()
+        print(num_of_generations)
+        df = df.drop(df[df['pop_num'] != num_of_generations].index)  # Удаление строк не содержащих последнее поколение
+        # Начать индексирование в dataframe с 0-ля
+        df = df.reset_index(drop=True)
+
+        num = 0
+        for i in df.columns:
+            if not re.search(data_for_analyze, i):
+                # df_of_launch[0]=df_of_launch[0].drop(df.columns[i], axis='columns')
+                df.drop(i, axis=1, inplace=True)
+            else:
+                if data_for_analyze == "gen_len":
+                    df.rename(columns={i: 'L' + str(num)}, inplace=True)
+                    num += 1
+
+        print("df ", df)
+
+        for j in range(1, len(df.columns)):
+            df[df.columns[j]] = pd.to_numeric(df[df.columns[j]])
+
+
+        EvoAnalytics.axs[EvoAnalytics.gener[num_of_generation][0]][EvoAnalytics.gener[num_of_generation][1]].set_title("Population " + str(num_of_generation))
+        sns.boxplot(data=df, palette="Blues",ax=EvoAnalytics.axs[EvoAnalytics.gener[num_of_generation][0]][EvoAnalytics.gener[num_of_generation][1]], linewidth=2)
+        EvoAnalytics.fig.savefig(data_for_analyze + "boxplots.png")
 
     @staticmethod
     def clear():
@@ -57,8 +118,13 @@ class EvoAnalytics:
             f.truncate()
             f.write(txt)
 
+    #@staticmethod
+    #def chart_series_creator_on_each_generation(f=None, chart_type='boxplot', data_for_analyze='gen_len'):
+
     @staticmethod
     def chart_series_creator(f=None, chart_type='boxplot', data_for_analyze='gen_len'):  # gen_len,obj and so on
+        print('num_of_gen', EvoAnalytics.num_of_generations)
+        print("num of rows", EvoAnalytics.num_of_rows)
 
         if not f:
             f = f'history_{EvoAnalytics.run_id}.csv'
@@ -112,7 +178,7 @@ class EvoAnalytics:
                 gener = [[j, k] for j in range(num_of_rows) for k in range(num_of_cols)]
 
                 axs[gener[0][0]][gener[0][0]].set_title("Population " + str(0))
-                sns.boxplot(data=df_of_launch[num_of_launch][:30], palette="Blues", ax=axs[0][0], linewidth=2)
+                sns.boxplot(data=df_of_launch[num_of_launch][:pop_size], palette="Blues", ax=axs[0][0], linewidth=2)
                 for i in range(1, int(df_of_launch[0].shape[0] / pop_size)):
                     axs[gener[i][0]][gener[i][1]].set_title("Population " + str(i))
                     sns.boxplot(data=df_of_launch[num_of_launch][pop_size * i:pop_size * i + pop_size],

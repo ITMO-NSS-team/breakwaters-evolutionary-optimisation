@@ -2,6 +2,7 @@ import copy
 from math import sqrt
 
 import numpy as np
+import math
 
 from EvoAlgs.SPEA2.SPEA2 import SPEA2
 from EvoAlgs.EvoAnalytics import EvoAnalytics
@@ -12,8 +13,19 @@ class DefaultSPEA2(SPEA2):
         archive_history = []
         history = SPEA2.ErrorHistory()
 
+        EvoAnalytics.num_of_generations=self.params.max_gens
+        EvoAnalytics.num_of_rows=math.ceil(EvoAnalytics.num_of_generations / EvoAnalytics.num_of_cols)
+        #EvoAnalytics.num_of_rows=4
+        EvoAnalytics.pop_size=self.params.pop_size
+        EvoAnalytics.set_params()
+
+
         gen = 0
         while gen < self.params.max_gens:
+
+            #print("gener evo an", EvoAnalytics.gener)
+            #print("maxgens",EvoAnalytics.num_of_generations)
+            #print("num_of_rows",EvoAnalytics.num_of_rows )
             self.fitness()
 
             [EvoAnalytics.save_cantidate(gen, ind.objectives, ind.genotype.genotype_array, ind.referenced_dataset) for ind in self._pop]
@@ -43,10 +55,12 @@ class DefaultSPEA2(SPEA2):
             archive_history.append(to_add)
 
 
+            EvoAnalytics.create_chart(gen)
+
             gen += 1
 
 
-        EvoAnalytics.chart_series_creator()
+        #EvoAnalytics.chart_series_creator()
 
         return history, archive_history
 
