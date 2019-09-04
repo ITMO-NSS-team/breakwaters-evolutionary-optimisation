@@ -67,10 +67,10 @@ class EvoAnalytics:
         for j in range(1, len(df.columns)):
             df[df.columns[j]] = pd.to_numeric(df[df.columns[j]])
 
-
-        EvoAnalytics.axs[EvoAnalytics.gener[num_of_generation][0]][EvoAnalytics.gener[num_of_generation][1]].set_title("Population " + str(num_of_generation))
-        sns.boxplot(data=df, palette="Blues",ax=EvoAnalytics.axs[EvoAnalytics.gener[num_of_generation][0]][EvoAnalytics.gener[num_of_generation][1]], linewidth=2)
-        EvoAnalytics.fig.savefig(data_for_analyze + "boxplots.png")
+        if chart_type == 'boxplot':
+            EvoAnalytics.axs[EvoAnalytics.gener[num_of_generation][0]][EvoAnalytics.gener[num_of_generation][1]].set_title("Population " + str(num_of_generation))
+            sns.boxplot(data=df, palette="Blues",ax=EvoAnalytics.axs[EvoAnalytics.gener[num_of_generation][0]][EvoAnalytics.gener[num_of_generation][1]], linewidth=2)
+            EvoAnalytics.fig.savefig(data_for_analyze + "boxplots.png")
 
     @staticmethod
     def clear():
