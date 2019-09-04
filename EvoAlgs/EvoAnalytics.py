@@ -26,6 +26,7 @@ class EvoAnalytics:
         plt.rcParams['figure.figsize'] = [40, 4*EvoAnalytics.num_of_rows]
         plt.rcParams['xtick.labelsize'] = 10
         plt.rcParams['ytick.labelsize'] = 10
+
         EvoAnalytics.fig,EvoAnalytics.axs=plt.subplots(ncols=EvoAnalytics.num_of_cols, nrows=EvoAnalytics.num_of_rows)
         EvoAnalytics.gener = [[j, k] for j in range(EvoAnalytics.num_of_rows) for k in range(EvoAnalytics.num_of_cols)]
 
@@ -70,7 +71,7 @@ class EvoAnalytics:
         if chart_type == 'boxplot':
             EvoAnalytics.axs[EvoAnalytics.gener[num_of_generation][0]][EvoAnalytics.gener[num_of_generation][1]].set_title("Population " + str(num_of_generation))
             sns.boxplot(data=df, palette="Blues",ax=EvoAnalytics.axs[EvoAnalytics.gener[num_of_generation][0]][EvoAnalytics.gener[num_of_generation][1]], linewidth=2)
-            EvoAnalytics.fig.savefig(data_for_analyze + "_boxplots.png")
+            EvoAnalytics.fig.savefig(data_for_analyze + "_boxplots.png",bbox_inches='tight')
 
     @staticmethod
     def clear():
