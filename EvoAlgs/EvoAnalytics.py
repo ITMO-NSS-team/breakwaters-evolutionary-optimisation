@@ -7,6 +7,8 @@ import math
 import seaborn as sns
 import re
 
+from tkinter import messagebox
+
 
 class EvoAnalytics:
     run_id = "opt_0"
@@ -29,6 +31,14 @@ class EvoAnalytics:
 
         EvoAnalytics.fig,EvoAnalytics.axs=plt.subplots(ncols=EvoAnalytics.num_of_cols, nrows=EvoAnalytics.num_of_rows)
         EvoAnalytics.gener = [[j, k] for j in range(EvoAnalytics.num_of_rows) for k in range(EvoAnalytics.num_of_cols)]
+
+    @staticmethod
+    def try_to_save_new_picture(data_for_analyze):
+        try:
+            EvoAnalytics.fig.savefig(data_for_analyze + "_boxplots.png", bbox_inches='tight')
+        except:
+            messagebox.showinfo("Error", "Please, close the file: " + data_for_analyze + "_boxplots.png")
+            return 0
 
 
     @staticmethod
@@ -71,7 +81,19 @@ class EvoAnalytics:
         if chart_type == 'boxplot':
             EvoAnalytics.axs[EvoAnalytics.gener[num_of_generation][0]][EvoAnalytics.gener[num_of_generation][1]].set_title("Population " + str(num_of_generation))
             sns.boxplot(data=df, palette="Blues",ax=EvoAnalytics.axs[EvoAnalytics.gener[num_of_generation][0]][EvoAnalytics.gener[num_of_generation][1]], linewidth=2)
-            EvoAnalytics.fig.savefig(data_for_analyze + "_boxplots.png",bbox_inches='tight')
+            #EvoAnalytics.fig.savefig(data_for_analyze + "_boxplots.png",bbox_inches='tight')
+
+            saving_process_is_completed = 0
+            while saving_process_is_completed < 1:
+                saving_process_is_completed = EvoAnalytics.try_to_save_new_picture(data_for_analyze)
+
+            #try:
+                #EvoAnalytics.fig.savefig(data_for_analyze + "_boxplots.png", bbox_inches='tight')
+            #except:
+                #messagebox.showinfo("Error", "Please, close the file: " + data_for_analyze + "_boxplots.png")
+                #saving_process_is_completed = 0
+                #while saving_process_is_completed < 1:
+                    #saving_process_is_completed = EvoAnalytics.try_to_save_new_picture(data_for_analyze)
 
     @staticmethod
     def clear():
