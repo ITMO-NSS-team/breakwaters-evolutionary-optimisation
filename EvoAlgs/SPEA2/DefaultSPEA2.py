@@ -19,12 +19,6 @@ class DefaultSPEA2(SPEA2):
         EvoAnalytics.pop_size=self.params.pop_size
         EvoAnalytics.set_params()
 
-        print("num of gen",EvoAnalytics.num_of_generations)
-        print("num of rows",EvoAnalytics.num_of_rows)
-        print("pop size",EvoAnalytics.pop_size)
-
-
-
         gen = 0
         while gen < self.params.max_gens:
 
