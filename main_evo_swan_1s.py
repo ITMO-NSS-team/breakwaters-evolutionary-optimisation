@@ -28,7 +28,6 @@ StaticStorage.bdy = "5.3 9.1 200 30"
 EvoAnalytics.clear()
 EvoAnalytics.run_id = 'run_{date:%Y_%m_%d_%H_%M_%S}'.format(date=datetime.datetime.now())
 
-
 computational_manager = SwanWinRemoteComputationalManager(["125"])
 #wave_model = SwanWaveModel(exp_domain, computational_manager)
 wave_model = SwanWaveModel(exp_domain, None)

@@ -28,7 +28,6 @@ class EvoAnalytics:
         plt.rcParams['figure.figsize'] = [40, 4*EvoAnalytics.num_of_rows]
         plt.rcParams['xtick.labelsize'] = 10
         plt.rcParams['ytick.labelsize'] = 10
-        fig, axs = plt.subplots(ncols=EvoAnalytics.num_of_cols, nrows=EvoAnalytics.num_of_rows)
 
         EvoAnalytics.fig,EvoAnalytics.axs=plt.subplots(ncols=EvoAnalytics.num_of_cols, nrows=EvoAnalytics.num_of_rows)
         EvoAnalytics.gener = [[j, k] for j in range(EvoAnalytics.num_of_rows) for k in range(EvoAnalytics.num_of_cols)]
@@ -37,6 +36,7 @@ class EvoAnalytics:
     def try_to_save_new_picture(data_for_analyze):
         try:
             EvoAnalytics.fig.savefig(data_for_analyze + "_boxplots.png", bbox_inches='tight')
+            return 1
         except:
             messagebox.showinfo("Error", "Please, close the file: " + data_for_analyze + "_boxplots.png")
             return 0
