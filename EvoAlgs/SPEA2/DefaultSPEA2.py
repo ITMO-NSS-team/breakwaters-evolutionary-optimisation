@@ -15,7 +15,7 @@ class DefaultSPEA2(SPEA2):
 
         EvoAnalytics.num_of_generations=self.params.max_gens
         EvoAnalytics.num_of_rows=math.ceil(EvoAnalytics.num_of_generations / EvoAnalytics.num_of_cols)
-        #EvoAnalytics.num_of_rows=4
+
         EvoAnalytics.pop_size=self.params.pop_size
         EvoAnalytics.set_params()
 

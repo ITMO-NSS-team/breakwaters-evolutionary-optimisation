@@ -6,11 +6,13 @@ import numpy as np
 import math
 import seaborn as sns
 import re
+import gc
 
 from tkinter import messagebox
 
 
 class EvoAnalytics:
+    plt.close("all")
     run_id = "opt_0"
     num_of_cols = 6
     num_of_generations=0
@@ -21,19 +23,24 @@ class EvoAnalytics:
     fig, axs = plt.subplots(ncols=num_of_cols, nrows=num_of_rows)
     pop_size=None
     gener=None
+    plt.close("all")
 
     @staticmethod
     def set_params():
+        gc.collect()
+        plt.close("all")
 
         plt.rcParams['figure.figsize'] = [40, 4*EvoAnalytics.num_of_rows]
         plt.rcParams['xtick.labelsize'] = 10
         plt.rcParams['ytick.labelsize'] = 10
 
         EvoAnalytics.fig,EvoAnalytics.axs=plt.subplots(ncols=EvoAnalytics.num_of_cols, nrows=EvoAnalytics.num_of_rows)
+        plt.close("all")
         EvoAnalytics.gener = [[j, k] for j in range(EvoAnalytics.num_of_rows) for k in range(EvoAnalytics.num_of_cols)]
 
     @staticmethod
     def try_to_save_new_picture(data_for_analyze):
+        plt.close("all")
         try:
             EvoAnalytics.fig.savefig(data_for_analyze + "_boxplots.png", bbox_inches='tight')
             return 1
@@ -45,21 +52,23 @@ class EvoAnalytics:
     @staticmethod
     def create_chart(num_of_generation, f=None, chart_type='boxplot', data_for_analyze='gen_len'):
 
+
+        plt.close("all")
         if not f:
             f = f'history_{EvoAnalytics.run_id}.csv'
 
         EvoAnalytics.change_symbol_in_file(f)
         df = pd.read_csv(f, header=0)
-        Indexes_of_new_launches = df[df['pop_num'] == 'pop_num'].index  # Начала строк для разделений
-        num_of_launches = len(Indexes_of_new_launches) + 1
+        #Indexes_of_new_launches = df[df['pop_num'] == 'pop_num'].index  # Начала строк для разделений
+        #num_of_launches = len(Indexes_of_new_launches) + 1
         # Разделение
-        if num_of_launches > 1:
-            df = df[Indexes_of_new_launches[len(Indexes_of_new_launches) - 1] + 1:]
+        #if num_of_launches > 1:
+        #    df = df[Indexes_of_new_launches[len(Indexes_of_new_launches) - 1] + 1:]
 
         df['pop_num'] = pd.to_numeric(df['pop_num'])
 
         num_of_generations = df['pop_num'].max()
-        print(num_of_generations)
+        #print(num_of_generations)
         df = df.drop(df[df['pop_num'] != num_of_generations].index)  # Удаление строк не содержащих последнее поколение
         # Начать индексирование в dataframe с 0-ля
         df = df.reset_index(drop=True)
@@ -74,14 +83,13 @@ class EvoAnalytics:
                     df.rename(columns={i: 'L' + str(num)}, inplace=True)
                     num += 1
 
-        print("df ", df)
-
         for j in range(1, len(df.columns)):
             df[df.columns[j]] = pd.to_numeric(df[df.columns[j]])
 
         if chart_type == 'boxplot':
             EvoAnalytics.axs[EvoAnalytics.gener[num_of_generation][0]][EvoAnalytics.gener[num_of_generation][1]].set_title("Population " + str(num_of_generation))
             sns.boxplot(data=df, palette="Blues",ax=EvoAnalytics.axs[EvoAnalytics.gener[num_of_generation][0]][EvoAnalytics.gener[num_of_generation][1]], linewidth=2)
+            plt.close('all')
             #EvoAnalytics.fig.savefig(data_for_analyze + "_boxplots.png",bbox_inches='tight')
 
             saving_process_is_completed = 0
@@ -95,6 +103,10 @@ class EvoAnalytics:
                 #saving_process_is_completed = 0
                 #while saving_process_is_completed < 1:
                     #saving_process_is_completed = EvoAnalytics.try_to_save_new_picture(data_for_analyze)
+            gc.collect()
+            plt.cla()
+            plt.clf()
+            plt.close('all')
 
     @staticmethod
     def clear():

@@ -13,16 +13,16 @@ class ModelsVisualization:
         self.exp_name = exp_name
 
         # to clear to plot
-        #plt.rcParams.update({'figure.max_open_warning': 0})
-       # plt.rcParams['figure.figsize'] = [15, 10]
-        #fig = plt.figure()
-        #ax = plt.subplot()
-        #ax.axes.set_aspect('equal')
-        #plt.savefig('dump.png')
+        plt.rcParams.update({'figure.max_open_warning': 0})
+        plt.rcParams['figure.figsize'] = [15, 10]
+        fig = plt.figure()
+        ax = plt.subplot()
+        ax.axes.set_aspect('equal')
+        plt.savefig('dump.png')
 
 
     def simple_visualise(self, hs: np.ndarray, all_breakers, base_breakers, fairways, target_points, fitness=None):
-        return
+
         fig = plt.figure()
         plt.rcParams['figure.figsize'] = [15, 10]
         # fig = plt.figure(figsize=(15, 10))
