@@ -18,7 +18,7 @@ class ModelsVisualization:
         fig = plt.figure()
         ax = plt.subplot()
         ax.axes.set_aspect('equal')
-        plt.savefig('dump.png')
+        #plt.savefig('dump.png')
 
 
     def simple_visualise(self, hs: np.ndarray, all_breakers, base_breakers, fairways, target_points, fitness=None):
