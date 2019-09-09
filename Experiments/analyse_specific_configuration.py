@@ -109,9 +109,9 @@ for i in [0, 1]:
                                           StaticStorage.exp_domain.fairways, StaticStorage.exp_domain.target_points, 5,
                                           [2, 6][i], ['а)', 'б)', 'а)', 'б)'][ord], wi == 1)
 
-        hs0 = simulation_result.get_output_for_target_points(exp_domain.target_points[0])
-        hs1 = simulation_result.get_output_for_target_points(exp_domain.target_points[1])
-        hs2 = simulation_result.get_output_for_target_points(exp_domain.target_points[2])
+        hs0 = simulation_result.get_5percent_output_for_target_points(exp_domain.target_points[0])
+        hs1 = simulation_result.get_5percent_output_for_target_points(exp_domain.target_points[1])
+        hs2 = simulation_result.get_5percent_output_for_target_points(exp_domain.target_points[2])
 
         print(f'{hs0},{hs1},{hs2}')
         ord += 1

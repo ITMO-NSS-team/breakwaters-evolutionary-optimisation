@@ -10,8 +10,10 @@ from CommonUtils.StaticStorage import StaticStorage
 import numpy as np
 
 from Breakers.BreakersUtils import BreakersUtils
+from multiprocessing import Lock
 
 import warnings
+
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 
@@ -81,6 +83,9 @@ class ConfigFileConfigurationStrategy(ConfigurationStrategyAbstract):
         out_file_name = 'hs'
         base_name = 'CONFIG_opt.swn'
 
+        new_config_name = 'CONFIG_opt_id{}'.format(configuration_label)
+        new_config_full_name = '{}.swn'.format(new_config_name)
+
         saved_work_dir = os.getcwd()
         os.chdir('D:\\SWAN_sochi\\')
 
@@ -89,38 +94,41 @@ class ConfigFileConfigurationStrategy(ConfigurationStrategyAbstract):
         if not os.path.isfile(
                 f'D:\\SWAN_sochi\\r\\hs{configuration_label}.d'):
 
+            shutil.copy(base_name, new_config_full_name)
+
+            time.sleep(0.5)
+
             all_obstacles = self._get_obstacle_for_modification(domain.model_grid, domain.base_breakers,
                                                                 modified_breakers)
 
-            for i, line in enumerate(fileinput.input(base_name, inplace=1)):
-                if 'optline' in line:
-                    for obs_str in all_obstacles:
-                        sys.stdout.write('{}\n'.format(obs_str))
-                    sys.stdout.write('$optline\n')
-                elif 'OBSTACLE' in line:
-                    sys.stdout.write('')
-                elif out_file_name in line:
-                    sys.stdout.write(
-                        re.sub(r'{}.*.d'.format(out_file_name), '{}{}.d'.format(out_file_name, configuration_label),
-                               line))
-                elif StaticStorage.is_custom_conditions and ('BOUndspec SEGMENT IJ 0 58 83 58 CON PAR' in line):
-                    sys.stdout.write(f'BOUndspec SEGMENT IJ 0 58 83 58 CON PAR {StaticStorage.bdy}\n')
-                elif StaticStorage.is_custom_conditions and ('BOUndspec SEGMENT IJ 0 0 0 58 CON PAR' in line):
-                    sys.stdout.write(f'BOUndspec SEGMENT IJ 0 0 0 58 CON PAR {StaticStorage.bdy}\n')
-                elif StaticStorage.is_custom_conditions and ('WIND' in line):
-                    sys.stdout.write(f'WIND {StaticStorage.wind}\n')
-                else:
-                    if line != '' and line != '\n':
-                        sys.stdout.write(line)
+            lock = Lock()
+            lock.acquire()
+            try:
+                for i, line in enumerate(fileinput.input(new_config_full_name, inplace=1)):
+                    if 'optline' in line:
+                        for obs_str in all_obstacles:
+                            sys.stdout.write('{}\n'.format(obs_str))
+                        sys.stdout.write('$optline\n')
+                    elif 'OBSTACLE' in line:
+                        sys.stdout.write('')
+                    elif out_file_name in line:
+                        sys.stdout.write(
+                            re.sub(r'{}.*.d'.format(out_file_name), '{}{}.d'.format(out_file_name, configuration_label),
+                                   line))
+                    elif StaticStorage.is_custom_conditions and ('BOUndspec SEGMENT IJ 0 58 83 58 CON PAR' in line):
+                        sys.stdout.write(f'BOUndspec SEGMENT IJ 0 58 83 58 CON PAR {StaticStorage.bdy}\n')
+                    elif StaticStorage.is_custom_conditions and ('BOUndspec SEGMENT IJ 0 0 0 58 CON PAR' in line):
+                        sys.stdout.write(f'BOUndspec SEGMENT IJ 0 0 0 58 CON PAR {StaticStorage.bdy}\n')
+                    elif StaticStorage.is_custom_conditions and ('WIND' in line):
+                        sys.stdout.write(f'WIND {StaticStorage.wind}\n')
+                    else:
+                        if line != '' and line != '\n':
+                            sys.stdout.write(line)
 
-            # time.sleep(2)
-            new_config_name = 'CONFIG_opt_id{}'.format(configuration_label)
-            new_config_full_name = '{}.swn'.format(new_config_name)
-            time.sleep(2)
-            shutil.copy(base_name, new_config_full_name)
-            time.sleep(2)
-        else:
-            new_config_name = None
+            finally:
+                lock.release()
+        #else:
+        #    new_config_name = None
 
         os.chdir(saved_work_dir)
 

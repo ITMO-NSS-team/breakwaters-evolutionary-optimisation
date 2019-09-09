@@ -36,12 +36,11 @@ class DifferentialOptimisationStrategy(OptimisationStrategyAbstract):
 
                 real_angle = polar_coords["angle"]
                 anchor_angle = anchor.point_to_relative_polar(prev_anchor)
-                relative_angle = ((real_angle - anchor_angle) + 360 ) % 360
+                relative_angle = ((real_angle - anchor_angle) + 360) % 360
                 points_to_encode.append([polar_coords["length"], relative_angle])
 
             chromosome.append(list(chain.from_iterable(points_to_encode)))
         return list(chain.from_iterable(chromosome))
-
 
     def calculate_fitness(self, genotype, model, task, base_fintess):
         fitness_value = 0
@@ -145,8 +144,7 @@ class DifferentialOptimisationStrategy(OptimisationStrategyAbstract):
 
                             sim_writer.writerow([f'{configuration_label}', txt_genotype])
 
-                simulation_result = model.run_simulation_for_constructions(model.domain.base_breakers,
-                                                                           proposed_breakers, configuration_label)
+                simulation_result = model.run_simulation_for_constructions(proposed_breakers, configuration_label)
                 fitness_value.append(obj.get_obj_value(model.domain, proposed_breakers, simulation_result))
 
         return fitness_value

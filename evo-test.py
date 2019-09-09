@@ -55,4 +55,4 @@ task = OptimisationTask(objectives, selected_modifications_for_tuning, mod_point
 
 opt_result = optimiser.optimise(wave_model, task)
 
-# hs0 =.simulation_result.get_output_for_target_points(exp_domain.target_points[0])
+# hs0 =.simulation_result.get_5percent_output_for_target_points(exp_domain.target_points[0])

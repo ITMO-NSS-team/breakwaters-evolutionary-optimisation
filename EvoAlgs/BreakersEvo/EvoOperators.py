@@ -18,6 +18,8 @@ from Optimisation.Objective import CostObjective, NavigationObjective, WaveHeigh
 from Visualisation.ModelVisualization import ModelsVisualization
 from Simulation.Results import WaveSimulationResult
 
+from collections import OrderedDict
+
 # TODO refactor
 len_range = [0, 3]
 dir_range = [-50, 50]
@@ -49,7 +51,38 @@ def obtain_numerical_chromosome(task):
 
 
 def calculate_objectives(model, task, pop):
-    for p_ind, p in enumerate(pop):
+    if model.computational_manager is not None and model.computational_manager.is_lazy_parallel:
+        # cycle for the mass simulation run
+        pre_simulated_results = []
+        pre_simulated_results_idx = []
+
+        for p_ind, p in enumerate(pop):
+            genotype = [int(round(g, 0)) for g in p.genotype.genotype_array]
+            proposed_breakers = BreakersEvoUtils.build_breakers_from_genotype(genotype, task, model.domain.model_grid)
+            simulation_result = model.run_simulation_for_constructions(proposed_breakers)
+            print(simulation_result.configuration_label)
+            pre_simulated_results.append(simulation_result)
+            pre_simulated_results_idx.append(simulation_result.configuration_label)
+
+        finalised_values = model.computational_manager.finalise_execution()
+        # process ids
+        if len(finalised_values) > 0:
+            for i, val in enumerate(finalised_values):
+                label = val[0]
+                hs = val[1]
+                indices = [i for i, x in enumerate(pre_simulated_results_idx) if x == label]
+                if len(indices)>2:
+                    print("STRANGE")
+                for idx in indices:
+                    pre_simulated_results[idx].hs = hs
+
+        for ps in pre_simulated_results:
+            if ps.hs is None:
+                print("NONE FOUND")
+    else:
+        pre_simulated_results = None
+
+    for i_ind, p in enumerate(pop):
         label_to_reference = None
         genotype = [int(round(g, 0)) for g in p.genotype.genotype_array]
 
@@ -79,15 +112,21 @@ def calculate_objectives(model, task, pop):
                 objectives.append([new_obj])
 
             if isinstance(obj, WaveHeightObjective):
-                simulation_result = model.run_simulation_for_constructions(model.domain.base_breakers,
-                                                                           proposed_breakers)
-                label_to_reference = simulation_result.configuration_label
-                new_obj = (obj.get_obj_value(model.domain, proposed_breakers, simulation_result))
+                if model.computational_manager is None or not model.computational_manager.is_lazy_parallel:
+                    simulation_result = model.run_simulation_for_constructions(proposed_breakers)
+                else:
+                    print(i_ind)
+                    try:
+                        simulation_result = pre_simulated_results[i_ind]
+                    except:
+                        print("!")
+                    label_to_reference = simulation_result.configuration_label
+                    new_obj = (obj.get_obj_value(model.domain, proposed_breakers, simulation_result))
 
-                # for 3 points it is list
-                new_obj = [(x1 - x2) / x2 * 100 for (x1, x2) in zip(new_obj, base_objectives[obj_ind])]
+                    # for 3 points it is list
+                    new_obj = [(x1 - x2) / x2 * 100 for (x1, x2) in zip(new_obj, base_objectives[obj_ind])]
 
-                objectives.append(new_obj)
+                    objectives.append(new_obj)
             else:
                 if len(task.objectives) < 4:
                     label = uuid.uuid4().hex
@@ -96,7 +135,7 @@ def calculate_objectives(model, task, pop):
                         configuration_label=label)
                     label_to_reference = label
 
-        print(objectives)
+        # print(objectives)
         if True:
             all_breakers = BreakersUtils.merge_breakers_with_modifications(model.domain.base_breakers,
                                                                            proposed_breakers)
@@ -112,8 +151,6 @@ def calculate_objectives(model, task, pop):
 
 
 def _calculate_reference_objectives(model, task):
-    # <class 'list'>: [0, 651.0, -50.0, [100.0, 150.0, 160.0]]
-    # <class 'list'>: [0, 651.0, -140.0, [100.0, 150.0, 160.0]]
     objectives = []
     for obj_ind, obj in enumerate(task.objectives):
         if isinstance(obj, (CostObjective, NavigationObjective, StructuralObjective)):
@@ -122,8 +159,19 @@ def _calculate_reference_objectives(model, task):
             objectives.append(new_obj)
 
         if isinstance(obj, WaveHeightObjective):
-            simulation_result = model.run_simulation_for_constructions(model.domain.base_breakers,
-                                                                       model.domain.base_breakers)
+
+            if model.computational_manager is not None and model.computational_manager.is_lazy_parallel:
+                simulation_result = model.run_simulation_for_constructions(model.domain.base_breakers)
+                values = model.computational_manager.finalise_execution()
+                # process ids
+                if len(values) > 0:
+                    for i, val in enumerate(values):
+                        label = val[0]
+                        hs = val[1]
+                        simulation_result.hs = hs
+            else:
+                simulation_result = model.run_simulation_for_constructions(model.domain.base_breakers)
+
             new_obj = (obj.get_obj_value(model.domain, model.domain.base_breakers, simulation_result))
             objectives.append(new_obj)
         else:

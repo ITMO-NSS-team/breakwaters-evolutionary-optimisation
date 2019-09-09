@@ -3,16 +3,13 @@ import random
 import numpy as np
 
 from Breakers.Breaker import xy_to_points, Breaker
+from CommonUtils.StaticStorage import StaticStorage
 from Configuration.Domains import SochiHarbor
+from EvoAlgs.BreakersEvo.BreakersEvoUtils import BreakersEvoUtils
 from Optimisation.Objective import CostObjective, NavigationObjective, WaveHeightObjective, StructuralObjective
 from Optimisation.OptimisationTask import OptimisationTask
 from Optimisation.Optimiser import ParetoEvolutionaryOptimiser
-from Simulation.WaveModel import SwanWaveModel, WaveModel
-from EvoAlgs.EvoAnalytics import EvoAnalytics
-from CommonUtils.StaticStorage import StaticStorage
-from EvoAlgs.BreakersEvo import EvoOperators
-import datetime
-from EvoAlgs.BreakersEvo.BreakersEvoUtils import BreakersEvoUtils
+from Simulation.WaveModel import SwanWaveModel
 from Visualisation.ModelVisualization import ModelsVisualization
 
 seed = 42
@@ -57,11 +54,10 @@ task = OptimisationTask(objectives, selected_modifications_for_tuning, mod_point
 # mod_id = "2bae29f1bf1d4b21a7c0fc45c1f48d43"
 # mod_id = '9b3a1e81cd694d8a892ec1aa69391a9b'
 # mod_id = '15cfec8f704f4d3b96fe64a89d270a2a'
-# mod_id = 'f5ceed9e0b86467bbdf88b948582cd31'
+mod_id = 'f5ceed9e0b86467bbdf88b948582cd31'
+# mod_id = "default"
 
-mod_id = '904dff5a-6946-434d-8d1d-aaa4e553e6cc'
-
-is_cust = True
+is_cust = False
 if not is_cust:
     res = wave_model._load_simulation_result_reference_by_id(mod_id)
 
@@ -82,13 +78,11 @@ if not is_cust:
 
         newg[4] = 50
         newg[5] = 39
-else:
-    newg = [33, 25, 36, 26, 57, 41, 56, 29]
 
-brks = BreakersEvoUtils.build_breakers_from_coords(newg, task)
-
-cost = sum([breaker.get_length() for breaker in brks])
-print(cost)
+    brks = BreakersEvoUtils.build_breakers_from_coords(newg, task)
+    cost = sum([breaker.get_length() for breaker in brks])
+    print(cost)
+# brks = exp_domain.base_breakers
 
 wind_walues = [
     "15.0 157.5",
@@ -126,8 +120,24 @@ bcond_values = [
 
 ]
 ord = 1
-for i in range(0, len(bcond_values)):
-    for wi in [0, 1]:
+import os, csv
+
+if not os.path.isdir(f'img/experiments/{mod_id}'):
+    os.mkdir(f'img/experiments/{mod_id}')
+
+with open(f'img/experiments/{mod_id}/{mod_id}.csv', 'w', newline='') as csvfile:
+    writer = csv.writer(csvfile, delimiter=' ',
+                        quotechar='|', quoting=csv.QUOTE_MINIMAL)
+    writer.writerow(['is_wind', 'rep', 'dir', 'hs1', 'hs2', 'hs3'])
+
+    with open(f'img/experiments/{mod_id}/{mod_id}-fortab.csv', 'w', newline='') as csvfile:
+        writer = csv.writer(csvfile, delimiter='\t',
+                            quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        writer.writerow(['hs1', 'hs2', 'hs3'])
+
+for wi in [0, 1]:
+    for i in range(0, len(bcond_values)):
+
         StaticStorage.is_custom_conditions = True
         if wi == 0:
             StaticStorage.wind = "0 0"
@@ -136,10 +146,9 @@ for i in range(0, len(bcond_values)):
         StaticStorage.bdy = bcond_values[i]
 
         label_to_reference = f'{mod_id}_w{wi}p{year_periodicity_labels[i]}'
-        simulation_result = wave_model.run_simulation_for_constructions(wave_model.domain.base_breakers, brks,
+        simulation_result = wave_model.run_simulation_for_constructions(brks,
                                                                         label_to_reference)
-
-        visualiser = ModelsVisualization(f'{mod_id}_p{year_periodicity_labels[i]}_w{wi}', "experiments")
+        visualiser = ModelsVisualization(f'{mod_id}_p{year_periodicity_labels[i]}_w{wi}', mod_id)
         visualiser.experimental_visualise(simulation_result.hs, brks, wave_model.domain.base_breakers,
                                           StaticStorage.exp_domain.fairways, StaticStorage.exp_domain.target_points, 5,
                                           [2, 2, 2, 2, 2, 2, 6, 6, 6, 6, 6, 6][i],
@@ -149,9 +158,21 @@ for i in range(0, len(bcond_values)):
                                           [157.5, 180, 202.5, 225.0, 247.0, 270.0,
                                            157.5, 180, 202.5, 225.0, 247.0, 270.0][i])
 
-        hs0 = simulation_result.get_output_for_target_points(exp_domain.target_points[0])
-        hs1 = simulation_result.get_output_for_target_points(exp_domain.target_points[1])
-        hs2 = simulation_result.get_output_for_target_points(exp_domain.target_points[2])
+        hs0 = simulation_result.get_5percent_output_for_target_points(exp_domain.target_points[0])
+        hs1 = simulation_result.get_5percent_output_for_target_points(exp_domain.target_points[1])
+        hs2 = simulation_result.get_5percent_output_for_target_points(exp_domain.target_points[2])
 
         print(f'{hs0},{hs1},{hs2}')
         ord += 1
+
+        with open(f'img/experiments/{mod_id}/{mod_id}.csv', 'a', newline='') as csvfile:
+            writer = csv.writer(csvfile, delimiter=' ',
+                                quotechar='|', quoting=csv.QUOTE_MINIMAL)
+            writer.writerow([wi, [1, 1, 1, 1, 1, 1, 50, 50, 50, 50, 50, 50][i],
+                             ['ЮЮВ', 'Ю', 'ЮЮЗ', 'ЮЗ', 'ЗЮЗ', 'З', 'ЮЮВ',
+                              'Ю', 'ЮЮЗ', 'ЮЗ', 'ЗЮЗ', 'З'][i], round(hs0, 2), round(hs1, 2), round(hs2, 2)])
+
+            with open(f'img/experiments/{mod_id}/{mod_id}-fortab.csv', 'a', newline='') as csvfile:
+                writer = csv.writer(csvfile, delimiter='\t',
+                                    quotechar='|', quoting=csv.QUOTE_MINIMAL)
+                writer.writerow([round(hs0, 2), round(hs1, 2), round(hs2, 2)])

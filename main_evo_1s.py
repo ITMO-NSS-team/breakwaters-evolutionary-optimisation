@@ -55,4 +55,4 @@ StaticStorage.genotype_length = len(selected_mod_points_to_optimise) * 2
 
 opt_result = optimiser.optimise(wave_model, task)
 
-hs0 = opt_result.simulation_result.get_output_for_target_points(exp_domain.target_points[0])
+hs0 = opt_result.simulation_result.get_5percent_output_for_target_points(exp_domain.target_points[0])

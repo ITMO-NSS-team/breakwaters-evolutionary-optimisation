@@ -222,9 +222,14 @@ class SwanSimulationStrategy(SimulationStrategyAbstract):
             hs = np.genfromtxt('D:\\SWAN_sochi\\r\\hs{}.d'.format(configuration_info.configuration_label))
         else:
             out_file_name = f'hs{configuration_info.configuration_label}.d'
-            computational_manager.execute(configuration_info.file_name, out_file_name)
-            hs = np.genfromtxt(f'D:\\SWAN_sochi\\r\\{out_file_name}')
 
-        hs[hs != -9] = hs[hs != -9] * 1.22  # 13% to 5%
+            if os.path.isfile('D:\\SWAN_sochi\\r\\hs{}.d'.format(configuration_info.configuration_label)):
+                hs = np.genfromtxt(f'D:\\SWAN_sochi\\r\\{out_file_name}')
+            else:
+                computational_manager.execute(configuration_info.file_name, out_file_name)
+                if computational_manager.is_lazy_parallel:
+                    hs = None
+                else:
+                    hs = np.genfromtxt(f'D:\\SWAN_sochi\\r\\{out_file_name}')
 
         return WaveSimulationResult(hs, configuration_info.configuration_label)

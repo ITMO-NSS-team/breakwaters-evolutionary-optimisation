@@ -154,7 +154,7 @@ for wi in [0, 1]:
         StaticStorage.bdy = bcond_values[i]
 
         label_to_reference = f'{mod_id}_w{wi}p{year_periodicity_labels[i]}'
-        simulation_result = wave_model.run_simulation_for_constructions(wave_model.domain.base_breakers, brks,
+        simulation_result = wave_model.run_simulation_for_constructions(brks,
                                                                         label_to_reference)
         visualiser = ModelsVisualization(f'{mod_id}_p{year_periodicity_labels[i]}_w{wi}', mod_id)
         visualiser.experimental_visualise(simulation_result.hs, brks, wave_model.domain.base_breakers,
@@ -166,9 +166,9 @@ for wi in [0, 1]:
                                           [157.5, 180, 202.5, 225.0, 247.0, 270.0,
                                            157.5, 180, 202.5, 225.0, 247.0, 270.0][i])
 
-        hs0 = simulation_result.get_output_for_target_points(exp_domain.target_points[0])
-        hs1 = simulation_result.get_output_for_target_points(exp_domain.target_points[1])
-        hs2 = simulation_result.get_output_for_target_points(exp_domain.target_points[2])
+        hs0 = simulation_result.get_5percent_output_for_target_points(exp_domain.target_points[0])
+        hs1 = simulation_result.get_5percent_output_for_target_points(exp_domain.target_points[1])
+        hs2 = simulation_result.get_5percent_output_for_target_points(exp_domain.target_points[2])
 
         print(f'{hs0},{hs1},{hs2}')
         ord += 1
