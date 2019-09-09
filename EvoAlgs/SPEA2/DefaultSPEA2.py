@@ -24,14 +24,10 @@ class DefaultSPEA2(SPEA2):
             print("gen", gen)
             with open('out.txt', 'w') as out:
                 out.write('{}\n'.format(gen))
-            #print("gener evo an", EvoAnalytics.gener)
-            #print("maxgens",EvoAnalytics.num_of_generations)
-            #print("num_of_rows",EvoAnalytics.num_of_rows )
+
             self.fitness()
 
             [EvoAnalytics.save_cantidate(gen, ind.objectives, ind.genotype.genotype_array, ind.referenced_dataset) for ind in self._pop]
-
-            #EvoAnalytics.chart_series_creator()
 
             self._archive = self.environmental_selection(self._pop, self._archive)
             best = sorted(self._archive, key=lambda p: mean_obj(p))[0]
@@ -54,8 +50,6 @@ class DefaultSPEA2(SPEA2):
             to_add = copy.deepcopy(self._archive + self._pop)
             self.objectives(to_add)
             archive_history.append(to_add)
-
-            print("YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY")
 
             EvoAnalytics.create_chart(gen)
 

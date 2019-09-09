@@ -19,7 +19,8 @@ random.seed(seed)
 exp_domain = SochiHarbor()
 
 computational_manager = SwanWinRemoteComputationalManager(["125"])
-wave_model = SwanWaveModel(exp_domain, None)
+#wave_model = SwanWaveModel(exp_domain, None)
+wave_model = SimpleGeomWaveModel(exp_domain)
 
 optimiser = ParetoEvolutionaryOptimiser()
 

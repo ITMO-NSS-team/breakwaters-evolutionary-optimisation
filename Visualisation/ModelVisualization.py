@@ -50,7 +50,7 @@ class ModelsVisualization:
                     mask[i][j] = 0
 
         with sb.axes_style("white"):
-            ax = sb.heatmap(hs, mask=mask, vmax=6, vmin=0, cmap='RdYlBu_r', cbar_kws={"shrink": 0.5})
+            ax = sb.heatmap(hs, mask=mask, vmax=6, vmin=0, cmap='RdYlBu_r', cbar_kws={"shrink": 0.85})
 
         breaker_points = []
         for i in range(len(all_breakers)):
@@ -125,7 +125,7 @@ class ModelsVisualization:
                     mask[i][j] = 0
 
         with sb.axes_style("white"):
-            ax = sb.heatmap(hs, mask=mask, vmax=vmax, vmin=0, cmap='RdYlBu_r', cbar_kws={"shrink": 0.5})
+            ax = sb.heatmap(hs, mask=mask, vmax=vmax, vmin=0, cmap='RdYlBu_r', cbar_kws={"shrink": 0.85})
 
         # ax.set_aspect('auto')
 

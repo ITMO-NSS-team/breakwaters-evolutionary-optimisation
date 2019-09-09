@@ -21,7 +21,8 @@ exp_domain = SochiHarbor()
 StaticStorage.exp_domain = exp_domain
 
 computational_manager = SwanWinRemoteComputationalManager(["125"])
-wave_model = SwanWaveModel(exp_domain, None)
+#wave_model = SwanWaveModel(exp_domain, None)
+wave_model = SwanWaveModel(exp_domain, computational_manager)
 
 optimiser = ParetoEvolutionaryOptimiser()
 
