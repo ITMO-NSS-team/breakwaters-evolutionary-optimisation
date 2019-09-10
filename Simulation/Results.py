@@ -9,10 +9,14 @@ class SimulationResult(object):
 
 
 class WaveSimulationResult(SimulationResult):
+
+
     def __init__(self, hs, configuration_label):
         self.hs = hs
         # TODO move to parent
         self.configuration_label = configuration_label
+
+        self.coeff_hs_to_5 = 1.22
 
     def _get_output_for_target_points(self, points):
         if isinstance(points, list):
@@ -23,9 +27,12 @@ class WaveSimulationResult(SimulationResult):
     def get_5percent_output_for_target_points(self, points):
         hs = self._get_output_for_target_points(points)
         if isinstance(points, list):
-            return [hs_i * 1.22 for hs_i in hs]
+            return [hs_i * self.coeff_hs_to_5 for hs_i in hs]
         else:
-            return hs * 1.22
+            return hs * self.coeff_hs_to_5
 
     def get_hs_output_for_target_points(self, points):
         return self._get_output_for_target_points(points)
+
+    def get_5percent_output_for_field(self):
+        return self.hs * self.coeff_hs_to_5

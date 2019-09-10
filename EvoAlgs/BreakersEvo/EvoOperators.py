@@ -142,7 +142,7 @@ def calculate_objectives(model, task, pop):
 
             visualiser = ModelsVisualization(f'swan_{simulation_result.configuration_label}', EvoAnalytics.run_id)
 
-            visualiser.simple_visualise(simulation_result.hs, all_breakers, model.domain.base_breakers,
+            visualiser.simple_visualise(simulation_result.get_5percent_output_for_field(), all_breakers, model.domain.base_breakers,
                                         StaticStorage.exp_domain.fairways, StaticStorage.exp_domain.target_points,
                                         objectives)
         p.objectives = list(itertools.chain(*objectives))
@@ -152,6 +152,7 @@ def calculate_objectives(model, task, pop):
 
 def _calculate_reference_objectives(model, task):
     objectives = []
+    simulation_result = None
     for obj_ind, obj in enumerate(task.objectives):
         if isinstance(obj, (CostObjective, NavigationObjective, StructuralObjective)):
             # TODO expensive check can be missed? investigate
@@ -174,12 +175,10 @@ def _calculate_reference_objectives(model, task):
 
             new_obj = (obj.get_obj_value(model.domain, model.domain.base_breakers, simulation_result))
             objectives.append(new_obj)
-        else:
-            simulation_result = None
 
     if not os.path.isdir(f'img/{EvoAnalytics.run_id}/swan_default.png') and simulation_result is not None:
         visualiser = ModelsVisualization(f'swan_default', EvoAnalytics.run_id)
-        visualiser.simple_visualise(simulation_result.hs, model.domain.base_breakers, model.domain.base_breakers,
+        visualiser.simple_visualise(simulation_result.get_5percent_output_for_field(), model.domain.base_breakers, model.domain.base_breakers,
                                     StaticStorage.exp_domain.fairways, StaticStorage.exp_domain.target_points,
                                     objectives)
     return objectives

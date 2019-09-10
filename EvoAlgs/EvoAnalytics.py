@@ -55,7 +55,7 @@ class EvoAnalytics:
 
         plt.close("all")
         if not f:
-            f = f'history_{EvoAnalytics.run_id}.csv'
+            f = f'HistoryFiles/history_{EvoAnalytics.run_id}.csv'
 
         EvoAnalytics.change_symbol_in_file(f)
         df = pd.read_csv(f, header=0)
@@ -110,13 +110,13 @@ class EvoAnalytics:
 
     @staticmethod
     def clear():
-        hist_file_name = f'history_{EvoAnalytics.run_id}.csv'
+        hist_file_name = f'HistoryFiles/history_{EvoAnalytics.run_id}.csv'
         if os.path.isfile(hist_file_name):
             os.remove(hist_file_name)
 
     @staticmethod
     def save_cantidate(pop_num, objectives, genotype, referenced_dataset):
-        hist_file_name = f'history_{EvoAnalytics.run_id}.csv'
+        hist_file_name = f'HistoryFiles/history_{EvoAnalytics.run_id}.csv'
         if not os.path.isfile(hist_file_name):
             with open(hist_file_name, 'w', newline='') as f:
                 EvoAnalytics._write_header_to_csv(f, objectives, genotype, referenced_dataset)
@@ -147,7 +147,7 @@ class EvoAnalytics:
     #TODO move to file creation method
     def change_symbol_in_file(file=None, symbol=',', symbol_for_change=';'):
         if not file:
-            file = f'history_{EvoAnalytics.run_id}.csv'
+            file = f'HistoryFiles/history_{EvoAnalytics.run_id}.csv'
         with open(file, 'r+') as f:
             txt = f.read().replace(symbol_for_change, symbol)
             f.seek(0)
@@ -163,7 +163,7 @@ class EvoAnalytics:
         print("num of rows", EvoAnalytics.num_of_rows)
 
         if not f:
-            f = f'history_{EvoAnalytics.run_id}.csv'
+            f = f'HistoryFiles/history_{EvoAnalytics.run_id}.csv'
 
         EvoAnalytics.change_symbol_in_file(f)
 

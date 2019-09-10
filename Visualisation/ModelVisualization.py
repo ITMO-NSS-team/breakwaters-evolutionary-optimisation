@@ -1,6 +1,7 @@
 import os
 
 import matplotlib.pyplot as plt
+
 import numpy as np
 import seaborn as sb
 import math
@@ -92,8 +93,9 @@ class ModelsVisualization:
             os.mkdir(f'img/{self.exp_name}')
 
         plt.savefig(f'img/{self.exp_name}/{self.configuration_label}.png', bbox_inches='tight')
-        # plt.show()
+        plt.cla()
         plt.clf()
+        plt.close('all')
 
     def experimental_visualise(self, hs: np.ndarray, all_breakers, base_breakers, fairways, target_points,
                                title_mod, vmax, order_id, is_wind, rep_info, dir_info, real_ang):
