@@ -1,18 +1,17 @@
 from abc import ABCMeta, abstractmethod
-
+from copy import copy
 
 class SimulationResult(object):
 
     @abstractmethod
-    def get_output_for_target_points(self, points):
+    def _get_output_for_target_points(self, points):
         return
 
 
 class WaveSimulationResult(SimulationResult):
 
-
     def __init__(self, hs, configuration_label):
-        self.hs = hs
+        self._hs = copy(hs)
         # TODO move to parent
         self.configuration_label = configuration_label
 
@@ -20,9 +19,9 @@ class WaveSimulationResult(SimulationResult):
 
     def _get_output_for_target_points(self, points):
         if isinstance(points, list):
-            return [self.hs[point.y, point.x] for point in points]
+            return [self._hs[point.y, point.x] for point in points]
         else:
-            return self.hs[points.y, points.x]
+            return self._hs[points.y, points.x]
 
     def get_5percent_output_for_target_points(self, points):
         hs = self._get_output_for_target_points(points)
@@ -35,4 +34,6 @@ class WaveSimulationResult(SimulationResult):
         return self._get_output_for_target_points(points)
 
     def get_5percent_output_for_field(self):
-        return self.hs * self.coeff_hs_to_5
+        hs = copy(self._hs)
+        hs[hs != -9] = hs[hs != -9] * self.coeff_hs_to_5
+        return hs
