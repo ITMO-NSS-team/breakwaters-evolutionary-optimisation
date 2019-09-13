@@ -24,8 +24,9 @@ class ModelsVisualization:
 
     def simple_visualise(self, hs: np.ndarray, all_breakers, base_breakers, fairways, target_points, fitness=None):
 
-        fig = plt.figure()
         plt.rcParams['figure.figsize'] = [15, 10]
+        fig = plt.figure()
+
         # fig = plt.figure(figsize=(15, 10))
         ax = plt.subplot()
         ax.axes.set_aspect('equal')
