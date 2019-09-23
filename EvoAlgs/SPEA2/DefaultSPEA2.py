@@ -21,9 +21,11 @@ class DefaultSPEA2(SPEA2):
 
         gen = 0
         while gen < self.params.max_gens:
-            print("gen", gen)
-            with open('out.txt', 'w') as out:
-                out.write('{}\n'.format(gen))
+
+            #print("gen", gen)
+            #with open('out.txt', 'w') as out:
+                #out.write('{}\n'.format(gen))
+
 
             self.fitness()
 

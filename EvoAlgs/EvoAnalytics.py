@@ -30,6 +30,7 @@ class EvoAnalytics:
         plt.close("all")
 
         plt.rcParams['figure.figsize'] = [40, 4*EvoAnalytics.num_of_rows]
+
         plt.rcParams['xtick.labelsize'] = 10
         plt.rcParams['ytick.labelsize'] = 10
 
@@ -95,7 +96,7 @@ class EvoAnalytics:
             f.write(txt)
 
     @staticmethod
-    def create_chart(num_of_generation=None, f=None, chart_type='boxplot', data_for_analyze='gen_len',
+    def create_chart(num_of_generation=None, f=None, chart_type='boxplot', data_for_analyze='obj',
                      analyze_only_last_generation=True):
 
         plt.close("all")

@@ -40,6 +40,7 @@ selected_modifications_for_tuning = base_modifications_for_tuning
 selected_mod_points_to_optimise = [mod_points_to_optimise[mod.breaker_id] for mod in base_modifications_for_tuning]
 
 
+
 objectives = [StructuralObjective(importance=1),
               CostObjective(importance=3),
               NavigationObjective(importance=1)]
@@ -49,11 +50,11 @@ EvoAnalytics.run_id = 'run_{date:%Y_%m_%d_%H_%M_%S}'.format(date=datetime.dateti
 
 EvoAnalytics.create_chart(None,"history_run_2019_08_26_10_12_05.csv",analyze_only_last_generation=False)
 
-task = OptimisationTask(objectives, selected_modifications_for_tuning, mod_points_to_optimise, )
+task = OptimisationTask(objectives, selected_modifications_for_tuning, mod_points_to_optimise,)
 
 StaticStorage.task = task
 StaticStorage.genotype_length = len(selected_mod_points_to_optimise) * 2
-print("genotype length",selected_mod_points_to_optimise)
+
 
 opt_result = optimiser.optimise(wave_model, task)
 

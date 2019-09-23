@@ -50,15 +50,59 @@ def obtain_numerical_chromosome(task):
     return list(chain.from_iterable(chromosome))
 
 
-def calculate_objectives(model, task, pop):
+def fitness_function_of_single_objective_optimization(model, task, ind):
+
+    pre_simulated_results = None
+
+    proposed_breakers = BreakersEvoUtils.build_breakers_from_genotype(ind, task, model.domain.model_grid)
+
+    objectives = []
+
+    base_objectives = _calculate_reference_objectives(model, task)
+
+    combined_breakers_for_cost_estimation = BreakersUtils.merge_breakers_with_modifications( model.domain.base_breakers, proposed_breakers)
+
+    for obj_ind, obj in enumerate(task.objectives):
+        if isinstance(obj, (CostObjective, NavigationObjective, StructuralObjective)):
+            # TODO expensive check can be missed? investigate
+            if not isinstance(obj, StructuralObjective):
+                new_obj = obj.get_obj_value(model.domain, combined_breakers_for_cost_estimation)
+            else:
+                new_obj = obj.get_obj_value(model.domain, proposed_breakers)
+
+            if isinstance(obj, CostObjective):
+                new_obj = (new_obj - base_objectives[obj_ind]) / base_objectives[obj_ind] * 100
+            if isinstance(obj, NavigationObjective):
+                new_obj = -(new_obj - base_objectives[obj_ind]) / base_objectives[obj_ind] * 100
+            if isinstance(obj, StructuralObjective):
+                new_obj = new_obj - base_objectives[obj_ind]
+
+            objectives.append([new_obj])
+
+
+def calculate_objectives(model, task, pop,fromDE=False):
+    print("Some obj of pop!!!!!!!!!", pop)
+
+
+
+
+
     if model.computational_manager is not None and model.computational_manager.is_lazy_parallel:
         # cycle for the mass simulation run
         pre_simulated_results = []
         pre_simulated_results_idx = []
 
         for p_ind, p in enumerate(pop):
-            genotype = [int(round(g, 0)) for g in p.genotype.genotype_array]
+
+            if fromDE:
+                genotype=[int(round(g, 0)) for g in p]
+            else:
+                genotype = [int(round(g, 0)) for g in p.genotype.genotype_array]
+
+
             proposed_breakers = BreakersEvoUtils.build_breakers_from_genotype(genotype, task, model.domain.model_grid)
+
+
             simulation_result = model.run_simulation_for_constructions(proposed_breakers)
             print(simulation_result.configuration_label)
             pre_simulated_results.append(simulation_result)
@@ -84,9 +128,20 @@ def calculate_objectives(model, task, pop):
 
     for i_ind, p in enumerate(pop):
         label_to_reference = None
-        genotype = [int(round(g, 0)) for g in p.genotype.genotype_array]
+
+        if fromDE:
+            genotype = [int(round(g, 0)) for g in p]
+        else:
+            genotype = [int(round(g, 0)) for g in p.genotype.genotype_array]
+
+        #genotype = [int(round(g, 0)) for g in p.genotype.genotype_array]
+
+        print("genotype", genotype)
 
         proposed_breakers = BreakersEvoUtils.build_breakers_from_genotype(genotype, task, model.domain.model_grid)
+
+        print("prop breakers", proposed_breakers)
+
         objectives = []
 
         base_objectives = _calculate_reference_objectives(model, task)
@@ -135,7 +190,7 @@ def calculate_objectives(model, task, pop):
                         configuration_label=label)
                     label_to_reference = label
 
-        # print(objectives)
+        print("Objectives",objectives)
         if True:
             all_breakers = BreakersUtils.merge_breakers_with_modifications(model.domain.base_breakers,
                                                                            proposed_breakers)
@@ -145,9 +200,18 @@ def calculate_objectives(model, task, pop):
             visualiser.simple_visualise(simulation_result.get_5percent_output_for_field(), all_breakers, model.domain.base_breakers,
                                         StaticStorage.exp_domain.fairways, StaticStorage.exp_domain.target_points,
                                         objectives)
-        p.objectives = list(itertools.chain(*objectives))
 
-        p.referenced_dataset = label_to_reference
+        if fromDE:
+
+            print("objectives for DE", objectives)
+            objectives = [i[0] for i in objectives]
+            return sum(objectives)
+
+        else:
+
+            p.objectives = list(itertools.chain(*objectives))
+
+            p.referenced_dataset = label_to_reference
 
 
 def _calculate_reference_objectives(model, task):

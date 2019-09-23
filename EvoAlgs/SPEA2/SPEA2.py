@@ -92,10 +92,17 @@ class SPEA2:
         pass
 
     def fitness(self):
+
         self.objectives(self._pop)
+
+
+
         union = self._archive + self._pop
 
         raw_values = raw_fitness(union)
+
+        print("raw_values", raw_values)
+
         for idx in range(len(union)):
             union[idx].raw_fitness = raw_values[idx]
 
@@ -159,6 +166,7 @@ class SPEA2:
         return env
 
     def selected(self, size, pop):
+        print("pop",pop)
         selected = []
         while len(selected) < size:
             selected.append(self.binary_tournament(pop))

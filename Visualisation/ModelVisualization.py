@@ -5,8 +5,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sb
 import math
-
-
 class ModelsVisualization:
 
     def __init__(self, configuration_label, exp_name):
@@ -14,18 +12,29 @@ class ModelsVisualization:
         self.exp_name = exp_name
 
         # to clear to plot
+
         plt.rcParams.update({'figure.max_open_warning': 0})
         plt.rcParams['figure.figsize'] = [15, 10]
+
+        plt.xticks([])
         fig = plt.figure()
         ax = plt.subplot()
         ax.axes.set_aspect('equal')
+        plt.axis('off')
         #plt.savefig('dump.png')
 
 
     def simple_visualise(self, hs: np.ndarray, all_breakers, base_breakers, fairways, target_points, fitness=None):
 
+
+        #plt.axis('off')
+        #plt.rcParams['xtick.labelsize'] = 0
+        #plt.rcParams['ytick.labelsize'] = 0
         plt.rcParams['figure.figsize'] = [15, 10]
         fig = plt.figure()
+        plt.axis('off')
+        plt.tick_params(axis='both', left='off', top='off', right='off', bottom='off', labelleft='off', labeltop='off',
+                        labelright='off', labelbottom='off')
 
         # fig = plt.figure(figsize=(15, 10))
         ax = plt.subplot()
@@ -100,6 +109,7 @@ class ModelsVisualization:
 
     def experimental_visualise(self, hs: np.ndarray, all_breakers, base_breakers, fairways, target_points,
                                title_mod, vmax, order_id, is_wind, rep_info, dir_info, real_ang, len_info):
+
 
         plt.rcParams['figure.figsize'] = [7, 5]
         plt.rcParams["font.size"] = "8"
