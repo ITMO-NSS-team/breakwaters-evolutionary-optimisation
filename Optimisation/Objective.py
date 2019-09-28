@@ -65,7 +65,7 @@ class StructuralObjective(Objective):
 
     def get_obj_value(self, domain, breakers):
 
-        print()
+
         num_self_intersection = sum(
             [sum([int(self._selfintersection(breaker1, breaker2)) for breaker2 in breakers]) for breaker1 in breakers])
 

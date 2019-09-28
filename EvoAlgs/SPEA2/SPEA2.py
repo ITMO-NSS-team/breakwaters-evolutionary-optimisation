@@ -29,8 +29,10 @@ class SPEA2:
         self.mutation = self.operators.mutation
 
     def __init_populations(self):
+
         gens = self.init_population(self.params.pop_size)
         self._pop = [SPEA2.Individ(genotype=gen) for gen in gens]
+        print("Pop",self._pop[0].genotype.genotype_array,self._pop[1].genotype.genotype_array,self._pop[2].genotype.genotype_array)
         self._archive = []
 
     class Params:

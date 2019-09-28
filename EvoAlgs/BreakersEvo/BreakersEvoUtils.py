@@ -6,6 +6,7 @@ class BreakersEvoUtils:
     def build_breakers_from_genotype(genotype, task, grid):
         gen_id = 0
 
+        #print("genotype",genotype)
         new_modifications = []
 
         for modification in task.possible_modifications:
@@ -27,6 +28,12 @@ class BreakersEvoUtils:
                 prev_anchor = anchor_point
                 anchor_point = modification.points[point_ind]
             new_modifications.append(modification)
+
+        #print("new_modifications",new_modifications[0].points[0].x,new_modifications[0].points[0].y,new_modifications[0].points[1].x,new_modifications[0].points[1].y,new_modifications[0].points[2].x,\
+              #new_modifications[0].points[2].y, "next",new_modifications[1].points[0].x,new_modifications[1].points[0].y,new_modifications[1].points[1].x,new_modifications[1].points[1].y,new_modifications[1].points[2].x,\
+              #new_modifications[1].points[2].y)
+
+
         return new_modifications
 
     @staticmethod

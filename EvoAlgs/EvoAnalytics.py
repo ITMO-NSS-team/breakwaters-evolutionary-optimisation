@@ -7,6 +7,7 @@ import math
 import seaborn as sns
 import re
 import gc
+import imageio
 
 from tkinter import messagebox
 
@@ -206,3 +207,20 @@ class EvoAnalytics:
                                     palette="Blues",
                                     ax=axs[gener[i][0]][gener[i][1]], linewidth=2)
                     plt.savefig(data_for_analyze + '_for_' + str(num_of_launch) + '_launch.png')
+
+    @staticmethod
+    def gif_images_maker(directory=run_id):
+
+        path="wave_gif_imgs/"+directory
+        #path="wave_gif_imgs/run_2019_09_28_01_40_10"
+
+        images = []
+        for filename in os.listdir(path):
+            images.append(imageio.imread(path + "/" + filename))
+        imageio.mimsave('moe.gif', images)
+
+        #filenames = ["1_0.png", "1_1.png", "1_2.png", "1_3.png", "1_4.png"]
+        #for filename in filenames:
+            #images.append(imageio.imread("wave_gif_imgs/"+directory+"/"+filename))
+        #imageio.mimsave('movie.gif', images)
+

@@ -24,7 +24,8 @@ class ModelsVisualization:
         #plt.savefig('dump.png')
 
 
-    def simple_visualise(self, hs: np.ndarray, all_breakers, base_breakers, fairways, target_points, fitness=None):
+    def simple_visualise(self, hs: np.ndarray, all_breakers, base_breakers, fairways, target_points, fitness=None,dir="img",image_for_gif=False,\
+                         population_and_ind_number=[]):
 
 
         #plt.axis('off')
@@ -47,7 +48,12 @@ class ModelsVisualization:
             fit_str = ",".join(
                 [str(round(f)) if not isinstance(f, list) else ",".join([str(int(round(hs))) for hs in f]) for f in
                  fitness])
-            ax.set_title(f'Высоты волн с 5%-ной обеспеченносью в целевых точках: {values}, \r\n'
+
+            if image_for_gif:
+                ax.set_title(f'Номер популяции: {population_and_ind_number[0]}, \r\n'
+                             f'Индивид {population_and_ind_number[1]}')
+            else:
+                ax.set_title(f'Высоты волн с 5%-ной обеспеченносью в целевых точках: {values}, \r\n'
                          f'fitness {fit_str}')
 
         map_of_place = hs
@@ -99,10 +105,10 @@ class ModelsVisualization:
             plt.annotate(f'[№{point_ind},{point.x + 2},{point.y + 2}]', (point.x, point.y), color='black')
 
         # plt.figure(figsize=(4, 5))
-        if not os.path.isdir(f'img/{self.exp_name}'):
-            os.mkdir(f'img/{self.exp_name}')
+        if not os.path.isdir(f'{dir}/{self.exp_name}'):
+            os.mkdir(f'{dir}/{self.exp_name}')
 
-        plt.savefig(f'img/{self.exp_name}/{self.configuration_label}.png', bbox_inches='tight')
+        plt.savefig(f'{dir}/{self.exp_name}/{self.configuration_label}.png', bbox_inches='tight')
         plt.cla()
         plt.clf()
         plt.close('all')
@@ -124,6 +130,9 @@ class ModelsVisualization:
         wind_str = "без учета локального ветра."
         if is_wind:
             wind_str = "с учетом локального ветра."
+
+
+
 
         ax.set_title(
             f'{order_id} Высоты волн с {title_mod}% обеспеченностью в целевых точках: {values} м. \n Направление волнения {dir_info} для повторяемости раз в  {rep_info} лет,\n {wind_str} Длины доп. сооружений:\n {len_info}')
@@ -202,8 +211,8 @@ class ModelsVisualization:
                   head_width=0.5, head_length=0.5, color="cyan", width=0.2, zorder=10)
 
         # plt.figure(figsize=(4, 5))
-        if not os.path.isdir(f'img/experiments/{self.exp_name}'):
-            os.mkdir(f'img/experiments/{self.exp_name}')
-        plt.savefig(f'img/experiments/{self.exp_name}/{self.configuration_label}.png', bbox_inches='tight')
+        if not os.path.isdir(f'{dir}/experiments/{self.exp_name}'):
+            os.mkdir(f'{dir}/experiments/{self.exp_name}')
+        plt.savefig(f'{dir}/experiments/{self.exp_name}/{self.configuration_label}.png', bbox_inches='tight')
         # plt.show()
         plt.clf()
