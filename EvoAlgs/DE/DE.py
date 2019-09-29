@@ -8,6 +8,9 @@ class DEIterator:
         self.fitness = de.evaluate(self.population)
         self.best_fitness = min(self.fitness)
 
+        if de.save_gif_images:
+            de.print_individuals_with_best_fitness(self.population, self.fitness, 0)
+
         self.num_of_best_inds_for_print=5
         if de.goal == "minimization":
             self.indexes_of_best_individuals=np.argsort(self.fitness)[::-1][:self.num_of_best_inds_for_print]
@@ -36,6 +39,7 @@ class DEIterator:
         # is better than the target vector, the target vector is replaced.
         while self.iteration < self.de.maxiters:
             # Compute values for f and cr in each iteration
+            #de.print_individuals_with_best_fitness(self.population, self.fitness, self.iteration)
             self.f, self.cr = self.calculate_params()
             for self.idx_target in range(de.popsize):
                 # Create a mutant using a base vector, and the current f and cr values
@@ -97,8 +101,9 @@ class PDEIterator(DEIterator):
 
 class DE:
     def __init__(self,fobj,print_func,bounds, mutation=(0.5, 1.0), crossover=0.7, maxiters=30,
-                 self_adaptive=False, popsize=None, seed=None,dimensions=2):
+                 self_adaptive=False, popsize=None, seed=None,dimensions=2,save_gif=True):
 
+        self.save_gif_images=save_gif
         self.print_func=print_func
         self.goal="minimization"
         print("bounds",bounds)
@@ -200,6 +205,7 @@ class DE:
 
         print("np.random",np.random.rand(popsize, dimensions))
 
+
         return np.array(new_population)
         #return np.random.rand(popsize, dimensions)
 
@@ -248,11 +254,6 @@ class DE:
             self.print_func([individuals[j]],num_of_pop_ind=[population_number,i])
 
 
-
-
-
-
-
     def solve(self, show_progress=False):
         if show_progress:
             from tqdm import tqdm
@@ -262,13 +263,17 @@ class DE:
 
             step_num=0
         for step in iterator:
-            step_num+=1
-            print("step_num",step_num)
+
+            if step_num%5==0:
+                print("step_num",step_num)
             idx = step.best_idx
             P = step.population
             fitness = step.fitness
 
-            self.print_individuals_with_best_fitness(P,fitness,step_num)
+            if self.save_gif_images:
+                if step.iteration-1==step_num:
+                    step_num+=1
+                    self.print_individuals_with_best_fitness(P, fitness, step_num)
 
             if step.iteration > self.maxiters:
                 if show_progress:

@@ -51,7 +51,7 @@ class ModelsVisualization:
 
             if image_for_gif:
                 ax.set_title(f'Номер популяции: {population_and_ind_number[0]}, \r\n'
-                             f'Индивид {population_and_ind_number[1]}')
+                             f'Индивид {population_and_ind_number[1]+1}')
             else:
                 ax.set_title(f'Высоты волн с 5%-ной обеспеченносью в целевых точках: {values}, \r\n'
                          f'fitness {fit_str}')
