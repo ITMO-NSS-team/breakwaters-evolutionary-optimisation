@@ -2,6 +2,7 @@ from EvoAlgs.DE.base import *
 import numpy as np
 from Visualisation.ModelVisualization import ModelsVisualization
 from EvoAlgs.EvoAnalytics import EvoAnalytics
+import math
 
 
 class DEIterator:
@@ -14,11 +15,12 @@ class DEIterator:
         if de.save_gif_images:
             de.print_individuals_with_best_fitness(self.population, self.fitness, 0)
 
-        self.num_of_best_inds_for_print=5
+        EvoAnalytics.num_of_best_inds_for_print=5
         if de.goal == "minimization":
-            self.indexes_of_best_individuals=np.argsort(self.fitness)[::-1][:self.num_of_best_inds_for_print]
+            self.indexes_of_best_individuals=np.argsort(self.fitness)[::-1][:EvoAnalytics.num_of_best_inds_for_print]
         else:
-            self.indexes_of_best_individuals = np.argsort(self.fitness)[:self.num_of_best_inds_for_print]
+            self.indexes_of_best_individuals = np.argsort(self.fitness)[:EvoAnalytics.num_of_best_inds_for_print]
+
 
         #print("indexes",self.indexes_of_best_individuals)
 
@@ -258,7 +260,7 @@ class DE:
                 yield step
 
     def print_individuals_with_best_fitness(self,individuals,fitnesses,population_number):
-        num_of_best_individuals=5
+        num_of_best_individuals=EvoAnalytics.num_of_best_inds_for_print
         if self.goal=="minimization":
             indexes_of_individuals=np.argsort(fitnesses)[::-1][:num_of_best_individuals]
         else:
@@ -284,18 +286,36 @@ class DE:
         else:
             iterator = self.iterator()
 
-        for step in iterator:
+
+        #Analytics
+        EvoAnalytics.num_of_generations = self.maxiters
+        EvoAnalytics.num_of_rows = math.ceil(EvoAnalytics.num_of_generations / EvoAnalytics.num_of_cols)
+        EvoAnalytics.pop_size = self.popsize
+        EvoAnalytics.set_params()
+        #print("pop in iterator",i in iterator.population)
+        #EvoAnalytics.save_cantidate(iterator., [fitness[i]], ind)
+        #[EvoAnalytics.save_cantidate(step.iteration, [fitness[i]], ind) for i, ind in enumerate(iterator.pop)]
 
 
+
+        for step_idx,step in enumerate(iterator):
 
             idx = step.best_idx
             P = step.population
             fitness = step.fitness
 
+            if step_idx==0:
+                [EvoAnalytics.save_cantidate(step.iteration, [fitness[i]], ind) for i, ind in enumerate(P)]
+                EvoAnalytics.create_chart(step.iteration, data_for_analyze='obj',chart_for_gif=True)
+                EvoAnalytics.create_chart(step.iteration, data_for_analyze='len', chart_for_gif=True)
+
             if self.save_gif_images:
                 if step.iteration-1==self.step_num:
                     self.step_num+=1
                     self.print_individuals_with_best_fitness(P, fitness, self.step_num)
+                    [EvoAnalytics.save_cantidate(step.iteration, [fitness[i]], ind) for i,ind in enumerate(P)]
+                    EvoAnalytics.create_chart(step.iteration,data_for_analyze='obj',chart_for_gif=True)
+                    EvoAnalytics.create_chart(step.iteration, data_for_analyze='len', chart_for_gif=True)
 
             if step.iteration > self.maxiters:
                 if show_progress:

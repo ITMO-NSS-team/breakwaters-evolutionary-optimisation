@@ -17,7 +17,7 @@ class EvoAnalytics:
     num_of_cols = 6
     num_of_generations=0
     num_of_rows = math.ceil(num_of_generations / num_of_cols)
-
+    num_of_best_inds_for_print = 5
 
     fig, axs = plt.subplots(ncols=num_of_cols, nrows=num_of_rows)
     pop_size=None
@@ -56,7 +56,7 @@ class EvoAnalytics:
             os.remove(hist_file_name)
 
     @staticmethod
-    def save_cantidate(pop_num, objectives, genotype, referenced_dataset):
+    def save_cantidate(pop_num, objectives, genotype, referenced_dataset="None"):
         hist_file_name = f'HistoryFiles/history_{EvoAnalytics.run_id}.csv'
         if not os.path.isfile(hist_file_name):
             with open(hist_file_name, 'w', newline='') as f:
@@ -97,7 +97,7 @@ class EvoAnalytics:
 
     @staticmethod
     def create_chart(num_of_generation=None, f=None, chart_type='boxplot', data_for_analyze='obj',
-                     analyze_only_last_generation=True):
+                     analyze_only_last_generation=True,chart_for_gif=False):
 
         plt.close("all")
         if not f:
@@ -132,6 +132,19 @@ class EvoAnalytics:
 
             for j in range(1, len(df.columns)):
                 df[df.columns[j]] = pd.to_numeric(df[df.columns[j]])
+
+            if chart_for_gif:
+                if not os.path.isdir("boxplots/"+str(data_for_analyze)+"/"+str(EvoAnalytics.run_id)):
+                    os.mkdir("boxplots/"+str(data_for_analyze)+"/"+str(EvoAnalytics.run_id))
+
+                ax = plt.subplot()
+                ax.set_title("Population " + str(num_of_generation))
+                sns.boxplot(data=df, palette="Blues")
+
+                for i in range(EvoAnalytics.num_of_best_inds_for_print):
+                    plt.savefig("boxplots/"+str(data_for_analyze)+"/"+str(EvoAnalytics.run_id)+"/"+str(num_of_generation)+"_"+str(i)+ ".png")
+
+                plt.close('all')
 
             if chart_type == 'boxplot':
                 EvoAnalytics.axs[EvoAnalytics.gener[num_of_generation][0]][
@@ -208,15 +221,22 @@ class EvoAnalytics:
                     plt.savefig(data_for_analyze + '_for_' + str(num_of_launch) + '_launch.png')
 
     @staticmethod
-    def gif_images_maker(directory=run_id):
+    def gif_images_maker(directory=run_id,gif_type="breakers"):
 
-        path="wave_gif_imgs/"+directory
+        if gif_type=="breakers":
+            path="wave_gif_imgs/"+directory
+        else:
+            path = "boxplots/"+str(gif_type)+"/" + directory
         #path="wave_gif_imgs/run_2019_09_28_01_40_10"
 
         images = []
         for filename in os.listdir(path):
             images.append(imageio.imread(path + "/" + filename))
-        imageio.mimsave('breakers_in_each_pop'+str(directory)+'.gif', images)
+
+        if gif_type=="breakers":
+            imageio.mimsave('breakers_in_each_pop'+str(directory)+'.gif', images)
+        else:
+            imageio.mimsave(str(gif_type) + str(directory) + '.gif', images)
 
         #filenames = ["1_0.png", "1_1.png", "1_2.png", "1_3.png", "1_4.png"]
         #for filename in filenames:

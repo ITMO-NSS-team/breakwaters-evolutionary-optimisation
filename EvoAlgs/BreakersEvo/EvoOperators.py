@@ -267,12 +267,17 @@ def calculate_objectives(model, task, pop,fromDE=False,check_intersections=False
 
             if fromDE:
                 visualiser = ModelsVisualization(str(num_of_pop_ind[0]) + "_" + str(num_of_pop_ind[1]), EvoAnalytics.run_id)
+
+                visualiser.simple_visualise(simulation_result.get_5percent_output_for_field(), all_breakers,
+                                            model.domain.base_breakers,
+                                            StaticStorage.exp_domain.fairways, StaticStorage.exp_domain.target_points,
+                                            objectives, image_for_gif=True, population_and_ind_number=num_of_pop_ind)
             else:
                 visualiser = ModelsVisualization(f'swan_{simulation_result.configuration_label}', EvoAnalytics.run_id)
 
-            visualiser.simple_visualise(simulation_result.get_5percent_output_for_field(), all_breakers, model.domain.base_breakers,
-                                        StaticStorage.exp_domain.fairways, StaticStorage.exp_domain.target_points,
-                                        objectives,image_for_gif=True,population_and_ind_number=num_of_pop_ind)
+                visualiser.simple_visualise(simulation_result.get_5percent_output_for_field(), all_breakers, model.domain.base_breakers,
+                                            StaticStorage.exp_domain.fairways, StaticStorage.exp_domain.target_points,
+                                            objectives,image_for_gif=False,population_and_ind_number=num_of_pop_ind)
 
         if fromDE:
 
@@ -480,7 +485,7 @@ def initial_pop_random(size, **kwargs):
                 else:
                     genotype[j] = random.randint(-3, 3) * 15
 
-                print("genotupe[i]", genotype[j])
+
 
             is_bad = False
             for objective in strict_objectives:

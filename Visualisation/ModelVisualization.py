@@ -50,7 +50,6 @@ class ModelsVisualization:
                 [str(round(f)) if not isinstance(f, list) else ",".join([str(int(round(hs))) for hs in f]) for f in
                  fitness])
 
-
             if image_for_gif:
                 ax.set_title(f'Номер поколения: {population_and_ind_number[0]+1}, \r\n'
                              f'Индивид {population_and_ind_number[1]+1}')

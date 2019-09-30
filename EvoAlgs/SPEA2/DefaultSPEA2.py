@@ -29,7 +29,11 @@ class DefaultSPEA2(SPEA2):
 
             self.fitness()
 
+
             [EvoAnalytics.save_cantidate(gen, ind.objectives, ind.genotype.genotype_array, ind.referenced_dataset) for ind in self._pop]
+
+
+
 
             self._archive = self.environmental_selection(self._pop, self._archive)
             best = sorted(self._archive, key=lambda p: mean_obj(p))[0]
