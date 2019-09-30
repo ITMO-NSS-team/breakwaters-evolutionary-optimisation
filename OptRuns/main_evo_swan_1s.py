@@ -14,7 +14,7 @@ from Optimisation.OptimisationTask import OptimisationTask
 import datetime
 
 if __name__ == '__main__':
-    seed = 9142  # random.randint(1,10001)
+    seed = 91429  # random.randint(1,10001)
 
     # 42
     np.random.seed(seed)

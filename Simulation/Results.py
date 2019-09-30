@@ -30,7 +30,7 @@ class WaveSimulationResult(SimulationResult):
         else:
             return hs * self.coeff_hs_to_5
 
-    def get_hs_output_for_target_points(self, points):
+    def get_13percent_output_for_target_points(self, points):
         return self._get_output_for_target_points(points)
 
     def get_5percent_output_for_field(self):

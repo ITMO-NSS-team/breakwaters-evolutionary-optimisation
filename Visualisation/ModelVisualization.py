@@ -1,6 +1,7 @@
 import os
-
+import matplotlib
 import matplotlib.pyplot as plt
+import matplotlib.patches as patches
 
 import numpy as np
 import seaborn as sb
@@ -16,7 +17,7 @@ class ModelsVisualization:
         # to clear to plot
         plt.rcParams.update({'figure.max_open_warning': 0})
         plt.rcParams['figure.figsize'] = [15, 10]
-        fig = plt.figure()
+        #fig = plt.figure(edgecolor='black')
         ax = plt.subplot()
         ax.axes.set_aspect('equal')
         #plt.savefig('dump.png')
@@ -101,11 +102,25 @@ class ModelsVisualization:
     def experimental_visualise(self, hs: np.ndarray, all_breakers, base_breakers, fairways, target_points,
                                title_mod, vmax, order_id, is_wind, rep_info, dir_info, real_ang, len_info):
 
+        import warnings
+        warnings.filterwarnings("ignore", category=matplotlib.cbook.mplDeprecation)
+
         plt.rcParams['figure.figsize'] = [7, 5]
         plt.rcParams["font.size"] = "8"
-        fig = plt.figure()
+        fig = plt.figure(frameon=True)
         ax = plt.subplot()
         ax.axes.set_aspect('equal')
+
+        #plt.axis('o')
+        plt.tick_params(axis='both', left='off', top='off', right='off', bottom='off', labelleft='off', labeltop='off',
+                        labelright='off', labelbottom='off')
+
+
+        rect = patches.Rectangle((0, 0), hs.shape[1], hs.shape[0], linewidth=1, edgecolor='black', facecolor='none')
+        ax.add_patch(rect)
+
+        for point_ind, point in enumerate(target_points):
+            plt.scatter(point.x, point.y, color='orange', marker='o', zorder=10)
 
         values = str(round(hs[target_points[0].y][target_points[0].x], 2))
         for i in range(1, len(target_points)):
@@ -116,7 +131,7 @@ class ModelsVisualization:
             wind_str = "с учетом локального ветра."
 
         ax.set_title(
-            f'{order_id} Высоты волн с {title_mod}% обеспеченностью в целевых точках: {values} м. \n Направление волнения {dir_info} для повторяемости раз в  {rep_info} лет,\n {wind_str} Длины доп. сооружений:\n {len_info}')
+            f'\n        {order_id} Высоты волн с {title_mod}% обеспеченностью в целевых точках: {values} м. \n Направление волнения {dir_info} для повторяемости раз в  {rep_info} лет,\n {wind_str} Длины доп. сооружений:\n {len_info}')
 
         map_of_place = hs
 
@@ -164,7 +179,6 @@ class ModelsVisualization:
             plt.plot(p1, p2, '--', c='g', linewidth=2, marker='.')
             # print(self.fairways[0].x1)
 
-        #
 
         wind_names = ["С", "СВ", "В", "ЮВ", "Ю", "ЮЗ", "З", "СЗ"]
 

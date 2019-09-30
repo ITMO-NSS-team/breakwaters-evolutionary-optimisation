@@ -74,10 +74,10 @@ def calculate_objectives(model, task, pop):
                 if len(indices)>2:
                     print("STRANGE")
                 for idx in indices:
-                    pre_simulated_results[idx].hs = hs
+                    pre_simulated_results[idx]._hs = hs
 
         for ps in pre_simulated_results:
-            if ps.hs is None:
+            if ps._hs is None:
                 print("NONE FOUND")
     else:
         pre_simulated_results = None
@@ -169,7 +169,7 @@ def _calculate_reference_objectives(model, task):
                     for i, val in enumerate(values):
                         label = val[0]
                         hs = val[1]
-                        simulation_result.hs = hs
+                        simulation_result._hs = hs
             else:
                 simulation_result = model.run_simulation_for_constructions(model.domain.base_breakers)
 

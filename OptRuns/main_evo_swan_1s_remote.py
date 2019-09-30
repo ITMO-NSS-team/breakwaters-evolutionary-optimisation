@@ -14,7 +14,7 @@ from Optimisation.OptimisationTask import OptimisationTask
 import datetime
 
 if __name__ == '__main__':
-    seed = 9142  # random.randint(1,10001)
+    seed = 914200  # random.randint(1,10001)
 
     # 42
     np.random.seed(seed)
@@ -30,7 +30,7 @@ if __name__ == '__main__':
     EvoAnalytics.clear()
     EvoAnalytics.run_id = 'run_{date:%Y_%m_%d_%H_%M_%S}'.format(date=datetime.datetime.now())
 
-    parallel_computational_manager = SwanWinRemoteComputationalManager(resources_names=["125", "124", "121"],
+    parallel_computational_manager = SwanWinRemoteComputationalManager(resources_names=["125", "124", "121", "123"],
                                                                        is_lazy_parallel=True)
     wave_model = SwanWaveModel(exp_domain, parallel_computational_manager)
 

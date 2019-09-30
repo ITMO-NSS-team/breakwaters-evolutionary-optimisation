@@ -32,7 +32,7 @@ base_modifications_for_tuning = [
     Breaker('mod2_bottom', list(map(xy_to_points, [[-1, -1], [50, 39]])), 0, '--'),  # 45
     Breaker('mod3long', list(map(xy_to_points, [[-1, -1], [56, 32], [67, 35]])), 0.9, 'IIIa'),  # 67
     Breaker('mod3short', list(map(xy_to_points, [[-1, -1], [63, 38], [67, 39]])), 0.9, 'IIIb'),  # 89
-    Breaker('mod_add', list(map(xy_to_points, [[-1, -1], [56, 42]])), 0.9, '-'),  # 910
+    Breaker('mod_add', list(map(xy_to_points, [[-1, -1], [56, 40]])), 0.9, '-'),  # 1011
 ]
 
 mod_points_to_optimise = {  # order is important
@@ -54,10 +54,10 @@ objectives = [StructuralObjective(importance=1),
 
 task = OptimisationTask(objectives, selected_modifications_for_tuning, mod_points_to_optimise, )
 
-mod_id = "2bae29f1bf1d4b21a7c0fc45c1f48d43"#1
-# mod_id = '9b3a1e81cd694d8a892ec1aa69391a9b'#2
-# mod_id = '15cfec8f704f4d3b96fe64a89d270a2a'#3
-#mod_id = 'f5ceed9e0b86467bbdf88b948582cd31'  # 4
+#mod_id = "2bae29f1bf1d4b21a7c0fc45c1f48d43"#1
+#mod_id = '9b3a1e81cd694d8a892ec1aa69391a9b'#2
+#mod_id = '15cfec8f704f4d3b96fe64a89d270a2a'#3
+mod_id = 'f5ceed9e0b86467bbdf88b948582cd31'  # 4
 #mod_id = "default"
 
 is_cust = False
@@ -81,8 +81,15 @@ if not is_cust:
         newg[9] = 38
 
     if mod_id == '9b3a1e81cd694d8a892ec1aa69391a9b':
+        newg[4] = 56
+        newg[5] = 40
+
         newg[6] = 56
         newg[7] = 32
+
+        newg[10] = 56
+        newg[11] = 40
+
 
     if mod_id == '15cfec8f704f4d3b96fe64a89d270a2a':
         newg[8] = 63
@@ -91,9 +98,14 @@ if not is_cust:
         newg[4] = 50
         newg[5] = 39
 
+
     if mod_id == 'f5ceed9e0b86467bbdf88b948582cd31':
         newg[6] = 56
         newg[7] = 32
+
+        newg[10] = 56
+        newg[11] = 40
+
 
 
 #brks = exp_domain.base_breakers
@@ -167,8 +179,8 @@ bcond_values = [
 ]
 
 bcond_values0 = [
-    "1.9 6.2 200 30",
-    "7.4 8.4 200 30"
+    "2.8 6.2 200 30",
+    "5.7 8.4 200 30"
 ]
 
 wind_walues0 = [
@@ -222,6 +234,7 @@ for i in [0, 1]:
 
         bord += 1
 
+#exit()
 wave_model.model_results_file_name = "D:\\SWAN_sochi\\model_results.db"
 
 with open(f'img/experiments/{mod_id}/{mod_id}.csv', 'w', newline='') as csvfile:
