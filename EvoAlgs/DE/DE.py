@@ -20,7 +20,7 @@ class DEIterator:
         else:
             self.indexes_of_best_individuals = np.argsort(self.fitness)[:self.num_of_best_inds_for_print]
 
-        print("indexes",self.indexes_of_best_individuals)
+        #print("indexes",self.indexes_of_best_individuals)
 
 
         self.best_idx = np.argmin(self.fitness)
@@ -228,7 +228,7 @@ class DE:
     def evaluate(self, P,iteration):
         # Denormalize population matrix to obtain the scaled parameters
 
-        print("i",iteration)
+        #print("i",iteration)
         #print("P before denorm",P)
         PD = self.denormalize(P)
         #print("P after denorm", PD)
@@ -238,8 +238,8 @@ class DE:
 
     def evaluate_denormalized(self, PD,index_of_ind):
 
-        print("PD",PD)
-        print("index of ind",index_of_ind)
+        #print("PD",PD)
+        #print("index of ind",index_of_ind)
 
         if len(PD)>1:
             return [self.fobj([ind], fromDE=True, num_of_pop_ind=[self.step_num, i]) for i,ind in enumerate(PD)]
@@ -287,7 +287,7 @@ class DE:
         for step in iterator:
 
 
-            print("step_num",self.step_num)
+
             idx = step.best_idx
             P = step.population
             fitness = step.fitness
