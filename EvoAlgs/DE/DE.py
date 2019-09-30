@@ -1,13 +1,16 @@
 from EvoAlgs.DE.base import *
 import numpy as np
+from Visualisation.ModelVisualization import ModelsVisualization
+from EvoAlgs.EvoAnalytics import EvoAnalytics
+
 
 class DEIterator:
     def __init__(self, de):
         self.de = de
         self.population = de.init()
-        self.fitness = de.evaluate(self.population)
+        self.fitness = de.evaluate(self.population,0)
         self.best_fitness = min(self.fitness)
-
+        self.index_of_ind=0
         if de.save_gif_images:
             de.print_individuals_with_best_fitness(self.population, self.fitness, 0)
 
@@ -42,6 +45,7 @@ class DEIterator:
             #de.print_individuals_with_best_fitness(self.population, self.fitness, self.iteration)
             self.f, self.cr = self.calculate_params()
             for self.idx_target in range(de.popsize):
+
                 # Create a mutant using a base vector, and the current f and cr values
                 mutant = self.create_mutant(self.idx_target)
                 # Evaluate and replace if better
@@ -64,7 +68,7 @@ class DEIterator:
         return self.mutant
 
     def replace(self, i, mutant):
-        mutant_fitness, = self.de.evaluate(np.asarray([mutant]))
+        mutant_fitness, = self.de.evaluate(np.asarray([mutant]),i)
         return self.replacement(i, mutant, mutant_fitness)
 
     def replacement(self, target_idx, mutant, mutant_fitness):
@@ -94,7 +98,7 @@ class PDEIterator(DEIterator):
         # Do not analyze after having the whole population (wait until the last individual)
         if i == self.de.popsize - 1:
             # Evaluate the whole new population (class PDE implements a parallel version of evaluate)
-            mutant_fitness = self.de.evaluate(self.mutants)
+            mutant_fitness = self.de.evaluate(self.mutants,i)
             for j in range(self.de.popsize):
                 super().replacement(j, self.mutants[j], mutant_fitness[j])
 
@@ -108,6 +112,7 @@ class DE:
         self.goal="minimization"
         print("bounds",bounds)
         self.adaptive = self_adaptive
+        self.step_num=0
         # Indicates the number of extra parameters in an individual that are not used for evaluating
         # If extra_params = d, discards the last d elements from an individual prior to evaluation.
         self.extra_params = 0
@@ -186,7 +191,7 @@ class DE:
             num_of_attempt=0
             new_ind=[i for i in np.random.rand(dimensions)]
             new_ind_denormalized = [i for i in self.denormalize([new_ind])[0]]
-            while self.fobj([new_ind_denormalized], check_intersections=True,num_of_ind=[j,num_of_attempt]) is True:
+            while self.fobj([new_ind_denormalized], check_intersections=True,num_of_pop_ind=[j,num_of_attempt]) is True:
                 num_of_attempt+=1
 
                 new_ind=[i for i in np.random.rand(dimensions)]
@@ -220,17 +225,26 @@ class DE:
         mutant = self.repair(self.crossover(population[target_idx], trial, cr))
         return mutant
 
-    def evaluate(self, P):
+    def evaluate(self, P,iteration):
         # Denormalize population matrix to obtain the scaled parameters
+
+        print("i",iteration)
         #print("P before denorm",P)
         PD = self.denormalize(P)
         #print("P after denorm", PD)
         if self.extra_params > 0:
             PD = PD[:, :-self.extra_params]
-        return self.evaluate_denormalized(PD)
+        return self.evaluate_denormalized(PD,iteration)
 
-    def evaluate_denormalized(self, PD):
-        return [self.fobj([ind],fromDE=True) for ind in PD]
+    def evaluate_denormalized(self, PD,index_of_ind):
+
+        print("PD",PD)
+        print("index of ind",index_of_ind)
+
+        if len(PD)>1:
+            return [self.fobj([ind], fromDE=True, num_of_pop_ind=[self.step_num, i]) for i,ind in enumerate(PD)]
+        else:
+            return [self.fobj([ind],fromDE=True,num_of_pop_ind=[self.step_num+1,index_of_ind]) for ind in PD]
 
     def iterator(self):
         return iter(DEIterator(self))
@@ -250,8 +264,17 @@ class DE:
         else:
             indexes_of_individuals = np.argsort(fitnesses)[:num_of_best_individuals]
 
-        for i,j in enumerate(indexes_of_individuals):
-            self.print_func([individuals[j]],num_of_pop_ind=[population_number,i])
+        for i, j in enumerate(indexes_of_individuals):
+            visualiser = ModelsVisualization(str(population_number) + "_" + str(j), EvoAnalytics.run_id)
+            visualiser.Make_directory_for_gif_images()
+            visualiser.Gif_images_saving(population_number,i)
+        #for i,j in enumerate(indexes_of_individuals):
+
+            #self.print_func([individuals[j]],num_of_pop_ind=[population_number,i])
+
+
+
+
 
 
     def solve(self, show_progress=False):
@@ -261,19 +284,18 @@ class DE:
         else:
             iterator = self.iterator()
 
-            step_num=0
         for step in iterator:
 
-            if step_num%5==0:
-                print("step_num",step_num)
+
+            print("step_num",self.step_num)
             idx = step.best_idx
             P = step.population
             fitness = step.fitness
 
             if self.save_gif_images:
-                if step.iteration-1==step_num:
-                    step_num+=1
-                    self.print_individuals_with_best_fitness(P, fitness, step_num)
+                if step.iteration-1==self.step_num:
+                    self.step_num+=1
+                    self.print_individuals_with_best_fitness(P, fitness, self.step_num)
 
             if step.iteration > self.maxiters:
                 if show_progress:

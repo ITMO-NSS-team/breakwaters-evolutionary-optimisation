@@ -8,7 +8,6 @@ import seaborn as sns
 import re
 import gc
 import imageio
-
 from tkinter import messagebox
 
 
@@ -217,10 +216,12 @@ class EvoAnalytics:
         images = []
         for filename in os.listdir(path):
             images.append(imageio.imread(path + "/" + filename))
-        imageio.mimsave('moe.gif', images)
+        imageio.mimsave('breakers_in_each_pop'+str(directory)+'.gif', images)
 
         #filenames = ["1_0.png", "1_1.png", "1_2.png", "1_3.png", "1_4.png"]
         #for filename in filenames:
             #images.append(imageio.imread("wave_gif_imgs/"+directory+"/"+filename))
         #imageio.mimsave('movie.gif', images)
+
+
 

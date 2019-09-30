@@ -97,8 +97,6 @@ class SPEA2:
 
         self.objectives(self._pop)
 
-
-
         union = self._archive + self._pop
 
         raw_values = raw_fitness(union)

@@ -1,10 +1,11 @@
 import os
 
 import matplotlib.pyplot as plt
-
+import cv2
 import numpy as np
 import seaborn as sb
 import math
+import shutil
 class ModelsVisualization:
 
     def __init__(self, configuration_label, exp_name):
@@ -49,8 +50,9 @@ class ModelsVisualization:
                 [str(round(f)) if not isinstance(f, list) else ",".join([str(int(round(hs))) for hs in f]) for f in
                  fitness])
 
+
             if image_for_gif:
-                ax.set_title(f'Номер популяции: {population_and_ind_number[0]}, \r\n'
+                ax.set_title(f'Номер поколения: {population_and_ind_number[0]+1}, \r\n'
                              f'Индивид {population_and_ind_number[1]+1}')
             else:
                 ax.set_title(f'Высоты волн с 5%-ной обеспеченносью в целевых точках: {values}, \r\n'
@@ -216,3 +218,19 @@ class ModelsVisualization:
         plt.savefig(f'{dir}/experiments/{self.exp_name}/{self.configuration_label}.png', bbox_inches='tight')
         # plt.show()
         plt.clf()
+
+
+
+    def Make_directory_for_gif_images(self):
+        if not os.path.isdir(f'wave_gif_imgs/{self.exp_name}'):
+            os.mkdir(f'wave_gif_imgs/{self.exp_name}')
+
+    def Gif_images_saving(self,population_num,num_in_best_ind_set):
+
+        dir=str(os.path.abspath(os.curdir)).replace('\\','/')
+        #dir = str(os.path.abspath(os.curdir))
+        shutil.copy(dir+"/img/"+str(self.exp_name)+"/"+str(self.configuration_label)+".png",\
+                    dir+"/wave_gif_imgs/"+str(self.exp_name)+"/"+str(population_num)+"_"+str(num_in_best_ind_set)+".png")
+
+
+        #image1=cv2.imwrite("wave_gif_imgs"+str(self.exp_name)+"/"+str(self)+str(population_num)+"_"+str(num_in_best_ind_set)+".png",image)
