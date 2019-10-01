@@ -241,9 +241,9 @@ class EvoAnalytics:
 
 
         if gif_type=="breakers":
-            imageio.mimsave('gif_img/'+str(EvoAnalytics.run_id)+'breakers_in_each_pop'+str(directory)+'.gif', images)
+            imageio.mimsave('gif_img/'+str(EvoAnalytics.run_id)+"/"+'breakers_in_each_pop'+str(directory)+'.gif', images)
         else:
-            imageio.mimsave(str(gif_type)+"__" + str(directory) + '.gif', images)
+            imageio.mimsave('gif_img/'+str(EvoAnalytics.run_id)+"/"+str(gif_type)+"__" + str(directory) + '.gif', images)
 
     @staticmethod
     def gif_images_maker():

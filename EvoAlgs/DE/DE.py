@@ -187,10 +187,10 @@ class DE:
         #print("dims",self.dims)
         return self.random_init(self.popsize, self.dims)
 
-    #def check_constructions(self,new_ind_denormalized):
-        #if self.fobj([new_ind_denormalized], check_intersections=True,num_of_pop_ind=[j,num_of_attempt])
+    def check_constructions(self,new_ind):
 
-
+        new_ind_denormalized = [i for i in self.denormalize([new_ind])[0]]
+        return self.fobj([new_ind_denormalized], check_intersections=True)
 
 
     def random_init(self,popsize, dimensions):
@@ -198,18 +198,17 @@ class DE:
         new_population=[]
 
         for j in range(0,popsize):
-            #new_ind = [i for i in np.random.rand(dimensions)]
-            #new_ind = self.denormalize([[i for i in np.random.rand(dimensions)]])
-            num_of_attempt=0
+
+            #num_of_attempt=0
             new_ind=[i for i in np.random.rand(dimensions)]
-            new_ind_denormalized = [i for i in self.denormalize([new_ind])[0]]
+            #new_ind_denormalized = [i for i in self.denormalize([new_ind])[0]]
 
             #Check constructions
-            while self.fobj([new_ind_denormalized], check_intersections=True,num_of_pop_ind=[j,num_of_attempt]) is True:
-                num_of_attempt+=1
-
+            #while self.fobj([new_ind_denormalized], check_intersections=True,num_of_pop_ind=[j,num_of_attempt]) is True:
+            while self.check_constructions(new_ind) is True:
+                #num_of_attempt+=1
                 new_ind=[i for i in np.random.rand(dimensions)]
-                new_ind_denormalized = [i for i in self.denormalize([new_ind])[0]]
+                #new_ind_denormalized = [i for i in self.denormalize([new_ind])[0]]
 
             new_population.append(new_ind)
 
