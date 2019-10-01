@@ -62,11 +62,15 @@ class DEIterator:
     def create_mutant(self, i):
         # Simple self-adaptive strategy, where the F and CR control
         # parameters are inherited from the base vector.
+
+
         if self.de.adaptive:
             # Use the params of the target vector
             dt = self.de.denormalize(self.population[i])
             self.f, self.cr = dt[-2:]
         self.mutant = self.de.mutant(i, self.population, self.f, self.cr)
+
+        print("mutant",self.mutant)
         return self.mutant
 
     def replace(self, i, mutant):
@@ -183,6 +187,12 @@ class DE:
         #print("dims",self.dims)
         return self.random_init(self.popsize, self.dims)
 
+    #def check_constructions(self,new_ind_denormalized):
+        #if self.fobj([new_ind_denormalized], check_intersections=True,num_of_pop_ind=[j,num_of_attempt])
+
+
+
+
     def random_init(self,popsize, dimensions):
         # print("dim-ions",dimensions)
         new_population=[]
@@ -193,6 +203,8 @@ class DE:
             num_of_attempt=0
             new_ind=[i for i in np.random.rand(dimensions)]
             new_ind_denormalized = [i for i in self.denormalize([new_ind])[0]]
+
+            #Check constructions
             while self.fobj([new_ind_denormalized], check_intersections=True,num_of_pop_ind=[j,num_of_attempt]) is True:
                 num_of_attempt+=1
 

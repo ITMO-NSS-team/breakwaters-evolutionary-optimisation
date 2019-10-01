@@ -17,9 +17,7 @@ seed = 42
 np.random.seed(seed)
 random.seed(seed)
 
-EvoAnalytics.gif_images_maker("run_2019_10_01_15_19_59",gif_type="breakers")
-EvoAnalytics.gif_images_maker("run_2019_10_01_15_19_59",gif_type="len")
-EvoAnalytics.gif_images_maker("run_2019_10_01_15_19_59",gif_type="obj")
+
 
 exp_domain = SochiHarbor()
 StaticStorage.exp_domain = exp_domain
@@ -68,9 +66,9 @@ StaticStorage.genotype_length = len(selected_mod_points_to_optimise) * 2
 opt_result = optimiser.optimise(wave_model, task)
 print("opt_result",opt_result)
 
-EvoAnalytics.gif_images_maker(EvoAnalytics.run_id,gif_type="breakers")
-EvoAnalytics.gif_images_maker(EvoAnalytics.run_id,gif_type="len")
-EvoAnalytics.gif_images_maker(EvoAnalytics.run_id,gif_type="obj")
+
+EvoAnalytics.gif_images_maker()
+
 
 
 hs0 = opt_result.simulation_result.get_5percent_output_for_target_points(exp_domain.target_points[0])

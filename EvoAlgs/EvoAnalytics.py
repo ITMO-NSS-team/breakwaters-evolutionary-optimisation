@@ -221,7 +221,7 @@ class EvoAnalytics:
                     plt.savefig(data_for_analyze + '_for_' + str(num_of_launch) + '_launch.png')
 
     @staticmethod
-    def gif_images_maker(directory=run_id,gif_type="breakers"):
+    def gif_image_maker(directory=run_id,gif_type="breakers"):
 
         if gif_type=="breakers":
             path="wave_gif_imgs/"+directory
@@ -241,10 +241,18 @@ class EvoAnalytics:
 
 
         if gif_type=="breakers":
-            imageio.mimsave('breakers_in_each_pop'+str(directory)+'.gif', images)
+            imageio.mimsave('gif_img/'+str(EvoAnalytics.run_id)+'breakers_in_each_pop'+str(directory)+'.gif', images)
         else:
             imageio.mimsave(str(gif_type)+"__" + str(directory) + '.gif', images)
 
+    @staticmethod
+    def gif_images_maker():
+
+        if not os.path.isdir(f'gif_img/{EvoAnalytics.run_id}'):
+            os.mkdir(f'gif_img/{EvoAnalytics.run_id}')
 
 
+        EvoAnalytics.gif_image_maker(EvoAnalytics.run_id, gif_type="breakers")
+        EvoAnalytics.gif_image_maker(EvoAnalytics.run_id, gif_type="len")
+        EvoAnalytics.gif_image_maker(EvoAnalytics.run_id, gif_type="obj")
 

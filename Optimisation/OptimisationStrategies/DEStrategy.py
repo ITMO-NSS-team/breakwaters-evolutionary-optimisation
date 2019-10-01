@@ -31,6 +31,6 @@ class DEStrategy(OptimisationStrategyAbstract):
         solution1 = DE(problem,print_best_individuals,
                       # [(0, 0), (StaticStorage.exp_domain.base_grid.grid_x, StaticStorage.exp_domain.base_grid.grid_y)],
                        [(0, -45), (20, 45)],
-                           popsize=20, dimensions=StaticStorage.genotype_length,maxiters=10).solve()
+                           popsize=30, dimensions=StaticStorage.genotype_length,maxiters=40).solve()
 
         return solution1
