@@ -17,9 +17,9 @@ class DEIterator:
 
         EvoAnalytics.num_of_best_inds_for_print=5
         if de.goal == "minimization":
-            self.indexes_of_best_individuals=np.argsort(self.fitness)[::-1][:EvoAnalytics.num_of_best_inds_for_print]
-        else:
             self.indexes_of_best_individuals = np.argsort(self.fitness)[:EvoAnalytics.num_of_best_inds_for_print]
+        else:
+            self.indexes_of_best_individuals=np.argsort(self.fitness)[::-1][:EvoAnalytics.num_of_best_inds_for_print]
 
 
         #print("indexes",self.indexes_of_best_individuals)
@@ -262,9 +262,9 @@ class DE:
     def print_individuals_with_best_fitness(self,individuals,fitnesses,population_number):
         num_of_best_individuals=EvoAnalytics.num_of_best_inds_for_print
         if self.goal=="minimization":
-            indexes_of_individuals=np.argsort(fitnesses)[::-1][:num_of_best_individuals]
-        else:
             indexes_of_individuals = np.argsort(fitnesses)[:num_of_best_individuals]
+        else:
+            indexes_of_individuals = np.argsort(fitnesses)[::-1][:num_of_best_individuals]
 
         for i, j in enumerate(indexes_of_individuals):
             visualiser = ModelsVisualization(str(population_number) + "_" + str(j), EvoAnalytics.run_id)

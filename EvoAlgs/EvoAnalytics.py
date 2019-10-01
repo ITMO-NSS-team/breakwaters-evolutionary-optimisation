@@ -138,30 +138,30 @@ class EvoAnalytics:
                     os.mkdir("boxplots/"+str(data_for_analyze)+"/"+str(EvoAnalytics.run_id))
 
                 ax = plt.subplot()
-                ax.set_title("Population " + str(num_of_generation))
+                ax.set_title("Population " + str(num_of_generation+1))
                 sns.boxplot(data=df, palette="Blues")
 
                 for i in range(EvoAnalytics.num_of_best_inds_for_print):
-                    plt.savefig("boxplots/"+str(data_for_analyze)+"/"+str(EvoAnalytics.run_id)+"/"+str(num_of_generation)+"_"+str(i)+ ".png")
+                    plt.savefig("boxplots/"+str(data_for_analyze)+"/"+str(EvoAnalytics.run_id)+"/"+str(num_of_generation+1)+"_"+str(i+1)+ ".png")
 
                 plt.close('all')
 
-            if chart_type == 'boxplot':
-                EvoAnalytics.axs[EvoAnalytics.gener[num_of_generation][0]][
-                    EvoAnalytics.gener[num_of_generation][1]].set_title("Population " + str(num_of_generation))
-                sns.boxplot(data=df, palette="Blues", ax=EvoAnalytics.axs[EvoAnalytics.gener[num_of_generation][0]][
-                    EvoAnalytics.gener[num_of_generation][1]], linewidth=2)
-                plt.close('all')
-                # EvoAnalytics.fig.savefig(data_for_analyze + "_boxplots.png",bbox_inches='tight')
+            else:
+                if chart_type == 'boxplot':
+                    EvoAnalytics.axs[EvoAnalytics.gener[num_of_generation][0]][ EvoAnalytics.gener[num_of_generation][1]].set_title("Population " + str(num_of_generation))
+                    sns.boxplot(data=df, palette="Blues", ax=EvoAnalytics.axs[EvoAnalytics.gener[num_of_generation][0]][EvoAnalytics.gener[num_of_generation][1]], linewidth=2)
+                    plt.close('all')
 
-                saving_process_is_completed = 0
-                while saving_process_is_completed < 1:
-                    saving_process_is_completed = EvoAnalytics.try_to_save_new_picture(data_for_analyze)
+                    # EvoAnalytics.fig.savefig(data_for_analyze + "_boxplots.png",bbox_inches='tight')
 
-                gc.collect()
-                plt.cla()
-                plt.clf()
-                plt.close('all')
+                    saving_process_is_completed = 0
+                    while saving_process_is_completed < 1:
+                        saving_process_is_completed = EvoAnalytics.try_to_save_new_picture(data_for_analyze)
+
+                    gc.collect()
+                    plt.cla()
+                    plt.clf()
+                    plt.close('all')
 
 
         else:
@@ -229,19 +229,22 @@ class EvoAnalytics:
             path = "boxplots/"+str(gif_type)+"/" + directory
         #path="wave_gif_imgs/run_2019_09_28_01_40_10"
 
+        print("os.listdir(path)",sorted(os.listdir(path)))
+
         images = []
+        sorted_names_of_images=[str(j)+".png" for j in sorted([int(i.replace(".png","")) for i in os.listdir(path)])]
+
+        print("sorted_images", sorted_names_of_images)
+
         for filename in os.listdir(path):
             images.append(imageio.imread(path + "/" + filename))
+
 
         if gif_type=="breakers":
             imageio.mimsave('breakers_in_each_pop'+str(directory)+'.gif', images)
         else:
-            imageio.mimsave(str(gif_type) + str(directory) + '.gif', images)
+            imageio.mimsave(str(gif_type)+"__" + str(directory) + '.gif', images)
 
-        #filenames = ["1_0.png", "1_1.png", "1_2.png", "1_3.png", "1_4.png"]
-        #for filename in filenames:
-            #images.append(imageio.imread("wave_gif_imgs/"+directory+"/"+filename))
-        #imageio.mimsave('movie.gif', images)
 
 
 

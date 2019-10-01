@@ -36,6 +36,7 @@ class DefaultSPEA2(SPEA2):
 
 
             self._archive = self.environmental_selection(self._pop, self._archive)
+
             best = sorted(self._archive, key=lambda p: mean_obj(p))[0]
 
             last_fit = history.last().fitness_value

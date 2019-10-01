@@ -229,7 +229,7 @@ class ModelsVisualization:
         dir=str(os.path.abspath(os.curdir)).replace('\\','/')
         #dir = str(os.path.abspath(os.curdir))
         shutil.copy(dir+"/img/"+str(self.exp_name)+"/"+str(self.configuration_label)+".png",\
-                    dir+"/wave_gif_imgs/"+str(self.exp_name)+"/"+str(population_num)+"_"+str(num_in_best_ind_set)+".png")
+                    dir+"/wave_gif_imgs/"+str(self.exp_name)+"/"+str(population_num+1)+"_"+str(num_in_best_ind_set+1)+".png")
 
 
         #image1=cv2.imwrite("wave_gif_imgs"+str(self.exp_name)+"/"+str(self)+str(population_num)+"_"+str(num_in_best_ind_set)+".png",image)

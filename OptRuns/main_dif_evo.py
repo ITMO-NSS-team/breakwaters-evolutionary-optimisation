@@ -17,7 +17,9 @@ seed = 42
 np.random.seed(seed)
 random.seed(seed)
 
-
+EvoAnalytics.gif_images_maker("run_2019_10_01_15_19_59",gif_type="breakers")
+EvoAnalytics.gif_images_maker("run_2019_10_01_15_19_59",gif_type="len")
+EvoAnalytics.gif_images_maker("run_2019_10_01_15_19_59",gif_type="obj")
 
 exp_domain = SochiHarbor()
 StaticStorage.exp_domain = exp_domain
