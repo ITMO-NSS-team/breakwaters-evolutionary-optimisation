@@ -229,12 +229,12 @@ class EvoAnalytics:
             path = "boxplots/"+str(gif_type)+"/" + directory
         #path="wave_gif_imgs/run_2019_09_28_01_40_10"
 
-        print("os.listdir(path)",sorted(os.listdir(path)))
+        #print("os.listdir(path)",sorted(os.listdir(path)))
 
         images = []
         sorted_names_of_images=[str(j)+".png" for j in sorted([int(i.replace(".png","")) for i in os.listdir(path)])]
 
-        print("sorted_images", sorted_names_of_images)
+        #print("sorted_images", sorted_names_of_images)
 
         for filename in os.listdir(path):
             images.append(imageio.imread(path + "/" + filename))
