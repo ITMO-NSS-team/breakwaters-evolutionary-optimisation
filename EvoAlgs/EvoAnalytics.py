@@ -142,7 +142,7 @@ class EvoAnalytics:
                 sns.boxplot(data=df, palette="Blues")
 
                 for i in range(EvoAnalytics.num_of_best_inds_for_print):
-                    plt.savefig("boxplots/"+str(data_for_analyze)+"/"+str(EvoAnalytics.run_id)+"/"+str(num_of_generation+1)+"_"+str(i+1)+ ".png")
+                    plt.savefig("boxplots/"+str(data_for_analyze)+"/"+str(EvoAnalytics.run_id)+"/"+str(num_of_generation+1)+str(i+1)+ ".png")
 
                 plt.close('all')
 
@@ -234,10 +234,13 @@ class EvoAnalytics:
         images = []
         sorted_names_of_images=[str(j)+".png" for j in sorted([int(i.replace(".png","")) for i in os.listdir(path)])]
 
-        #print("sorted_images", sorted_names_of_images)
+        print("sorted_images", sorted_names_of_images)
 
-        for filename in os.listdir(path):
+        for filename in sorted_names_of_images:
             images.append(imageio.imread(path + "/" + filename))
+
+        #for filename in os.listdir(path):
+            #images.append(imageio.imread(path + "/" + filename))
 
 
         if gif_type=="breakers":
