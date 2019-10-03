@@ -18,6 +18,11 @@ np.random.seed(seed)
 random.seed(seed)
 
 
+EvoAnalytics.num_of_best_inds_for_print=5
+EvoAnalytics.num_of_generations=5
+EvoAnalytics.gif_images_maker("run_2019_10_03_17_24_59")
+
+
 
 exp_domain = SochiHarbor()
 StaticStorage.exp_domain = exp_domain
@@ -45,8 +50,7 @@ selected_mod_points_to_optimise = [mod_points_to_optimise[mod.breaker_id] for mo
 objectives = [StructuralObjective(importance=1),
               CostObjective(importance=3),
               NavigationObjective(importance=1)]
-
-             # WaveHeightObjective(importance=1)]
+              #WaveHeightObjective(importance=1)]
 
 EvoAnalytics.clear()
 EvoAnalytics.run_id = 'run_{date:%Y_%m_%d_%H_%M_%S}'.format(date=datetime.datetime.now())
@@ -69,7 +73,7 @@ print("opt_result",opt_result)
 
 
 EvoAnalytics.gif_images_maker()
-
+EvoAnalytics.united_gif_image_maker()
 
 
 hs0 = opt_result.simulation_result.get_5percent_output_for_target_points(exp_domain.target_points[0])

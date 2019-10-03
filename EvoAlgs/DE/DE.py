@@ -308,8 +308,10 @@ class DE:
         #[EvoAnalytics.save_cantidate(step.iteration, [fitness[i]], ind) for i, ind in enumerate(iterator.pop)]
 
 
-
         for step_idx,step in enumerate(iterator):
+
+
+            print("step_idx",step_idx)
 
             idx = step.best_idx
             P = step.population
@@ -317,10 +319,10 @@ class DE:
 
             if step_idx==0:
                 [EvoAnalytics.save_cantidate(step.iteration, [fitness[i]], ind) for i, ind in enumerate(P)]
-                EvoAnalytics.create_chart(step.iteration, data_for_analyze='obj',chart_for_gif=True)
-                EvoAnalytics.create_chart(step.iteration, data_for_analyze='len', chart_for_gif=True)
+                EvoAnalytics.create_chart(step.iteration, data_for_analyze='obj',chart_for_gif=True,first_generation=True)
+                EvoAnalytics.create_chart(step.iteration, data_for_analyze='len', chart_for_gif=True,first_generation=True)
 
-            if self.save_gif_images:
+            if self.save_gif_images and step_idx>0:
                 if step.iteration-1==self.step_num:
                     self.step_num+=1
                     self.print_individuals_with_best_fitness(P, fitness, self.step_num)

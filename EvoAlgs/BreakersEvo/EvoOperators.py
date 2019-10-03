@@ -258,8 +258,6 @@ def calculate_objectives(model, task, pop,fromDE=False,check_intersections=False
                         configuration_label=label)
                     label_to_reference = label
 
-
-
         if True:
             all_breakers = BreakersUtils.merge_breakers_with_modifications(model.domain.base_breakers,
                                                                            proposed_breakers)
@@ -278,6 +276,7 @@ def calculate_objectives(model, task, pop,fromDE=False,check_intersections=False
                 visualiser.simple_visualise(simulation_result.get_5percent_output_for_field(), all_breakers, model.domain.base_breakers,
                                             StaticStorage.exp_domain.fairways, StaticStorage.exp_domain.target_points,
                                             objectives,image_for_gif=False,population_and_ind_number=num_of_pop_ind)
+
 
         if fromDE:
 

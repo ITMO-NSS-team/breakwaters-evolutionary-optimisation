@@ -32,6 +32,8 @@ class ModelsVisualization:
         #plt.axis('off')
         #plt.rcParams['xtick.labelsize'] = 0
         #plt.rcParams['ytick.labelsize'] = 0
+        plt.rcParams['axes.titlesize'] = 20
+        plt.rcParams['axes.labelsize'] = 20
         plt.rcParams['figure.figsize'] = [15, 10]
         fig = plt.figure()
         plt.axis('off')
@@ -51,8 +53,9 @@ class ModelsVisualization:
                  fitness])
 
             if image_for_gif:
-                ax.set_title(f'Номер поколения: {population_and_ind_number[0]+1}, \r\n'
-                             f'Индивид {population_and_ind_number[1]+1}')
+
+                ax.set_title(f'Generation {population_and_ind_number[0]+1}, \r\n'
+                             f'Individ {population_and_ind_number[1]+1}')
             else:
                 ax.set_title(f'Высоты волн с 5%-ной обеспеченносью в целевых точках: {values}, \r\n'
                          f'fitness {fit_str}')
@@ -229,7 +232,7 @@ class ModelsVisualization:
         dir=str(os.path.abspath(os.curdir)).replace('\\','/')
         #dir = str(os.path.abspath(os.curdir))
         shutil.copy(dir+"/img/"+str(self.exp_name)+"/"+str(self.configuration_label)+".png",\
-                    dir+"/wave_gif_imgs/"+str(self.exp_name)+"/"+str(population_num+1)+str(num_in_best_ind_set+1)+".png")
+                    dir+"/wave_gif_imgs/"+str(self.exp_name)+"/"+str(population_num+1)+"_"+str(num_in_best_ind_set+1)+".png")
 
 
         #image1=cv2.imwrite("wave_gif_imgs"+str(self.exp_name)+"/"+str(self)+str(population_num)+"_"+str(num_in_best_ind_set)+".png",image)

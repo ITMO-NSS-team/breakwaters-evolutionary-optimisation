@@ -9,6 +9,7 @@ import re
 import gc
 import imageio
 from tkinter import messagebox
+from PIL import Image
 
 
 class EvoAnalytics:
@@ -18,6 +19,11 @@ class EvoAnalytics:
     num_of_generations=0
     num_of_rows = math.ceil(num_of_generations / num_of_cols)
     num_of_best_inds_for_print = 5
+    df_min_len=0
+    df_max_len=1
+    df_min_obj=0
+    df_max_obj=1
+
 
     fig, axs = plt.subplots(ncols=num_of_cols, nrows=num_of_rows)
     pop_size=None
@@ -31,8 +37,10 @@ class EvoAnalytics:
 
         plt.rcParams['figure.figsize'] = [40, 4*EvoAnalytics.num_of_rows]
 
-        plt.rcParams['xtick.labelsize'] = 10
-        plt.rcParams['ytick.labelsize'] = 10
+        plt.rcParams['xtick.labelsize'] = 20
+        plt.rcParams['ytick.labelsize'] = 20
+        plt.rcParams['axes.titlesize'] = 20
+        plt.rcParams['axes.labelsize'] = 20
 
         EvoAnalytics.fig,EvoAnalytics.axs=plt.subplots(ncols=EvoAnalytics.num_of_cols, nrows=EvoAnalytics.num_of_rows)
         plt.close("all")
@@ -97,7 +105,7 @@ class EvoAnalytics:
 
     @staticmethod
     def create_chart(num_of_generation=None, f=None, chart_type='boxplot', data_for_analyze='obj',
-                     analyze_only_last_generation=True,chart_for_gif=False):
+                     analyze_only_last_generation=True,chart_for_gif=False,first_generation=False):
 
         plt.close("all")
         if not f:
@@ -134,15 +142,50 @@ class EvoAnalytics:
                 df[df.columns[j]] = pd.to_numeric(df[df.columns[j]])
 
             if chart_for_gif:
+
+
                 if not os.path.isdir("boxplots/"+str(data_for_analyze)+"/"+str(EvoAnalytics.run_id)):
                     os.mkdir("boxplots/"+str(data_for_analyze)+"/"+str(EvoAnalytics.run_id))
 
+                plt.close("all")
+
+
+                if first_generation==0:
+                    if data_for_analyze == "gen_len":
+
+                        EvoAnalytics.df_min_len=min([df[i].min() for i in df.columns])
+                        EvoAnalytics.df_max_len=max([df[i].max() for i in df.columns])
+
+                    else:
+                        print(df)
+                        print("num_of_num_of_generation in obj", num_of_generation)
+                        EvoAnalytics.df_min_obj = min([df[i].min() for i in df.columns])
+                        EvoAnalytics.df_max_obj = max([df[i].max() for i in df.columns])
+
+                        print("min obj",EvoAnalytics.df_min_obj)
+                        print("max obj", EvoAnalytics.df_max_obj)
+
+                print("min obj", EvoAnalytics.df_min_obj)
+                print("max obj", EvoAnalytics.df_max_obj)
+
+                if data_for_analyze=="gen_len":
+                    print(df)
+                    #plt.ylim(EvoAnalytics.df_min_len , EvoAnalytics.df_max_len)
+                else:
+                    #plt.ylim(0 , 350 )
+                    pass
+
                 ax = plt.subplot()
+
                 ax.set_title("Population " + str(num_of_generation+1))
+
+
+                print("MIN df",df.min())
+
                 sns.boxplot(data=df, palette="Blues")
 
                 for i in range(EvoAnalytics.num_of_best_inds_for_print):
-                    plt.savefig("boxplots/"+str(data_for_analyze)+"/"+str(EvoAnalytics.run_id)+"/"+str(num_of_generation+1)+str(i+1)+ ".png")
+                    plt.savefig("boxplots/"+str(data_for_analyze)+"/"+str(EvoAnalytics.run_id)+"/"+str(num_of_generation+1)+"_"+str(i+1)+ ".png")
 
                 plt.close('all')
 
@@ -224,38 +267,100 @@ class EvoAnalytics:
     def gif_image_maker(directory=run_id,gif_type="breakers"):
 
         if gif_type=="breakers":
-            path="wave_gif_imgs/"+directory
+            path="wave_gif_imgs/"+directory+"/"
+            #path = "C:\\Users\\YanaPolonskaya\\PycharmProjects\\breakwater-evo-opt (22.08.19 21 00)\\OptRuns\\wave_gif_imgs\\run_2019_10_03_17_24_59\\"
         else:
-            path = "boxplots/"+str(gif_type)+"/" + directory
+            path = "boxplots/"+str(gif_type)+"/" + directory+"/"
         #path="wave_gif_imgs/run_2019_09_28_01_40_10"
 
         #print("os.listdir(path)",sorted(os.listdir(path)))
 
         images = []
-        sorted_names_of_images=[str(j)+".png" for j in sorted([int(i.replace(".png","")) for i in os.listdir(path)])]
+        sorted_names_of_images = []
 
-        print("sorted_images", sorted_names_of_images)
+        print("num of gen",EvoAnalytics.num_of_generations)
+        print("num_of_best_ind",EvoAnalytics.num_of_best_inds_for_print)
+
+
+        for i1 in range(EvoAnalytics.num_of_generations):
+            for i2 in range(EvoAnalytics.num_of_best_inds_for_print):
+                sorted_names_of_images.append("{}_{}.png".format(i1 + 1, i2 + 1))
 
         for filename in sorted_names_of_images:
-            images.append(imageio.imread(path + "/" + filename))
+            images.append(Image.open(path + filename))
+
+        #sorted_names_of_images=[str(j)+".png" for j in sorted([int(i.replace(".png","")) for i in os.listdir(path)])]
+
+        save_path =str(os.path.abspath(os.curdir))+"\\gif_img\\"+directory+"\\"
+
+
+
+        if gif_type == "breakers":
+            images[0].save("{}breakers.gif".format(save_path), save_all=True, append_images=images[1:], duration=100, loop=0)
+        else:
+            images[0].save("{}{}.gif".format(save_path,gif_type), save_all=True, append_images=images[1:], duration=100,
+                           loop=0)
 
         #for filename in os.listdir(path):
             #images.append(imageio.imread(path + "/" + filename))
 
 
-        if gif_type=="breakers":
-            imageio.mimsave('gif_img/'+str(EvoAnalytics.run_id)+"/"+'breakers_in_each_pop'+str(directory)+'.gif', images)
-        else:
-            imageio.mimsave('gif_img/'+str(EvoAnalytics.run_id)+"/"+str(gif_type)+"__" + str(directory) + '.gif', images)
+        #if gif_type=="breakers":
+
+            #imageio.mimsave('gif_img/'+str(directory)+"/"+'breakers_in_each_pop'+str(directory)+'.gif', images)
+        #else:
+            #imageio.mimsave('gif_img/'+str(directory)+"/"+str(gif_type)+"__" + str(directory) + '.gif', images)
 
     @staticmethod
-    def gif_images_maker():
-
-        if not os.path.isdir(f'gif_img/{EvoAnalytics.run_id}'):
-            os.mkdir(f'gif_img/{EvoAnalytics.run_id}')
+    def gif_images_maker(directory=None):
 
 
-        EvoAnalytics.gif_image_maker(EvoAnalytics.run_id, gif_type="breakers")
-        EvoAnalytics.gif_image_maker(EvoAnalytics.run_id, gif_type="len")
-        EvoAnalytics.gif_image_maker(EvoAnalytics.run_id, gif_type="obj")
+
+        if directory:
+            run_id=directory
+        else:
+            run_id=EvoAnalytics.run_id
+
+        if not os.path.isdir(f'gif_img/{run_id}'):
+            os.mkdir(f'gif_img/{run_id}')
+
+
+        EvoAnalytics.gif_image_maker(run_id, gif_type="breakers")
+        EvoAnalytics.gif_image_maker(run_id, gif_type="len")
+        EvoAnalytics.gif_image_maker(run_id, gif_type="obj")
+
+    @staticmethod
+    def united_gif_image_maker(directory=None,gif_type="breakers"):
+
+        if not directory:
+            directory=EvoAnalytics.run_id
+
+        if not os.path.isdir(f'series/{EvoAnalytics.run_id}'):
+            os.mkdir(f'series/{EvoAnalytics.run_id}')
+
+        num_of_subplots=3
+
+        for i1 in range(EvoAnalytics.num_of_generations):
+            images = []
+            for i2 in range(EvoAnalytics.num_of_best_inds_for_print):
+                #sorted_names_of_images.append("{}_{}.png".format(i1 + 1, i2 + 1))
+                images.append(Image.open("wave_gif_imgs/" + directory + "/"+str(i1+1)+"_"+str(i2+1)+".png"))
+                images.append(Image.open("boxplots/" + "len" + "/" + directory + "/"+str(i1+1)+"_"+str(i2+1)+".png"))
+                images.append(Image.open("boxplots/" + "obj" + "/" + directory + "/" + str(i1+1) + "_" + str(i2+1)+".png"))
+
+
+                f, axarr = plt.subplots(1, num_of_subplots)
+                for j in range(num_of_subplots):
+                    axarr[j].set_yticklabels([])
+                    axarr[j].set_xticklabels([])
+                    axarr[j].imshow(images[j])
+
+
+                plt.savefig("series/"+EvoAnalytics.run_id+"/"+str(i1+1)+"_"+str(i2+1)+".png")
+
+
+
+
+
+
 
