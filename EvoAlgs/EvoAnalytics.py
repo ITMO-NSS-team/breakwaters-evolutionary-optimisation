@@ -168,19 +168,16 @@ class EvoAnalytics:
                 print("min obj", EvoAnalytics.df_min_obj)
                 print("max obj", EvoAnalytics.df_max_obj)
 
-                if data_for_analyze=="gen_len":
-                    print(df)
-                    #plt.ylim(EvoAnalytics.df_min_len , EvoAnalytics.df_max_len)
-                else:
-                    #plt.ylim(0 , 350 )
-                    pass
 
                 ax = plt.subplot()
 
                 ax.set_title("Population " + str(num_of_generation+1))
 
-
-                print("MIN df",df.min())
+                if data_for_analyze == "gen_len":
+                    print(df)
+                    plt.ylim(0, 1)
+                else:
+                    plt.ylim(0, 350)
 
                 sns.boxplot(data=df, palette="Blues")
 
@@ -326,7 +323,7 @@ class EvoAnalytics:
 
 
         EvoAnalytics.gif_image_maker(run_id, gif_type="breakers")
-        EvoAnalytics.gif_image_maker(run_id, gif_type="len")
+        EvoAnalytics.gif_image_maker(run_id, gif_type="gen_len")
         EvoAnalytics.gif_image_maker(run_id, gif_type="obj")
 
     @staticmethod
@@ -345,7 +342,7 @@ class EvoAnalytics:
             for i2 in range(EvoAnalytics.num_of_best_inds_for_print):
                 #sorted_names_of_images.append("{}_{}.png".format(i1 + 1, i2 + 1))
                 images.append(Image.open("wave_gif_imgs/" + directory + "/"+str(i1+1)+"_"+str(i2+1)+".png"))
-                images.append(Image.open("boxplots/" + "len" + "/" + directory + "/"+str(i1+1)+"_"+str(i2+1)+".png"))
+                images.append(Image.open("boxplots/" + "gen_len" + "/" + directory + "/"+str(i1+1)+"_"+str(i2+1)+".png"))
                 images.append(Image.open("boxplots/" + "obj" + "/" + directory + "/" + str(i1+1) + "_" + str(i2+1)+".png"))
 
 

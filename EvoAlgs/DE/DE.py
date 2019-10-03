@@ -320,7 +320,7 @@ class DE:
             if step_idx==0:
                 [EvoAnalytics.save_cantidate(step.iteration, [fitness[i]], ind) for i, ind in enumerate(P)]
                 EvoAnalytics.create_chart(step.iteration, data_for_analyze='obj',chart_for_gif=True,first_generation=True)
-                EvoAnalytics.create_chart(step.iteration, data_for_analyze='len', chart_for_gif=True,first_generation=True)
+                EvoAnalytics.create_chart(step.iteration, data_for_analyze='gen_len', chart_for_gif=True,first_generation=True)
 
             if self.save_gif_images and step_idx>0:
                 if step.iteration-1==self.step_num:
@@ -328,7 +328,7 @@ class DE:
                     self.print_individuals_with_best_fitness(P, fitness, self.step_num)
                     [EvoAnalytics.save_cantidate(step.iteration, [fitness[i]], ind) for i,ind in enumerate(P)]
                     EvoAnalytics.create_chart(step.iteration,data_for_analyze='obj',chart_for_gif=True)
-                    EvoAnalytics.create_chart(step.iteration, data_for_analyze='len', chart_for_gif=True)
+                    EvoAnalytics.create_chart(step.iteration, data_for_analyze='gen_len', chart_for_gif=True)
 
             if step.iteration > self.maxiters:
                 if show_progress:

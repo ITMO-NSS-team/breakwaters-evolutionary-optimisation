@@ -18,9 +18,9 @@ np.random.seed(seed)
 random.seed(seed)
 
 
-EvoAnalytics.num_of_best_inds_for_print=5
-EvoAnalytics.num_of_generations=5
-EvoAnalytics.gif_images_maker("run_2019_10_03_17_24_59")
+#EvoAnalytics.num_of_best_inds_for_print=5
+#EvoAnalytics.num_of_generations=5
+#EvoAnalytics.gif_images_maker("run_2019_10_03_17_24_59")
 
 
 
