@@ -37,8 +37,8 @@ class EvoAnalytics:
 
         plt.rcParams['figure.figsize'] = [40, 4*EvoAnalytics.num_of_rows]
 
-        plt.rcParams['xtick.labelsize'] = 20
-        plt.rcParams['ytick.labelsize'] = 20
+        plt.rcParams['xtick.labelsize'] = 30
+        plt.rcParams['ytick.labelsize'] = 30
         plt.rcParams['axes.titlesize'] = 20
         plt.rcParams['axes.labelsize'] = 20
 
@@ -157,16 +157,11 @@ class EvoAnalytics:
                         EvoAnalytics.df_max_len=max([df[i].max() for i in df.columns])
 
                     else:
-                        print(df)
-                        print("num_of_num_of_generation in obj", num_of_generation)
+
                         EvoAnalytics.df_min_obj = min([df[i].min() for i in df.columns])
                         EvoAnalytics.df_max_obj = max([df[i].max() for i in df.columns])
 
-                        print("min obj",EvoAnalytics.df_min_obj)
-                        print("max obj", EvoAnalytics.df_max_obj)
 
-                print("min obj", EvoAnalytics.df_min_obj)
-                print("max obj", EvoAnalytics.df_max_obj)
 
 
                 ax = plt.subplot()
@@ -174,7 +169,7 @@ class EvoAnalytics:
                 ax.set_title("Population " + str(num_of_generation+1))
 
                 if data_for_analyze == "gen_len":
-                    print(df)
+
                     #plt.ylim(EvoAnalytics.df_min_len, EvoAnalytics.df_max_len)
                     plt.ylim(0, 1.2)
                 else:
@@ -244,8 +239,8 @@ class EvoAnalytics:
             if chart_type == 'boxplot':
 
                 plt.rcParams['figure.figsize'] = [40, 4 * num_of_rows]
-                plt.rcParams['xtick.labelsize'] = 10
-                plt.rcParams['ytick.labelsize'] = 10
+                plt.rcParams['xtick.labelsize'] = 15
+                plt.rcParams['ytick.labelsize'] = 15
 
                 for num_of_launch in range(len(df_of_launch)):
                     fig, axs = plt.subplots(ncols=num_of_cols, nrows=num_of_rows)
@@ -276,8 +271,6 @@ class EvoAnalytics:
         images = []
         sorted_names_of_images = []
 
-        print("num of gen",EvoAnalytics.num_of_generations)
-        print("num_of_best_ind",EvoAnalytics.num_of_best_inds_for_print)
 
 
         for i1 in range(EvoAnalytics.num_of_generations):
@@ -350,6 +343,8 @@ class EvoAnalytics:
                 plt.rcParams['figure.figsize'] = [25, 15]
 
                 f, axarr = plt.subplots(1, num_of_subplots)
+                plt.subplots_adjust(wspace=0.1, hspace=0)
+
                 for j in range(num_of_subplots):
                     axarr[j].set_yticklabels([])
                     axarr[j].set_xticklabels([])

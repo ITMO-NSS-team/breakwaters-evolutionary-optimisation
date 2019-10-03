@@ -135,9 +135,6 @@ class ModelsVisualization:
         if is_wind:
             wind_str = "с учетом локального ветра."
 
-
-
-
         ax.set_title(
             f'{order_id} Высоты волн с {title_mod}% обеспеченностью в целевых точках: {values} м. \n Направление волнения {dir_info} для повторяемости раз в  {rep_info} лет,\n {wind_str} Длины доп. сооружений:\n {len_info}')
 
