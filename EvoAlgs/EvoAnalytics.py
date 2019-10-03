@@ -175,9 +175,10 @@ class EvoAnalytics:
 
                 if data_for_analyze == "gen_len":
                     print(df)
-                    plt.ylim(0, 1)
+                    #plt.ylim(EvoAnalytics.df_min_len, EvoAnalytics.df_max_len)
+                    plt.ylim(0, 1.2)
                 else:
-                    plt.ylim(0, 350)
+                    plt.ylim(0, 400)
 
                 sns.boxplot(data=df, palette="Blues")
 
@@ -338,13 +339,15 @@ class EvoAnalytics:
         num_of_subplots=3
 
         for i1 in range(EvoAnalytics.num_of_generations):
-            images = []
+
             for i2 in range(EvoAnalytics.num_of_best_inds_for_print):
+                images = []
                 #sorted_names_of_images.append("{}_{}.png".format(i1 + 1, i2 + 1))
                 images.append(Image.open("wave_gif_imgs/" + directory + "/"+str(i1+1)+"_"+str(i2+1)+".png"))
                 images.append(Image.open("boxplots/" + "gen_len" + "/" + directory + "/"+str(i1+1)+"_"+str(i2+1)+".png"))
                 images.append(Image.open("boxplots/" + "obj" + "/" + directory + "/" + str(i1+1) + "_" + str(i2+1)+".png"))
 
+                plt.rcParams['figure.figsize'] = [25, 15]
 
                 f, axarr = plt.subplots(1, num_of_subplots)
                 for j in range(num_of_subplots):
@@ -353,9 +356,17 @@ class EvoAnalytics:
                     axarr[j].imshow(images[j])
 
 
-                plt.savefig("series/"+EvoAnalytics.run_id+"/"+str(i1+1)+"_"+str(i2+1)+".png")
+                plt.savefig("series/"+EvoAnalytics.run_id+"/"+str(i1+1)+"_"+str(i2+1)+".png",bbox_inches='tight')
 
+        if not os.path.isdir(f'gif_img/{directory}'):
+            os.mkdir(f'gif_img/{directory}')
+        images=[]
+        for i1 in range(EvoAnalytics.num_of_generations):
+            for i2 in range(EvoAnalytics.num_of_best_inds_for_print):
+                images.append(Image.open("series/{}/{}_{}.png".format(directory,i1 + 1, i2 + 1)))
 
+        images[0].save("gif_img/{}/Graphs.gif".format(directory), save_all=True, append_images=images[1:], duration=100,
+                       loop=0)
 
 
 
