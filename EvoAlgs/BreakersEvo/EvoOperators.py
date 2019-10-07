@@ -83,28 +83,93 @@ def fitness_function_of_single_objective_optimization(model, task, ind):
 
             objectives.append([new_obj])
 
+
+'''
+
+def print_individuals(model, task, individuals,fitnesses,num_of_pop,goal="minimization"):
+
+    num_of_best_individuals = EvoAnalytics.num_of_best_inds_for_print
+    if goal == "minimization":
+        indexes_of_individuals = np.argsort(fitnesses)[:num_of_best_individuals]
+    else:
+        indexes_of_individuals = np.argsort(fitnesses)[::-1][:num_of_best_individuals]
+
+
+    for i, j in enumerate(indexes_of_individuals):
+
+        print("num_of_pop_ind ", [num_of_pop, i])
+
+        genotype = [int(g) for g in individuals[j]]
+
+        proposed_breakers = BreakersEvoUtils.build_breakers_from_genotype(genotype, task, model.domain.model_grid)
+
+        combined_breakers_for_cost_estimation = BreakersUtils.merge_breakers_with_modifications(
+            model.domain.base_breakers, proposed_breakers)
+
+        # if isinstance(obj, WaveHeightObjective):
+
+        # for obj_ind, obj in enumerate(task.objectives):
+
+        if sum([isinstance(obj, WaveHeightObjective) for obj in task.objectives]):
+
+            simulation_result = model.run_simulation_for_constructions(proposed_breakers)
+
+        else:
+
+            simulation_result = WaveSimulationResult(
+                hs=np.zeros(shape=(model.domain.model_grid.grid_y, model.domain.model_grid.grid_x)),
+                configuration_label=EvoAnalytics.run_id)
+
+        # simulation_result = model.run_simulation_for_constructions(proposed_breakers)
+
+        all_breakers = BreakersUtils.merge_breakers_with_modifications(model.domain.base_breakers,
+                                                                       proposed_breakers)
+
+        print("genitype", genotype)
+
+        visualiser = ModelsVisualization(str(num_of_pop + 1) + "_" + str(i + 1),
+                                         EvoAnalytics.run_id)
+
+        visualiser.simple_visualise(simulation_result.get_5percent_output_for_field(), all_breakers,
+                                    model.domain.base_breakers,
+                                    StaticStorage.exp_domain.fairways, StaticStorage.exp_domain.target_points,
+                                    [[2]], dir="wave_gif_imgs", image_for_gif=True,
+                                    population_and_ind_number=[num_of_pop,i])
+
+'''
+
 def print_individuals(model, task, pop,num_of_pop_ind=[]):
 
-
-    pre_simulated_results = None
-
+    print("pop",pop)
     genotype = [int(round(g, 0)) for g in pop[0]]
+
     proposed_breakers = BreakersEvoUtils.build_breakers_from_genotype(genotype, task, model.domain.model_grid)
 
     combined_breakers_for_cost_estimation = BreakersUtils.merge_breakers_with_modifications(
         model.domain.base_breakers, proposed_breakers)
 
-    ####################################
-    simulation_result = model.run_simulation_for_constructions(proposed_breakers)
+    #if isinstance(obj, WaveHeightObjective):
 
+    #for obj_ind, obj in enumerate(task.objectives):
 
+    if sum([isinstance(obj,WaveHeightObjective) for obj in task.objectives]):
 
+        simulation_result = model.run_simulation_for_constructions(proposed_breakers)
+
+    else:
+
+        simulation_result = WaveSimulationResult(hs=np.zeros(shape=(model.domain.model_grid.grid_y, model.domain.model_grid.grid_x)),configuration_label=EvoAnalytics.run_id)
+
+    #simulation_result = model.run_simulation_for_constructions(proposed_breakers)
 
     all_breakers = BreakersUtils.merge_breakers_with_modifications(model.domain.base_breakers,
                                                                        proposed_breakers)
 
 
-    visualiser = ModelsVisualization(str(num_of_pop_ind[0])+"_"+str(num_of_pop_ind[1]), EvoAnalytics.run_id)
+    print("genitype",genotype)
+
+
+    visualiser = ModelsVisualization(str(num_of_pop_ind[0]+1)+"_"+str(num_of_pop_ind[1]+1), EvoAnalytics.run_id)
 
     visualiser.simple_visualise(simulation_result.get_5percent_output_for_field(), all_breakers,
                                     model.domain.base_breakers,

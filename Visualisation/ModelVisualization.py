@@ -35,6 +35,7 @@ class ModelsVisualization:
         plt.rcParams['axes.titlesize'] = 20
         plt.rcParams['axes.labelsize'] = 20
         plt.rcParams['figure.figsize'] = [15, 10]
+        plt.rcParams["font.size"] = "1"
         fig = plt.figure()
         plt.axis('off')
         plt.tick_params(axis='both', left='off', top='off', right='off', bottom='off', labelleft='off', labeltop='off',
@@ -122,7 +123,7 @@ class ModelsVisualization:
 
 
         plt.rcParams['figure.figsize'] = [7, 5]
-        plt.rcParams["font.size"] = "8"
+        plt.rcParams["font.size"] = "1"
         fig = plt.figure()
         ax = plt.subplot()
         ax.axes.set_aspect('equal')

@@ -26,18 +26,34 @@ class DefaultSPEA2(SPEA2):
             #with open('out.txt', 'w') as out:
                 #out.write('{}\n'.format(gen))
 
-
             self.fitness()
-
 
             [EvoAnalytics.save_cantidate(gen, ind.objectives, ind.genotype.genotype_array, ind.referenced_dataset) for ind in self._pop]
 
+            #####Visualize best individuals
+            #EvoAnalytics.create_chart(gen, data_for_analyze='obj', chart_for_gif=True)
+            #EvoAnalytics.create_chart(gen, data_for_analyze='gen_len', chart_for_gif=True)
+            #####Visualize best individuals
 
+            #individuals=[[int(ind.genotype.genotype_array[j]) for j in range(len(ind.genotype.genotype_array))] for ind in self._pop]
 
+            print("FITNESSES IN SPEA2",self._pop[0].objectives)
+
+            #self.print_func(individuals=individuals, fitnesses=fitnesses, num_of_pop=population_number)
+
+            #for ind in self._pop:
+                #print("ind in SPEA2", ind.genotype.genotype_array)
 
             self._archive = self.environmental_selection(self._pop, self._archive)
 
             best = sorted(self._archive, key=lambda p: mean_obj(p))[0]
+
+            best_for_print=  [i.genotype.genotype_array  for i in sorted(self._archive, key=lambda p: mean_obj(p))[:EvoAnalytics.num_of_best_inds_for_print]]
+
+            for i, j in enumerate(best_for_print):
+                self.print_func([j], num_of_pop_ind=[gen, i])
+
+            print("best for PRINT",best_for_print)
 
             last_fit = history.last().fitness_value
             if last_fit > mean_obj(best):
@@ -58,12 +74,14 @@ class DefaultSPEA2(SPEA2):
             self.objectives(to_add)
             archive_history.append(to_add)
 
-            EvoAnalytics.create_chart(gen)
+            #EvoAnalytics.create_chart(gen)
 
             gen += 1
 
 
         #EvoAnalytics.chart_series_creator()
+        EvoAnalytics.create_chart(data_for_analyze='obj',analyze_only_last_generation=False,chart_for_gif=True)
+        EvoAnalytics.create_chart(data_for_analyze='gen_len', analyze_only_last_generation=False,chart_for_gif=True)
 
         return history, archive_history
 

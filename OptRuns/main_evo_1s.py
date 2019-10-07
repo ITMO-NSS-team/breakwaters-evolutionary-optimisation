@@ -43,13 +43,15 @@ selected_mod_points_to_optimise = [mod_points_to_optimise[mod.breaker_id] for mo
 
 objectives = [StructuralObjective(importance=1),
               CostObjective(importance=3),
-              NavigationObjective(importance=1)]
-              #WaveHeightObjective(importance=1)]
+              NavigationObjective(importance=1),
+              WaveHeightObjective(importance=1)]
 
 EvoAnalytics.clear()
 EvoAnalytics.run_id = 'run_{date:%Y_%m_%d_%H_%M_%S}'.format(date=datetime.datetime.now())
 
-EvoAnalytics.create_chart(None,"history_run_2019_08_26_10_12_05.csv",analyze_only_last_generation=False)
+#EvoAnalytics.create_chart(None,"history_run_2019_08_26_10_12_05.csv",analyze_only_last_generation=False)
+
+EvoAnalytics.create_chart(None,"HistoryFiles/history_run_2019_10_07_19_55_37.csv",analyze_only_last_generation=False,chart_for_gif=True)
 
 task = OptimisationTask(objectives, selected_modifications_for_tuning, mod_points_to_optimise,)
 
@@ -59,5 +61,8 @@ StaticStorage.genotype_length = len(selected_mod_points_to_optimise) * 2
 
 opt_result = optimiser.optimise(wave_model, task)
 
+
+EvoAnalytics.gif_images_maker()
+EvoAnalytics.united_gif_image_maker()
 
 hs0 = opt_result.simulation_result.get_5percent_output_for_target_points(exp_domain.target_points[0])

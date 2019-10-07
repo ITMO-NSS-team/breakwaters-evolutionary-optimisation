@@ -3,27 +3,26 @@ import numpy as np
 from Visualisation.ModelVisualization import ModelsVisualization
 from EvoAlgs.EvoAnalytics import EvoAnalytics
 import math
+from tqdm import tqdm
 
 
 class DEIterator:
     def __init__(self, de):
         self.de = de
         self.population = de.init()
-        self.fitness = de.evaluate(self.population,0)
+        self.fitness = de.evaluate(self.population, 0)
         self.best_fitness = min(self.fitness)
-        self.index_of_ind=0
-        if de.save_gif_images:
-            de.print_individuals_with_best_fitness(self.population, self.fitness, 0)
+        self.index_of_ind = 0
+        # if de.save_gif_images:
+        # de.print_individuals_with_best_fitness(self.population, self.fitness, 0)
 
-        EvoAnalytics.num_of_best_inds_for_print=5
+        EvoAnalytics.num_of_best_inds_for_print = 5
         if de.goal == "minimization":
             self.indexes_of_best_individuals = np.argsort(self.fitness)[:EvoAnalytics.num_of_best_inds_for_print]
         else:
-            self.indexes_of_best_individuals=np.argsort(self.fitness)[::-1][:EvoAnalytics.num_of_best_inds_for_print]
+            self.indexes_of_best_individuals = np.argsort(self.fitness)[::-1][:EvoAnalytics.num_of_best_inds_for_print]
 
-
-        #print("indexes",self.indexes_of_best_individuals)
-
+        # print("indexes",self.indexes_of_best_individuals)
 
         self.best_idx = np.argmin(self.fitness)
         # F and CR control parameters
@@ -44,10 +43,9 @@ class DEIterator:
         # is better than the target vector, the target vector is replaced.
         while self.iteration < self.de.maxiters:
             # Compute values for f and cr in each iteration
-            #de.print_individuals_with_best_fitness(self.population, self.fitness, self.iteration)
+            # de.print_individuals_with_best_fitness(self.population, self.fitness, self.iteration)
             self.f, self.cr = self.calculate_params()
             for self.idx_target in range(de.popsize):
-
                 # Create a mutant using a base vector, and the current f and cr values
                 mutant = self.create_mutant(self.idx_target)
                 # Evaluate and replace if better
@@ -63,18 +61,17 @@ class DEIterator:
         # Simple self-adaptive strategy, where the F and CR control
         # parameters are inherited from the base vector.
 
-
         if self.de.adaptive:
             # Use the params of the target vector
             dt = self.de.denormalize(self.population[i])
             self.f, self.cr = dt[-2:]
         self.mutant = self.de.mutant(i, self.population, self.f, self.cr)
 
-        print("mutant",self.mutant)
+        print("mutant", self.mutant)
         return self.mutant
 
     def replace(self, i, mutant):
-        mutant_fitness, = self.de.evaluate(np.asarray([mutant]),i)
+        mutant_fitness, = self.de.evaluate(np.asarray([mutant]), i)
         return self.replacement(i, mutant, mutant_fitness)
 
     def replacement(self, target_idx, mutant, mutant_fitness):
@@ -104,21 +101,21 @@ class PDEIterator(DEIterator):
         # Do not analyze after having the whole population (wait until the last individual)
         if i == self.de.popsize - 1:
             # Evaluate the whole new population (class PDE implements a parallel version of evaluate)
-            mutant_fitness = self.de.evaluate(self.mutants,i)
+            mutant_fitness = self.de.evaluate(self.mutants, i)
             for j in range(self.de.popsize):
                 super().replacement(j, self.mutants[j], mutant_fitness[j])
 
 
 class DE:
-    def __init__(self,fobj,print_func,bounds, mutation=(0.5, 1.0), crossover=0.7, maxiters=30,
-                 self_adaptive=False, popsize=None, seed=None,dimensions=2,save_gif=True):
+    def __init__(self, fobj, print_func, bounds, mutation=(0.5, 1.0), crossover=0.7, maxiters=30,
+                 self_adaptive=False, popsize=None, seed=None, dimensions=2, save_gif=True):
 
-        self.save_gif_images=save_gif
-        self.print_func=print_func
-        self.goal="minimization"
-        print("bounds",bounds)
+        self.save_gif_images = save_gif
+        self.print_func = print_func
+        self.goal = "minimization"
+        print("bounds", bounds)
         self.adaptive = self_adaptive
-        self.step_num=0
+        self.step_num = 0
         # Indicates the number of extra parameters in an individual that are not used for evaluating
         # If extra_params = d, discards the last d elements from an individual prior to evaluation.
         self.extra_params = 0
@@ -142,19 +139,17 @@ class DE:
             bnd.append(self.crossover_bounds)
             self.extra_params = 2
 
-        self._MIN=np.asarray(bnd[0], dtype='f8').T
-        self._MAX=np.asarray(bnd[1], dtype='f8').T
-
+        self._MIN = np.asarray(bnd[0], dtype='f8').T
+        self._MAX = np.asarray(bnd[1], dtype='f8').T
 
         self._DIFF = [np.fabs(self._MAX[i] - self._MIN[i]) for i in range(len(self._MIN))]
 
+        # self._MIN, self._MAX = np.asarray(bnd, dtype='f8').T
+        # self._DIFF = np.fabs(self._MAX - self._MIN)
+        # self.dims = len(bnd)
+        # self.dims=fobj.dimensions
 
-        #self._MIN, self._MAX = np.asarray(bnd, dtype='f8').T
-        #self._DIFF = np.fabs(self._MAX - self._MIN)
-        #self.dims = len(bnd)
-        #self.dims=fobj.dimensions
-
-        self.dims=dimensions
+        self.dims = dimensions
 
         self.fobj = fobj
         self.maxiters = maxiters
@@ -183,49 +178,45 @@ class DE:
 
     def init(self):
 
-
-        #print("dims",self.dims)
+        # print("dims",self.dims)
         return self.random_init(self.popsize, self.dims)
 
-    def check_constructions(self,new_ind):
+    def check_constructions(self, new_ind):
 
         new_ind_denormalized = [i for i in self.denormalize([new_ind])[0]]
         return self.fobj([new_ind_denormalized], check_intersections=True)
 
-
-    def random_init(self,popsize, dimensions):
+    def random_init(self, popsize, dimensions):
         # print("dim-ions",dimensions)
-        new_population=[]
+        new_population = []
 
-        for j in range(0,popsize):
+        for j in range(0, popsize):
 
-            #num_of_attempt=0
-            new_ind=[i for i in np.random.rand(dimensions)]
-            #new_ind_denormalized = [i for i in self.denormalize([new_ind])[0]]
+            # num_of_attempt=0
+            new_ind = [i for i in np.random.rand(dimensions)]
+            # new_ind_denormalized = [i for i in self.denormalize([new_ind])[0]]
 
-            #Check constructions
-            #while self.fobj([new_ind_denormalized], check_intersections=True,num_of_pop_ind=[j,num_of_attempt]) is True:
+            # Check constructions
+            # while self.fobj([new_ind_denormalized], check_intersections=True,num_of_pop_ind=[j,num_of_attempt]) is True:
             while self.check_constructions(new_ind) is True:
-                #num_of_attempt+=1
-                new_ind=[i for i in np.random.rand(dimensions)]
-                #new_ind_denormalized = [i for i in self.denormalize([new_ind])[0]]
+                # num_of_attempt+=1
+                new_ind = [i for i in np.random.rand(dimensions)]
+                # new_ind_denormalized = [i for i in self.denormalize([new_ind])[0]]
 
             new_population.append(new_ind)
 
-        #if self.fobj([new_ind], check_intersections=True):
-            #print("BAD_individ")
-        #else:
-            #print("Good individ")
+        # if self.fobj([new_ind], check_intersections=True):
+        # print("BAD_individ")
+        # else:
+        # print("Good individ")
 
+        # print("randpop", np.random.rand(dimensions))
+        print("new population", new_population)
 
-        #print("randpop", np.random.rand(dimensions))
-        print("new population",new_population)
-
-        print("np.random",np.random.rand(popsize, dimensions))
-
+        print("np.random", np.random.rand(popsize, dimensions))
 
         return np.array(new_population)
-        #return np.random.rand(popsize, dimensions)
+        # return np.random.rand(popsize, dimensions)
 
     def denormalize(self, population):
 
@@ -238,26 +229,26 @@ class DE:
         mutant = self.repair(self.crossover(population[target_idx], trial, cr))
         return mutant
 
-    def evaluate(self, P,iteration):
+    def evaluate(self, P, iteration):
         # Denormalize population matrix to obtain the scaled parameters
 
-        #print("i",iteration)
-        #print("P before denorm",P)
+        # print("i",iteration)
+        # print("P before denorm",P)
         PD = self.denormalize(P)
-        #print("P after denorm", PD)
+        # print("P after denorm", PD)
         if self.extra_params > 0:
             PD = PD[:, :-self.extra_params]
-        return self.evaluate_denormalized(PD,iteration)
+        return self.evaluate_denormalized(PD, iteration)
 
-    def evaluate_denormalized(self, PD,index_of_ind):
+    def evaluate_denormalized(self, PD, index_of_ind):
 
-        #print("PD",PD)
-        #print("index of ind",index_of_ind)
+        # print("PD",PD)
+        # print("index of ind",index_of_ind)
 
-        if len(PD)>1:
-            return [self.fobj([ind], fromDE=True, num_of_pop_ind=[self.step_num, i]) for i,ind in enumerate(PD)]
+        if len(PD) > 1:
+            return [self.fobj([ind], fromDE=True, num_of_pop_ind=[self.step_num, i]) for i, ind in enumerate(PD)]
         else:
-            return [self.fobj([ind],fromDE=True,num_of_pop_ind=[self.step_num+1,index_of_ind]) for ind in PD]
+            return [self.fobj([ind], fromDE=True, num_of_pop_ind=[self.step_num + 1, index_of_ind]) for ind in PD]
 
     def iterator(self):
         return iter(DEIterator(self))
@@ -270,64 +261,75 @@ class DE:
                 iteration = step.iteration
                 yield step
 
-    def print_individuals_with_best_fitness(self,individuals,fitnesses,population_number):
-        num_of_best_individuals=EvoAnalytics.num_of_best_inds_for_print
-        if self.goal=="minimization":
+    '''
+    def print_individuals_with_best_fitness(self, individuals, fitnesses, population_number):
+
+
+        individuals=[self.denormalize([i]) for i in individuals]
+        print("INDIVIDUALS AFTER DENORM",individuals)
+        individuals=[[ int(round(j)) for j in i[0]] for i in individuals ]
+        print("INDIVIDUALS AFTER ROUND", individuals)
+
+        self.print_func(individuals=individuals,fitnesses=fitnesses, num_of_pop=population_number)
+
+    '''
+
+    def print_individuals_with_best_fitness(self, individuals, fitnesses, population_number):
+
+        num_of_best_individuals = EvoAnalytics.num_of_best_inds_for_print
+        if self.goal == "minimization":
             indexes_of_individuals = np.argsort(fitnesses)[:num_of_best_individuals]
         else:
             indexes_of_individuals = np.argsort(fitnesses)[::-1][:num_of_best_individuals]
 
+        # for i, j in enumerate(indexes_of_individuals):
+        # visualiser = ModelsVisualization(str(population_number) + "_" + str(j), EvoAnalytics.run_id)
+        # visualiser.Make_directory_for_gif_images()
+        # visualiser.Gif_images_saving(population_number,i)
+
         for i, j in enumerate(indexes_of_individuals):
-            visualiser = ModelsVisualization(str(population_number) + "_" + str(j), EvoAnalytics.run_id)
-            visualiser.Make_directory_for_gif_images()
-            visualiser.Gif_images_saving(population_number,i)
-        #for i,j in enumerate(indexes_of_individuals):
+            print("num_of_pop_ind ", [population_number, i])
 
-            #self.print_func([individuals[j]],num_of_pop_ind=[population_number,i])
-
-
-
-
-
+            self.print_func(self.denormalize([individuals[j]]), num_of_pop_ind=[population_number, i])
+    
 
     def solve(self, show_progress=False):
         if show_progress:
-            from tqdm import tqdm
             iterator = tqdm(self.iterator(), total=self.maxiters, desc='Optimizing ({0})'.format(self.name))
         else:
             iterator = self.iterator()
 
-
-        #Analytics
+        # Analytics
         EvoAnalytics.num_of_generations = self.maxiters
         EvoAnalytics.num_of_rows = math.ceil(EvoAnalytics.num_of_generations / EvoAnalytics.num_of_cols)
         EvoAnalytics.pop_size = self.popsize
         EvoAnalytics.set_params()
-        #print("pop in iterator",i in iterator.population)
-        #EvoAnalytics.save_cantidate(iterator., [fitness[i]], ind)
-        #[EvoAnalytics.save_cantidate(step.iteration, [fitness[i]], ind) for i, ind in enumerate(iterator.pop)]
+        # print("pop in iterator",i in iterator.population)
+        # EvoAnalytics.save_cantidate(iterator., [fitness[i]], ind)
+        # [EvoAnalytics.save_cantidate(step.iteration, [fitness[i]], ind) for i, ind in enumerate(iterator.pop)]
 
+        for step_idx, step in enumerate(iterator):
 
-        for step_idx,step in enumerate(iterator):
-
-
-            print("step_idx",step_idx)
+            print("step_idx", step_idx)
 
             idx = step.best_idx
             P = step.population
             fitness = step.fitness
 
-            if step_idx==0:
+            if step_idx == 0:
+                self.print_individuals_with_best_fitness(P, fitness, self.step_num)
                 [EvoAnalytics.save_cantidate(step.iteration, [fitness[i]], ind) for i, ind in enumerate(P)]
-                EvoAnalytics.create_chart(step.iteration, data_for_analyze='obj',chart_for_gif=True,first_generation=True)
-                EvoAnalytics.create_chart(step.iteration, data_for_analyze='gen_len', chart_for_gif=True,first_generation=True)
+                EvoAnalytics.create_chart(step.iteration, data_for_analyze='obj', chart_for_gif=True,
+                                          first_generation=True)
+                EvoAnalytics.create_chart(step.iteration, data_for_analyze='gen_len', chart_for_gif=True,
+                                          first_generation=True)
 
-            if self.save_gif_images and step_idx>0:
-                if step.iteration-1==self.step_num:
-                    self.step_num+=1
+            if self.save_gif_images and step_idx > 0:
+                if step.iteration - 1 == self.step_num:
+                    self.step_num += 1
                     self.print_individuals_with_best_fitness(P, fitness, self.step_num)
-                    [EvoAnalytics.save_cantidate(step.iteration, [fitness[i]], ind) for i,ind in enumerate(P)]
-                    EvoAnalytics.create_chart(step.iteration,data_for_analyze='obj',chart_for_gif=True)
+                    [EvoAnalytics.save_cantidate(step.iteration, [fitness[i]], ind) for i, ind in enumerate(P)]
+                    EvoAnalytics.create_chart(step.iteration, data_for_analyze='obj', chart_for_gif=True)
                     EvoAnalytics.create_chart(step.iteration, data_for_analyze='gen_len', chart_for_gif=True)
 
             if step.iteration > self.maxiters:
