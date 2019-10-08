@@ -308,13 +308,14 @@ def calculate_objectives(model, task, pop,fromDE=False,check_intersections=False
                         simulation_result = pre_simulated_results[i_ind]
                     except:
                         print("!")
-                    label_to_reference = simulation_result.configuration_label
-                    new_obj = (obj.get_obj_value(model.domain, proposed_breakers, simulation_result))
+                label_to_reference = simulation_result.configuration_label
+                new_obj = (obj.get_obj_value(model.domain, proposed_breakers, simulation_result))
 
                     # for 3 points it is list
-                    new_obj = [(x1 - x2) / x2 * 100 for (x1, x2) in zip(new_obj, base_objectives[obj_ind])]
+                new_obj = [(x1 - x2) / x2 * 100 for (x1, x2) in zip(new_obj, base_objectives[obj_ind])]
 
-                    objectives.append(new_obj)
+                objectives.append(new_obj)
+
             else:
                 if len(task.objectives) < 4:
                     label = uuid.uuid4().hex
@@ -343,11 +344,15 @@ def calculate_objectives(model, task, pop,fromDE=False,check_intersections=False
                                             objectives,image_for_gif=False,population_and_ind_number=num_of_pop_ind)
 
 
+
         if fromDE:
 
             print("Objectives", objectives)
+            #objectives = [i[0] for i in objectives]
 
-            objectives = [i[0] for i in objectives]
+            objectives = [j for i in objectives for j in i]
+
+            print("Objectives", objectives)
 
             return sum(objectives)
 
