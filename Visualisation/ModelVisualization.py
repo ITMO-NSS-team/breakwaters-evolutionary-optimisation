@@ -30,7 +30,7 @@ class ModelsVisualization:
 
 
         #plt.axis('off')
-        #plt.rcParams['xtick.labelsize'] = 0
+        #plt.rcParams['xtick.labelsize'] = 10
         #plt.rcParams['ytick.labelsize'] = 0
         plt.rcParams['axes.titlesize'] = 20
         plt.rcParams['axes.labelsize'] = 20
@@ -152,7 +152,7 @@ class ModelsVisualization:
         with sb.axes_style("white"):
             ax = sb.heatmap(hs, mask=mask, vmax=vmax, vmin=0, cmap='RdYlBu_r', cbar_kws={"shrink": 0.85})
 
-        # ax.set_aspect('auto')
+        ax.set_aspect('auto')
 
         breaker_points = []
         for i in range(len(all_breakers)):
@@ -163,16 +163,16 @@ class ModelsVisualization:
 
                 if [all_breakers[i].points[j - 1].x, all_breakers[i].points[j - 1].y] not in breaker_points:
                     breaker_points.append([all_breakers[i].points[j - 1].x, all_breakers[i].points[j - 1].y])
-                    #plt.annotate(
-                    #    f'({all_breakers[i].points[j-1].x},{all_breakers[i].points[j-1].y})',
-                    #    (all_breakers[i].points[j - 1].x, all_breakers[i].points[j - 1].y))
+                    plt.annotate(
+                        f'({all_breakers[i].points[j-1].x},{all_breakers[i].points[j-1].y})',
+                        (all_breakers[i].points[j - 1].x, all_breakers[i].points[j - 1].y))
 
                 if j == len(all_breakers[i].points) - 1:
                     if [all_breakers[i].points[j].x, all_breakers[i].points[j].y] not in breaker_points:
                         breaker_points.append([all_breakers[i].points[j].x, all_breakers[i].points[j].y])
-                        #plt.annotate(
-                        #    f'({all_breakers[i].points[j].x},{all_breakers[i].points[j].y})',
-                        #    (all_breakers[i].points[j].x, all_breakers[i].points[j].y))
+                        plt.annotate(
+                            f'({all_breakers[i].points[j].x},{all_breakers[i].points[j].y})',
+                            (all_breakers[i].points[j].x, all_breakers[i].points[j].y))
 
         for i in range(len(base_breakers)):
             for j in range(1, len(base_breakers[i].points)):

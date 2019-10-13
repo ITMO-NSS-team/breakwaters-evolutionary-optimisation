@@ -140,7 +140,7 @@ def print_individuals(model, task, individuals,fitnesses,num_of_pop,goal="minimi
 
 def print_individuals(model, task, pop,num_of_pop_ind=[]):
 
-    print("pop",pop)
+    #print("pop",pop)
     genotype = [int(round(g, 0)) for g in pop[0]]
 
     proposed_breakers = BreakersEvoUtils.build_breakers_from_genotype(genotype, task, model.domain.model_grid)
@@ -166,7 +166,7 @@ def print_individuals(model, task, pop,num_of_pop_ind=[]):
                                                                        proposed_breakers)
 
 
-    print("genitype",genotype)
+    #print("genitype",genotype)
 
 
     visualiser = ModelsVisualization(str(num_of_pop_ind[0]+1)+"_"+str(num_of_pop_ind[1]+1), EvoAnalytics.run_id)
@@ -234,7 +234,7 @@ def calculate_objectives(model, task, pop,fromDE=False,check_intersections=False
 
             proposed_breakers = BreakersEvoUtils.build_breakers_from_genotype(genotype, task, model.domain.model_grid)
             simulation_result = model.run_simulation_for_constructions(proposed_breakers)
-            print(simulation_result.configuration_label)
+            #print(simulation_result.configuration_label)
             pre_simulated_results.append(simulation_result)
             pre_simulated_results_idx.append(simulation_result.configuration_label)
 
@@ -328,7 +328,7 @@ def calculate_objectives(model, task, pop,fromDE=False,check_intersections=False
             all_breakers = BreakersUtils.merge_breakers_with_modifications(model.domain.base_breakers,
                                                                            proposed_breakers)
 
-
+            '''
             if fromDE:
                 visualiser = ModelsVisualization(str(num_of_pop_ind[0]) + "_" + str(num_of_pop_ind[1]), EvoAnalytics.run_id)
 
@@ -343,18 +343,17 @@ def calculate_objectives(model, task, pop,fromDE=False,check_intersections=False
                                             StaticStorage.exp_domain.fairways, StaticStorage.exp_domain.target_points,
                                             objectives,image_for_gif=False,population_and_ind_number=num_of_pop_ind)
 
-
+            '''
 
         if fromDE:
 
-            print("Objectives", objectives)
-            #objectives = [i[0] for i in objectives]
+            return objectives
 
             objectives = [j for i in objectives for j in i]
 
             print("Objectives", objectives)
 
-            return sum(objectives)
+            return 0.8*objectives[0]+0.9*objectives[1]+0.5*objectives[2]+sum(objectives[3:])
 
         else:
 

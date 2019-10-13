@@ -19,6 +19,7 @@ class DEIterator:
         EvoAnalytics.num_of_best_inds_for_print = 5
         if de.goal == "minimization":
             self.indexes_of_best_individuals = np.argsort(self.fitness)[:EvoAnalytics.num_of_best_inds_for_print]
+
         else:
             self.indexes_of_best_individuals = np.argsort(self.fitness)[::-1][:EvoAnalytics.num_of_best_inds_for_print]
 
@@ -60,6 +61,17 @@ class DEIterator:
     def create_mutant(self, i):
         # Simple self-adaptive strategy, where the F and CR control
         # parameters are inherited from the base vector.
+
+        '''
+        mutant_copy=None
+        while mutant_copy is None or self.check_constructions(mutant_copy) is True:
+            if self.de.adaptive:
+                # Use the params of the target vector
+                dt = self.de.denormalize(self.population[i])
+                self.f, self.cr = dt[-2:]
+            self.mutant = self.de.mutant(i, self.population, self.f, self.cr)
+            mutant_copy=self.mutant
+        '''
 
         if self.de.adaptive:
             # Use the params of the target vector
@@ -279,6 +291,12 @@ class DE:
         num_of_best_individuals = EvoAnalytics.num_of_best_inds_for_print
         if self.goal == "minimization":
             indexes_of_individuals = np.argsort(fitnesses)[:num_of_best_individuals]
+            print("fitness", fitnesses)
+            print("best ind", indexes_of_individuals)
+
+            f = open("g.txt", "a+")
+            f.write("population")
+
         else:
             indexes_of_individuals = np.argsort(fitnesses)[::-1][:num_of_best_individuals]
 
@@ -287,8 +305,10 @@ class DE:
         # visualiser.Make_directory_for_gif_images()
         # visualiser.Gif_images_saving(population_number,i)
 
+
         for i, j in enumerate(indexes_of_individuals):
-            print("num_of_pop_ind ", [population_number, i])
+            #print("num_of_pop_ind ", [population_number, i])
+
 
             self.print_func(self.denormalize([individuals[j]]), num_of_pop_ind=[population_number, i])
     
@@ -307,7 +327,6 @@ class DE:
         # print("pop in iterator",i in iterator.population)
         # EvoAnalytics.save_cantidate(iterator., [fitness[i]], ind)
         # [EvoAnalytics.save_cantidate(step.iteration, [fitness[i]], ind) for i, ind in enumerate(iterator.pop)]
-
         for step_idx, step in enumerate(iterator):
 
             print("step_idx", step_idx)
@@ -331,15 +350,17 @@ class DE:
                     #EvoAnalytics.create_chart(step.iteration, data_for_analyze='gen_len', chart_for_gif=True)
 
             if step.iteration > self.maxiters:
-                EvoAnalytics.create_chart(data_for_analyze='obj', analyze_only_last_generation=False,
-                                          chart_for_gif=True)
-                EvoAnalytics.create_chart(data_for_analyze='gen_len', analyze_only_last_generation=False,
-                                          chart_for_gif=True)
+
                 if show_progress:
                     iterator.n = self.maxiters
                     iterator.refresh()
                     iterator.close()
                 break
+
+        EvoAnalytics.create_chart(data_for_analyze='obj', analyze_only_last_generation=False,
+                                  chart_for_gif=True)
+        EvoAnalytics.create_chart(data_for_analyze='gen_len', analyze_only_last_generation=False,
+                                  chart_for_gif=True)
 
         return self.denormalize([P[idx].reshape(-1, 1)]), fitness[idx]
 

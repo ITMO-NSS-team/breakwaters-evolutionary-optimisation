@@ -26,6 +26,7 @@ wave_model = SwanWaveModel(exp_domain, None)
 
 optimiser = ParetoEvolutionaryOptimiser()
 
+'''
 base_modifications_for_tuning = [
     Breaker('mod1', list(map(xy_to_points, [[-1, -1], [33, 22], [42, 17]])), 0, 'Ia'),
     Breaker('mod2_top', list(map(xy_to_points, [[-1, -1], [50, 32], [50, 39]])), 0, 'II')
@@ -35,6 +36,20 @@ mod_points_to_optimise = {  # order is important
     'mod1': [0],
     'mod2_top': [0],
 }
+'''
+base_modifications_for_tuning = [
+        Breaker('mod1', list(map(xy_to_points, [[-1, -1], [-1, -1], [33, 22], [42, 17]])), 0, 'Ia'),
+        Breaker('mod2_top', list(map(xy_to_points, [[-1, -1], [-1, -1], [50, 32], [50, 39]])), 0, 'II'),
+        Breaker('mod2_bottom', list(map(xy_to_points, [[-1, -1], [-1, -1], [50, 39], [50, 32]])), 0, '-')
+    ]
+
+mod_points_to_optimise = {  # order is important
+    'mod1': [1, 0],
+    'mod2_top': [1, 0],
+    'mod2_bottom': [1, 0],
+}
+
+
 
 selected_modifications_for_tuning = base_modifications_for_tuning
 selected_mod_points_to_optimise = [mod_points_to_optimise[mod.breaker_id] for mod in base_modifications_for_tuning]

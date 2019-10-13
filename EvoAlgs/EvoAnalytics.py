@@ -114,6 +114,8 @@ class EvoAnalytics:
         EvoAnalytics.change_symbol_in_file(f)
         df = pd.read_csv(f, header=0)
 
+        df = df.drop('referenced_dataset', 1)
+
         if analyze_only_last_generation:
             # Indexes_of_new_launches = df[df['pop_num'] == 'pop_num'].index  # Начала строк для разделений
             # num_of_launches = len(Indexes_of_new_launches) + 1
