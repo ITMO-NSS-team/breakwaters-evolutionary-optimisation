@@ -53,8 +53,8 @@ if __name__ == '__main__':
 
     objectives = [StructuralObjective(importance=1),
                   CostObjective(importance=3),
-                  NavigationObjective(importance=1),
-                  WaveHeightObjective(importance=2)]
+                  NavigationObjective(importance=1)]
+                  #WaveHeightObjective(importance=2)]
 
     task = OptimisationTask(objectives, selected_modifications_for_tuning, mod_points_to_optimise, )
 
@@ -62,5 +62,8 @@ if __name__ == '__main__':
     StaticStorage.genotype_length = sum([len(_) * 2 for _ in selected_mod_points_to_optimise])
 
     opt_result = optimiser.optimise(wave_model, task)
+
+    EvoAnalytics.gif_images_maker()
+    EvoAnalytics.united_gif_image_maker()
 
     hs0 = opt_result.simulation_result.get_5percent_output_for_target_points(exp_domain.target_points[0])
