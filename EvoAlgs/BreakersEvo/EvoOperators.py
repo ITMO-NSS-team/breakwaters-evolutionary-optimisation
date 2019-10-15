@@ -141,6 +141,7 @@ def print_individuals(model, task, individuals,fitnesses,num_of_pop,goal="minimi
 def print_individuals(model, task, pop,num_of_pop_ind=[]):
 
     #print("pop",pop)
+
     genotype = [int(round(g, 0)) for g in pop[0]]
 
     proposed_breakers = BreakersEvoUtils.build_breakers_from_genotype(genotype, task, model.domain.model_grid)
@@ -325,10 +326,14 @@ def calculate_objectives(model, task, pop,fromDE=False,check_intersections=False
                     label_to_reference = label
 
         if True:
+
+            pass
+            '''
+            
             all_breakers = BreakersUtils.merge_breakers_with_modifications(model.domain.base_breakers,
                                                                            proposed_breakers)
 
-            '''
+            
             if fromDE:
                 visualiser = ModelsVisualization(str(num_of_pop_ind[0]) + "_" + str(num_of_pop_ind[1]), EvoAnalytics.run_id)
 
@@ -347,7 +352,7 @@ def calculate_objectives(model, task, pop,fromDE=False,check_intersections=False
 
         if fromDE:
 
-            return objectives
+            #return objectives
 
             objectives = [j for i in objectives for j in i]
 

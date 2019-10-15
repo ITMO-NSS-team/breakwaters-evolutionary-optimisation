@@ -4,7 +4,7 @@ import numpy as np
 
 from Breakers.Breaker import xy_to_points, Breaker
 from Configuration.Domains import SochiHarbor
-from Optimisation.Optimiser import ParetoEvolutionaryOptimiser
+from Optimisation.Optimiser import ParetoEvolutionaryOptimiser, DEOptimiser
 from Simulation.WaveModel import SwanWaveModel
 from Computation.СomputationalEnvironment import SwanWinRemoteComputationalManager
 from EvoAlgs.EvoAnalytics import EvoAnalytics
@@ -34,7 +34,7 @@ if __name__ == '__main__':
                                                                        is_lazy_parallel=True)
     wave_model = SwanWaveModel(exp_domain, None)
 
-    optimiser = ParetoEvolutionaryOptimiser()
+    optimiser = DEOptimiser()
 
     base_modifications_for_tuning = [
         Breaker('mod1', list(map(xy_to_points, [[-1, -1], [-1, -1], [33, 22], [42, 17]])), 0, 'Ia'),

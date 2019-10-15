@@ -110,6 +110,9 @@ class EvoAnalytics:
         plt.close("all")
         if not f:
             f = f'HistoryFiles/history_{EvoAnalytics.run_id}.csv'
+        else:
+            f=  f'HistoryFiles/history_{f}.csv'
+
 
         EvoAnalytics.change_symbol_in_file(f)
         df = pd.read_csv(f, header=0)
@@ -283,7 +286,6 @@ class EvoAnalytics:
                     else:
                         if not os.path.isdir("boxplots/" + str(data_for_analyze) + "/" + str(EvoAnalytics.run_id)):
                             os.mkdir("boxplots/" + str(data_for_analyze) + "/" + str(EvoAnalytics.run_id))
-
 
 
                         print("DF OF LAUNCH 0",df_of_launch[0])

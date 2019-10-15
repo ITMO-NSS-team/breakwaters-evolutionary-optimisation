@@ -22,7 +22,21 @@ random.seed(seed)
 #EvoAnalytics.num_of_generations=5
 #EvoAnalytics.gif_images_maker("run_2019_10_03_17_24_59")
 
+'''
+EvoAnalytics.run_id="run_DE"
+EvoAnalytics.num_of_generations=26
+EvoAnalytics.gif_images_maker("run_DE")
+EvoAnalytics.united_gif_image_maker("run_DE")
+'''
 
+EvoAnalytics.run_id="run_kolya"
+EvoAnalytics.num_of_generations=15
+EvoAnalytics.create_chart(f="run_kolya",data_for_analyze='obj', analyze_only_last_generation=False,
+                                  chart_for_gif=True)
+EvoAnalytics.create_chart(f="run_kolya",data_for_analyze='gen_len', analyze_only_last_generation=False,
+                                  chart_for_gif=True)
+EvoAnalytics.gif_images_maker("run_kolya")
+EvoAnalytics.united_gif_image_maker("run_kolya")
 
 exp_domain = SochiHarbor()
 StaticStorage.exp_domain = exp_domain
