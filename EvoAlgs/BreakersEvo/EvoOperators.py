@@ -260,6 +260,7 @@ def calculate_objectives(model, task, pop,fromDE=False,check_intersections=False
     for i_ind, p in enumerate(pop):
         label_to_reference = None
 
+        print("PPPPPP",p)
         if fromDE:
             genotype = [int(round(g, 0)) for g in p]
         else:
@@ -358,7 +359,7 @@ def calculate_objectives(model, task, pop,fromDE=False,check_intersections=False
 
             print("Objectives", objectives)
 
-            return 0.8*objectives[0]+0.9*objectives[1]+0.5*objectives[2]+sum(objectives[3:])
+            return 0.8*objectives[0]+0.9*objectives[1]+0.5*objectives[2]+sum(objectives[3:]),objectives
 
         else:
 

@@ -10,7 +10,9 @@ class DEIterator:
     def __init__(self, de):
         self.de = de
         self.population = de.init()
-        self.fitness = de.evaluate(self.population, 0)
+        self.fitness,self.objectives = de.evaluate(self.population, 0)
+        #self.fitness=de.evaluate(self.population, 0)
+
         self.best_fitness = min(self.fitness)
         self.index_of_ind = 0
         # if de.save_gif_images:
@@ -83,16 +85,24 @@ class DEIterator:
         return self.mutant
 
     def replace(self, i, mutant):
-        mutant_fitness, = self.de.evaluate(np.asarray([mutant]), i)
-        return self.replacement(i, mutant, mutant_fitness)
+        #mutant_fitness,obj = self.de.evaluate(np.asarray([mutant]), i)
+        #return self.replacement(i, mutant, mutant_fitness, obj)
+        mutant_fitness,obj= self.de.evaluate(np.asarray([mutant]), i)
+        mutant_fitness,=mutant_fitness
+        print("mutant fitness", mutant_fitness)
+        return self.replacement(i, mutant, mutant_fitness, obj)
+        #return self.replacement(i, mutant, mutant_fitness)
 
-    def replacement(self, target_idx, mutant, mutant_fitness):
+    def replacement(self, target_idx, mutant, mutant_fitness,obj):
+    #def replacement(self, target_idx, mutant, mutant_fitness):
+
         if mutant_fitness < self.best_fitness:
             self.best_fitness = mutant_fitness
             self.best_idx = target_idx
         if mutant_fitness < self.fitness[target_idx]:
             self.population[target_idx] = mutant
             self.fitness[target_idx] = mutant_fitness
+            self.objectives[target_idx]=obj
             return True
         return False
 
@@ -258,9 +268,30 @@ class DE:
         # print("index of ind",index_of_ind)
 
         if len(PD) > 1:
+            fit=[]
+            obj=[]
+            for i, ind in enumerate(PD):
+                fit_and_obj=self.fobj([ind], fromDE=True, num_of_pop_ind=[self.step_num, i])
+                fit.append(fit_and_obj[0])
+                obj.append(fit_and_obj[1])
+
+            return fit,obj
+
+        else:
+            print("PD when len(PD<1",PD[0])
+
+            fit_and_obj=self.fobj([PD[0]], fromDE=True, num_of_pop_ind=[self.step_num + 1, index_of_ind])
+
+            print("fit and obj",fit_and_obj[0],fit_and_obj[1])
+            return [fit_and_obj[0]],fit_and_obj[1]
+
+        '''
+        if len(PD) > 1:
             return [self.fobj([ind], fromDE=True, num_of_pop_ind=[self.step_num, i]) for i, ind in enumerate(PD)]
         else:
+            print("PPPPPPPPPDDDDDDDDDD",PD)
             return [self.fobj([ind], fromDE=True, num_of_pop_ind=[self.step_num + 1, index_of_ind]) for ind in PD]
+        '''
 
     def iterator(self):
         return iter(DEIterator(self))
@@ -311,7 +342,7 @@ class DE:
 
 
             self.print_func(self.denormalize([individuals[j]]), num_of_pop_ind=[population_number, i])
-    
+
 
     def solve(self, show_progress=False):
         if show_progress:
@@ -334,10 +365,13 @@ class DE:
             idx = step.best_idx
             P = step.population
             fitness = step.fitness
+            obj=step.objectives
 
             if step_idx == 0:
                 self.print_individuals_with_best_fitness(P, fitness, self.step_num)
-                [EvoAnalytics.save_cantidate(step.iteration, [fitness[i]], ind) for i, ind in enumerate(P)]
+                print("obj for Evoanalytics",obj)
+                #[EvoAnalytics.save_cantidate(step.iteration, [fitness[i]], ind) for i, ind in enumerate(P)]
+                [EvoAnalytics.save_cantidate(step.iteration, obj[i], ind) for i, ind in enumerate(P)]
                 #EvoAnalytics.create_chart(step.iteration, data_for_analyze='obj', chart_for_gif=True, first_generation=True)
                 #EvoAnalytics.create_chart(step.iteration, data_for_analyze='gen_len', chart_for_gif=True, first_generation=True)
 
@@ -345,7 +379,10 @@ class DE:
                 if step.iteration - 1 == self.step_num:
                     self.step_num += 1
                     self.print_individuals_with_best_fitness(P, fitness, self.step_num)
-                    [EvoAnalytics.save_cantidate(step.iteration, [fitness[i]], ind) for i, ind in enumerate(P)]
+
+                    print("Fitness",fitness)
+                    #[EvoAnalytics.save_cantidate(step.iteration, [fitness[i]], ind) for i, ind in enumerate(P)]
+                    [EvoAnalytics.save_cantidate(step.iteration, obj[i], ind) for i, ind in enumerate(P)]
                     #EvoAnalytics.create_chart(step.iteration, data_for_analyze='obj', chart_for_gif=True)
                     #EvoAnalytics.create_chart(step.iteration, data_for_analyze='gen_len', chart_for_gif=True)
 

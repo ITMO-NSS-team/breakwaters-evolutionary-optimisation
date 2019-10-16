@@ -28,7 +28,7 @@ EvoAnalytics.num_of_generations=26
 EvoAnalytics.gif_images_maker("run_DE")
 EvoAnalytics.united_gif_image_maker("run_DE")
 '''
-
+'''
 EvoAnalytics.run_id="run_kolya"
 EvoAnalytics.num_of_generations=15
 EvoAnalytics.create_chart(f="run_kolya",data_for_analyze='obj', analyze_only_last_generation=False,
@@ -37,6 +37,7 @@ EvoAnalytics.create_chart(f="run_kolya",data_for_analyze='gen_len', analyze_only
                                   chart_for_gif=True)
 EvoAnalytics.gif_images_maker("run_kolya")
 EvoAnalytics.united_gif_image_maker("run_kolya")
+'''
 
 exp_domain = SochiHarbor()
 StaticStorage.exp_domain = exp_domain
@@ -63,8 +64,8 @@ selected_mod_points_to_optimise = [mod_points_to_optimise[mod.breaker_id] for mo
 
 objectives = [StructuralObjective(importance=1),
               CostObjective(importance=3),
-              NavigationObjective(importance=1),
-              WaveHeightObjective(importance=1)]
+              NavigationObjective(importance=1)]
+              #WaveHeightObjective(importance=1)]
 
 EvoAnalytics.clear()
 EvoAnalytics.run_id = 'run_{date:%Y_%m_%d_%H_%M_%S}'.format(date=datetime.datetime.now())
