@@ -180,6 +180,8 @@ def print_individuals(model, task, pop,num_of_pop_ind=[]):
 
 def calculate_objectives(model, task, pop,fromDE=False,check_intersections=False,num_of_pop_ind=[]):
 
+
+    print("pop0",pop)
     if check_intersections:
 
         genotype = [int(round(g, 0)) for g in pop[0]]
@@ -235,11 +237,25 @@ def calculate_objectives(model, task, pop,fromDE=False,check_intersections=False
 
             proposed_breakers = BreakersEvoUtils.build_breakers_from_genotype(genotype, task, model.domain.model_grid)
             simulation_result = model.run_simulation_for_constructions(proposed_breakers)
-            #print(simulation_result.configuration_label)
+            print("simulation result",simulation_result._hs)
             pre_simulated_results.append(simulation_result)
             pre_simulated_results_idx.append(simulation_result.configuration_label)
 
+        with open('pre_sem_res.txt', 'w') as out:
+            out.write('{}\n'.format("pre_sem_res"))
+        with open('pre_sem_res.txt', 'a') as out:
+            for i in pre_simulated_results:
+                out.write('{}\n'.format(i._hs))
+
         finalised_values = model.computational_manager.finalise_execution()
+        print("LEN FINALIZED VALUES",len(finalised_values))
+
+
+        with open('len.txt', 'w') as out:
+            out.write('{}\n'.format("len"))
+        with open('len.txt', 'a') as out:
+            out.write('{}\n'.format(len(pre_simulated_results)))
+            out.write('{}\n'.format(len(finalised_values)))
         # process ids
         if len(finalised_values) > 0:
             for i, val in enumerate(finalised_values):
@@ -252,15 +268,16 @@ def calculate_objectives(model, task, pop,fromDE=False,check_intersections=False
                     pre_simulated_results[idx].hs = hs
 
         for ps in pre_simulated_results:
-            if ps.hs is None:
+            if ps._hs is None:
                 print("NONE FOUND")
     else:
         pre_simulated_results = None
 
+
+    print("pop",pop)
     for i_ind, p in enumerate(pop):
         label_to_reference = None
 
-        print("PPPPPP",p)
         if fromDE:
             genotype = [int(round(g, 0)) for g in p]
         else:
@@ -305,12 +322,16 @@ def calculate_objectives(model, task, pop,fromDE=False,check_intersections=False
                 if model.computational_manager is None or not model.computational_manager.is_lazy_parallel:
                     simulation_result = model.run_simulation_for_constructions(proposed_breakers)
                 else:
-                    print(i_ind)
+                    print("num of ind",i_ind)
                     try:
                         simulation_result = pre_simulated_results[i_ind]
                     except:
                         print("!")
                 label_to_reference = simulation_result.configuration_label
+
+                #print("simulation result",simulation_result._hs)
+
+
                 new_obj = (obj.get_obj_value(model.domain, proposed_breakers, simulation_result))
 
                     # for 3 points it is list

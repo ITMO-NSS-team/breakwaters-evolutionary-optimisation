@@ -1,22 +1,12 @@
-from scipy import optimize
-from itertools import chain
-from Optimisation import OptimisationTask
-from Optimisation.Objective import *
-from Configuration.Grid import BreakerPoint
-from Simulation import WaveModel
-from Simulation.WaveModel import SwanWaveModel
-from EvoAlgs.DE.DE import DE
-from EvoAlgs.DE.Problems import Rastrigin1
-import csv
-import uuid
 from functools import partial
-import numpy as np
-from CommonUtils.StaticStorage import StaticStorage
-from EvoAlgs.BreakersEvo.EvoOperators import calculate_objectives,fitness_function_of_single_objective_optimization,print_individuals
-from EvoAlgs.SPEA2.Operators import default_operators
 
-from Optimisation.OptimisationStrategies.AbstractOptimisationStrategy import OptimisationStrategyAbstract, \
-    OptimisationResults
+from CommonUtils.StaticStorage import StaticStorage
+from EvoAlgs.BreakersEvo.EvoOperators import calculate_objectives, print_individuals
+from EvoAlgs.DE.DE import DE
+from Optimisation import OptimisationTask
+from Optimisation.OptimisationStrategies.AbstractOptimisationStrategy import OptimisationStrategyAbstract
+from Simulation import WaveModel
+
 
 class DEStrategy(OptimisationStrategyAbstract):
     def optimise(self, model: WaveModel, task: OptimisationTask):

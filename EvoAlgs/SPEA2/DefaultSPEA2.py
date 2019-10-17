@@ -20,11 +20,16 @@ class DefaultSPEA2(SPEA2):
         EvoAnalytics.set_params()
 
         gen = 0
+
+        with open('out.txt', 'w') as out:
+            out.write('{}\n'.format("archive"))
+
+
         while gen < self.params.max_gens:
 
-            #print("gen", gen)
-            #with open('out.txt', 'w') as out:
-                #out.write('{}\n'.format(gen))
+
+            print("GEN!!!!! ", gen)
+
 
             self.fitness()
 
@@ -45,6 +50,11 @@ class DefaultSPEA2(SPEA2):
                 #print("ind in SPEA2", ind.genotype.genotype_array)
 
             self._archive = self.environmental_selection(self._pop, self._archive)
+
+            with open('out.txt', 'a') as out:
+                out.write('{}\n'.format(self._archive))
+                out.write('{}\n'.format(len(self._archive)))
+
 
             best = sorted(self._archive, key=lambda p: mean_obj(p))[0]
 

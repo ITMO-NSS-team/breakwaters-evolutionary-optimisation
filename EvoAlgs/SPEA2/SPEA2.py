@@ -135,6 +135,10 @@ class SPEA2:
         return sqrt(sum)
 
     def environmental_selection(self, pop, archive):
+
+        print("Archive",archive)
+
+
         union = archive + pop
         env = [p for p in union if p.fitness() < 1.0]
 

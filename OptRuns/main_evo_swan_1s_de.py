@@ -30,9 +30,13 @@ if __name__ == '__main__':
     EvoAnalytics.clear()
     EvoAnalytics.run_id = 'run_{date:%Y_%m_%d_%H_%M_%S}'.format(date=datetime.datetime.now())
 
-    parallel_computational_manager = SwanWinRemoteComputationalManager(resources_names=["125", "124", "123", "121"],
-                                                                       is_lazy_parallel=True)
-    wave_model = SwanWaveModel(exp_domain, None)
+    #parallel_computational_manager = SwanWinRemoteComputationalManager(resources_names=["125", "124", "123", "121"],
+    #                                                                  is_lazy_parallel=True)
+    #wave_model = SwanWaveModel(exp_domain, None)
+
+    parallel_computational_manager = SwanWinRemoteComputationalManager(resources_names=["125", "124", "121", "123"],
+                                                                      is_lazy_parallel=True)
+    wave_model = SwanWaveModel(exp_domain, parallel_computational_manager)
 
     optimiser = DEOptimiser()
 
@@ -47,6 +51,9 @@ if __name__ == '__main__':
         'mod2_top': [1, 0],
         'mod2_bottom': [1, 0],
     }
+
+
+
 
     selected_modifications_for_tuning = base_modifications_for_tuning
     selected_mod_points_to_optimise = [mod_points_to_optimise[mod.breaker_id] for mod in base_modifications_for_tuning]
