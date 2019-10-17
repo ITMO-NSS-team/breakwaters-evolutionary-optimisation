@@ -25,7 +25,8 @@ wave_model = SwanWaveModel(exp_domain, None)
 
 optimiser = ParetoEvolutionaryOptimiser()
 
-for mod_id in ['904dff5a-6946-434d-8d1d-aaa4e553e6cc',
+for mod_id in ['newvar',
+               '904dff5a-6946-434d-8d1d-aaa4e553e6cc',
                '5-8',
                '53b30020-35a1-49aa-a4fd-b4d68e240c23',
                'default_shpora2',
@@ -136,6 +137,23 @@ for mod_id in ['904dff5a-6946-434d-8d1d-aaa4e553e6cc',
         newg = [31, 25, 50, 30]
 
         lensb_real = [lensb[0], lensb[2]]
+
+    elif mod_id == 'newvar':
+        base_modifications_for_tuning = [
+            Breaker('mod2_top', list(map(xy_to_points, [[-1, -1], [50, 32], [50, 39]])), 0, 'II'),
+            Breaker('mod2_bottom', list(map(xy_to_points, [[-1, -1], [50, 39], [50, 32]])), 0, '-'),
+            Breaker('mod_add', list(map(xy_to_points, [[-1, -1], [56, 40]])), 0.9, '-')
+        ]
+
+        mod_points_to_optimise = {  # order is important
+            'mod2_top': [0],
+            'mod2_bottom': [0],
+            'mod_add': [0]
+        }
+
+        lensb_real = [lensb[2],lensb[2],0]
+
+        newg = [50 + 1, 32 - 1, 50, 39 + 3, 56, 40 - 2]
 
     selected_modifications_for_tuning = base_modifications_for_tuning
     selected_mod_points_to_optimise = [mod_points_to_optimise[mod.breaker_id] for mod in base_modifications_for_tuning]
@@ -248,19 +266,20 @@ for mod_id in ['904dff5a-6946-434d-8d1d-aaa4e553e6cc',
                 label_to_reference = f'{mod_id}_w{wi}p{i}_s'
                 simulation_result = wave_model.run_simulation_for_constructions(brks,
                                                                                 label_to_reference)
-                visualiser = ModelsVisualization(label_to_reference, mod_id)
-                visualiser.experimental_visualise(simulation_result.get_5percent_output_for_field(), brks,
-                                                  wave_model.domain.base_breakers,
-                                                  StaticStorage.exp_domain.fairways,
-                                                  StaticStorage.exp_domain.target_points,
-                                                  5,
-                                                  [2, 6][i],
-                                                  # ['а)', 'б)', 'а)', 'б)'][bord],
-                                                  'а)',
-                                                  wi == 1, [1, 50][i],
-                                                  'ЮЮЗ',
-                                                  200.0,
-                                                  len_info)
+                if sign==1:
+                    visualiser = ModelsVisualization(label_to_reference, mod_id)
+                    visualiser.experimental_visualise(simulation_result.get_13percent_output_for_field(), brks,
+                                                      wave_model.domain.base_breakers,
+                                                      StaticStorage.exp_domain.fairways,
+                                                      StaticStorage.exp_domain.target_points,
+                                                      13,
+                                                      [2, 6][i],
+                                                      # ['а)', 'б)', 'а)', 'б)'][bord],
+                                                      'а)',
+                                                      wi == 1, [1, 50][i],
+                                                      'ЮЮЗ',
+                                                      200.0,
+                                                      len_info)
 
                 if sign == 0:
                     hs0 = simulation_result.get_5percent_output_for_target_points(exp_domain.target_points[0])
@@ -308,14 +327,15 @@ for mod_id in ['904dff5a-6946-434d-8d1d-aaa4e553e6cc',
                 simulation_result = wave_model.run_simulation_for_constructions(brks,
                                                                                 label_to_reference)
 
-                if ord == 0 and sign == 0:
+                if sign==1 and i==9-1: #
+                    #ord == 14+15 and sign == 1 #and [1, 1, 1, 1, 1, 1, 1, 50, 50, 50, 50, 50, 50, 50][i]==50:
                     print("SSE")
                     visualiser = ModelsVisualization(f'{mod_id}_p{year_periodicity_labels[i]}_w{wi}', mod_id)
-                    visualiser.experimental_visualise(simulation_result.get_5percent_output_for_field(), brks,
+                    visualiser.experimental_visualise(simulation_result.get_13percent_output_for_field(), brks,
                                                       wave_model.domain.base_breakers,
                                                       StaticStorage.exp_domain.fairways,
                                                       StaticStorage.exp_domain.target_points,
-                                                      5,
+                                                      13,
                                                       [2, 2, 2, 2, 2, 2, 2, 6, 6, 6, 6, 6, 6, 6][i],
                                                       # f'{ord})',
                                                       'б)',

@@ -23,7 +23,7 @@ class SPEA2OptimisationStrategy(OptimisationStrategyAbstract):
         operators = default_operators()
 
         _, archive_history = DefaultSPEA2(
-            params=DefaultSPEA2.Params(max_gens=30, pop_size=80, archive_size=40,
+            params=DefaultSPEA2.Params(max_gens=30, pop_size=10, archive_size=40,
                                        crossover_rate=0.6, mutation_rate=0.3,#0.9 0.9
                                        mutation_value_rate=[]),
             objectives=partial(calculate_objectives, model, task),

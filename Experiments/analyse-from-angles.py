@@ -55,12 +55,12 @@ objectives = [StructuralObjective(importance=1),
 task = OptimisationTask(objectives, selected_modifications_for_tuning, mod_points_to_optimise, )
 
 #mod_id = "2bae29f1bf1d4b21a7c0fc45c1f48d43"#1
-#mod_id = '9b3a1e81cd694d8a892ec1aa69391a9b'#2
+# mod_id = '9b3a1e81cd694d8a892ec1aa69391a9b'#2
 #mod_id = '15cfec8f704f4d3b96fe64a89d270a2a'#3
-mod_id = 'f5ceed9e0b86467bbdf88b948582cd31'  # 4
-#mod_id = "default"
+#mod_id = 'f5ceed9e0b86467bbdf88b948582cd31'  # 4
+mod_id = "default"
 
-is_cust = False
+is_cust = True
 wave_model.model_results_file_name = "D:\\SWAN_sochi\\model_results_for_report.db"
 if not is_cust:
     res = wave_model._load_simulation_result_reference_by_id(mod_id)
@@ -90,14 +90,12 @@ if not is_cust:
         newg[10] = 56
         newg[11] = 40
 
-
     if mod_id == '15cfec8f704f4d3b96fe64a89d270a2a':
         newg[8] = 63
         newg[9] = 38
 
         newg[4] = 50
         newg[5] = 39
-
 
     if mod_id == 'f5ceed9e0b86467bbdf88b948582cd31':
         newg[6] = 56
@@ -106,10 +104,8 @@ if not is_cust:
         newg[10] = 56
         newg[11] = 40
 
-
-
-#brks = exp_domain.base_breakers
-brks = BreakersEvoUtils.build_breakers_from_coords(newg, task)
+brks = exp_domain.base_breakers
+#brks = BreakersEvoUtils.build_breakers_from_coords(newg, task)
 
 lens = [breaker.get_length() for breaker in brks]
 
@@ -211,9 +207,9 @@ for i in [0, 1]:
         simulation_result = wave_model.run_simulation_for_constructions(brks,
                                                                         label_to_reference)
         visualiser = ModelsVisualization(label_to_reference, mod_id)
-        visualiser.experimental_visualise(simulation_result.get_5percent_output_for_field(), brks,
+        visualiser.experimental_visualise(simulation_result.get_13percent_output_for_field(), brks,
                                           wave_model.domain.base_breakers,
-                                          StaticStorage.exp_domain.fairways, StaticStorage.exp_domain.target_points, 5,
+                                          StaticStorage.exp_domain.fairways, StaticStorage.exp_domain.target_points, 13,
                                           6,
                                           ['а)', 'б)', 'а)', 'б)'][bord],
                                           wi == 1, [1, 50][i],
@@ -234,7 +230,7 @@ for i in [0, 1]:
 
         bord += 1
 
-#exit()
+# exit()
 wave_model.model_results_file_name = "D:\\SWAN_sochi\\model_results.db"
 
 with open(f'img/experiments/{mod_id}/{mod_id}.csv', 'w', newline='') as csvfile:
@@ -258,24 +254,24 @@ for wi in [0, 1]:
         StaticStorage.bdy = bcond_values[i]
 
         label_to_reference = f'{mod_id}_w{wi}p{year_periodicity_labels[i]}'
-        simulation_result = wave_model.run_simulation_for_constructions(brks,
-                                                                        label_to_reference)
-        visualiser = ModelsVisualization(f'{mod_id}_p{year_periodicity_labels[i]}_w{wi}', mod_id)
-        visualiser.experimental_visualise(simulation_result.get_5percent_output_for_field(), brks,
-                                          wave_model.domain.base_breakers,
-                                          StaticStorage.exp_domain.fairways, StaticStorage.exp_domain.target_points, 5,
-                                          [2, 2, 2, 2, 2, 2, 6, 6, 6, 6, 6, 6][i],
-                                          f'{ord})',
-                                          wi == 1, [1, 1, 1, 1, 1, 1, 50, 50, 50, 50, 50, 50][i],
-                                          ['ЮЮВ', 'Ю', 'ЮЮЗ', 'ЮЗ', 'ЗЮЗ', 'З', 'ЮЮВ', 'Ю', 'ЮЮЗ', 'ЮЗ', 'ЗЮЗ', 'З',
-                                           'ЮЮЗ'][i],
-                                          [157.5, 180, 202.5, 225.0, 247.0, 270.0,
-                                           157.5, 180, 202.5, 225.0, 247.0, 270.0, ][i],
-                                          len_info)
+        simulation_result = wave_model.run_simulation_for_constructions(brks, label_to_reference)
+        if i == 8-2:
+            visualiser = ModelsVisualization(f'{mod_id}_p{year_periodicity_labels[i]}_w{wi}', mod_id)
+            visualiser.experimental_visualise(simulation_result.get_13percent_output_for_field(), brks,
+                                              wave_model.domain.base_breakers,
+                                              StaticStorage.exp_domain.fairways, StaticStorage.exp_domain.target_points, 13,
+                                              [2, 2, 2, 2, 2, 2, 6, 6, 6, 6, 6, 6][i],
+                                              f'{ord})',
+                                              wi == 1, [1, 1, 1, 1, 1, 1, 50, 50, 50, 50, 50, 50][i],
+                                              ['ЮЮВ', 'Ю', 'ЮЮЗ', 'ЮЗ', 'ЗЮЗ', 'З', 'ЮЮВ', 'Ю', 'ЮЮЗ', 'ЮЗ', 'ЗЮЗ', 'З',
+                                               'ЮЮЗ'][i],
+                                              [157.5, 180, 202.5, 225.0, 247.0, 270.0,
+                                               157.5, 180, 202.5, 225.0, 247.0, 270.0, ][i],
+                                              len_info)
 
-        hs0 = simulation_result.get_5percent_output_for_target_points(exp_domain.target_points[0])
-        hs1 = simulation_result.get_5percent_output_for_target_points(exp_domain.target_points[1])
-        hs2 = simulation_result.get_5percent_output_for_target_points(exp_domain.target_points[2])
+            hs0 = simulation_result.get_5percent_output_for_target_points(exp_domain.target_points[0])
+            hs1 = simulation_result.get_5percent_output_for_target_points(exp_domain.target_points[1])
+            hs2 = simulation_result.get_5percent_output_for_target_points(exp_domain.target_points[2])
 
         print(f'{hs0},{hs1},{hs2}')
 

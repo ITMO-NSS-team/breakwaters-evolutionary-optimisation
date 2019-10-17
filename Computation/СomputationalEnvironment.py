@@ -33,6 +33,8 @@ class ComputationalManager(object):
     def __init__(self, resources_names, is_lazy_parallel=False):
         self.resources_names = resources_names
         self.resources_description = ComputationalResourceDescription("remotes_config.json")
+        assert self.resources_description.config_dict is not None
+
         if self.resources_description.config_dict is not None:
             self.resources_description = [desc for desc in self.resources_description.config_dict if
                                           desc['name'] in resources_names]
@@ -148,12 +150,3 @@ class SwanWinRemoteComputationalManager(SwanComputationalManager):
                         lock.release()
             self.input_data = []
         return results_list
-
-# def mass_execute(self, input_data_list):
-#    if self.resources_description is None:
-#        FileNotFoundError("Remote configuration config not found")
-#    resource_descriptions = self.resources_description
-#
-#    for i, config_file_names in enumerate(config_file_names):
-#       out_file_name = out_file_names[i]
-#

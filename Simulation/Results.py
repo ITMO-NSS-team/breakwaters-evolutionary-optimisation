@@ -37,3 +37,7 @@ class WaveSimulationResult(SimulationResult):
         hs = copy(self._hs)
         hs[hs != -9] = hs[hs != -9] * self.coeff_hs_to_5
         return hs
+
+    def get_13percent_output_for_field(self):
+        hs = copy(self._hs)
+        return hs
