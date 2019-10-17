@@ -1,11 +1,12 @@
+import math
 import os
+import shutil
 
 import matplotlib.pyplot as plt
-import cv2
 import numpy as np
 import seaborn as sb
-import math
-import shutil
+
+
 class ModelsVisualization:
 
     def __init__(self, configuration_label, exp_name):
@@ -22,16 +23,15 @@ class ModelsVisualization:
         ax = plt.subplot()
         ax.axes.set_aspect('equal')
         plt.axis('off')
-        #plt.savefig('dump.png')
+        # plt.savefig('dump.png')
 
-
-    def simple_visualise(self, hs: np.ndarray, all_breakers, base_breakers, fairways, target_points, fitness=None,dir="img",image_for_gif=False,\
+    def simple_visualise(self, hs: np.ndarray, all_breakers, base_breakers, fairways, target_points, fitness=None,
+                         dir="img", image_for_gif=False, \
                          population_and_ind_number=[]):
 
-
-        #plt.axis('off')
-        #plt.rcParams['xtick.labelsize'] = 10
-        #plt.rcParams['ytick.labelsize'] = 0
+        # plt.axis('off')
+        # plt.rcParams['xtick.labelsize'] = 10
+        # plt.rcParams['ytick.labelsize'] = 0
         plt.rcParams['axes.titlesize'] = 20
         plt.rcParams['axes.labelsize'] = 20
         plt.rcParams['figure.figsize'] = [15, 10]
@@ -59,7 +59,7 @@ class ModelsVisualization:
                              f'Individ {population_and_ind_number[1]+1}')
             else:
                 ax.set_title(f'Высоты волн с 5%-ной обеспеченносью в целевых точках: {values}, \r\n'
-                         f'fitness {fit_str}')
+                             f'fitness {fit_str}')
 
         map_of_place = hs
 
@@ -120,7 +120,6 @@ class ModelsVisualization:
 
     def experimental_visualise(self, hs: np.ndarray, all_breakers, base_breakers, fairways, target_points,
                                title_mod, vmax, order_id, is_wind, rep_info, dir_info, real_ang, len_info):
-
 
         plt.rcParams['figure.figsize'] = [7, 5]
         plt.rcParams["font.size"] = "1"
@@ -193,7 +192,7 @@ class ModelsVisualization:
         base_y = 9
         k = 5
         for ang_ind, ang in enumerate([0, 45, 90, 135, 180, 225, 270, 315]):
-            ang2 = (ang+120) % 360
+            ang2 = (ang + 120) % 360
             new_x = np.sin(ang2 / 180 * math.pi) * k
             new_y = -np.cos(ang2 / 180 * math.pi) * k
 
@@ -204,7 +203,7 @@ class ModelsVisualization:
 
             plt.annotate(wind_names[ang_ind], (base_x + new_x, base_y + new_y), color='black')
 
-        real_ang = (real_ang + 120 + 180 ) % 360
+        real_ang = (real_ang + 120 + 180) % 360
 
         new_x = np.sin(real_ang / 180 * math.pi) * (k + 2)
         new_y = -np.cos(real_ang / 180 * math.pi) * (k + 2)
@@ -219,18 +218,16 @@ class ModelsVisualization:
         # plt.show()
         plt.clf()
 
-
-
     def Make_directory_for_gif_images(self):
         if not os.path.isdir(f'wave_gif_imgs/{self.exp_name}'):
             os.mkdir(f'wave_gif_imgs/{self.exp_name}')
 
-    def Gif_images_saving(self,population_num,num_in_best_ind_set):
+    def Gif_images_saving(self, population_num, num_in_best_ind_set):
 
-        dir=str(os.path.abspath(os.curdir)).replace('\\','/')
-        #dir = str(os.path.abspath(os.curdir))
-        shutil.copy(dir+"/img/"+str(self.exp_name)+"/"+str(self.configuration_label)+".png",\
-                    dir+"/wave_gif_imgs/"+str(self.exp_name)+"/"+str(population_num+1)+"_"+str(num_in_best_ind_set+1)+".png")
+        dir = str(os.path.abspath(os.curdir)).replace('\\', '/')
+        # dir = str(os.path.abspath(os.curdir))
+        shutil.copy(dir + "/img/" + str(self.exp_name) + "/" + str(self.configuration_label) + ".png", \
+                    dir + "/wave_gif_imgs/" + str(self.exp_name) + "/" + str(population_num + 1) + "_" + str(
+                        num_in_best_ind_set + 1) + ".png")
 
-
-        #image1=cv2.imwrite("wave_gif_imgs"+str(self.exp_name)+"/"+str(self)+str(population_num)+"_"+str(num_in_best_ind_set)+".png",image)
+        # image1=cv2.imwrite("wave_gif_imgs"+str(self.exp_name)+"/"+str(self)+str(population_num)+"_"+str(num_in_best_ind_set)+".png",image)

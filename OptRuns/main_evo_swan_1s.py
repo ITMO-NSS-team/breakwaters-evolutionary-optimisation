@@ -31,11 +31,11 @@ if __name__ == '__main__':
     EvoAnalytics.run_id = 'run_{date:%Y_%m_%d_%H_%M_%S}'.format(date=datetime.datetime.now())
 
 
-    wave_model = SwanWaveModel(exp_domain, None)
+    #wave_model = SwanWaveModel(exp_domain, None)
 
     parallel_computational_manager = SwanWinRemoteComputationalManager(resources_names=["125", "124", "121", "123"],
                                                                       is_lazy_parallel=True)
-    #wave_model = SwanWaveModel(exp_domain, parallel_computational_manager)
+    wave_model = SwanWaveModel(exp_domain, parallel_computational_manager)
 
     optimiser = ParetoEvolutionaryOptimiser()
 

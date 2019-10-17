@@ -18,8 +18,6 @@ from Optimisation.Objective import CostObjective, NavigationObjective, WaveHeigh
 from Visualisation.ModelVisualization import ModelsVisualization
 from Simulation.Results import WaveSimulationResult
 
-
-
 from collections import OrderedDict
 
 # TODO refactor
@@ -52,10 +50,7 @@ def obtain_numerical_chromosome(task):
     return list(chain.from_iterable(chromosome))
 
 
-
-
 def fitness_function_of_single_objective_optimization(model, task, ind):
-
     pre_simulated_results = None
 
     proposed_breakers = BreakersEvoUtils.build_breakers_from_genotype(ind, task, model.domain.model_grid)
@@ -64,7 +59,8 @@ def fitness_function_of_single_objective_optimization(model, task, ind):
 
     base_objectives = _calculate_reference_objectives(model, task)
 
-    combined_breakers_for_cost_estimation = BreakersUtils.merge_breakers_with_modifications( model.domain.base_breakers, proposed_breakers)
+    combined_breakers_for_cost_estimation = BreakersUtils.merge_breakers_with_modifications(model.domain.base_breakers,
+                                                                                            proposed_breakers)
 
     for obj_ind, obj in enumerate(task.objectives):
         if isinstance(obj, (CostObjective, NavigationObjective, StructuralObjective)):
@@ -138,9 +134,9 @@ def print_individuals(model, task, individuals,fitnesses,num_of_pop,goal="minimi
 
 '''
 
-def print_individuals(model, task, pop,num_of_pop_ind=[]):
 
-    #print("pop",pop)
+def print_individuals(model, task, pop, num_of_pop_ind=[]):
+    # print("pop",pop)
 
     genotype = [int(round(g, 0)) for g in pop[0]]
 
@@ -149,39 +145,38 @@ def print_individuals(model, task, pop,num_of_pop_ind=[]):
     combined_breakers_for_cost_estimation = BreakersUtils.merge_breakers_with_modifications(
         model.domain.base_breakers, proposed_breakers)
 
-    #if isinstance(obj, WaveHeightObjective):
+    # if isinstance(obj, WaveHeightObjective):
 
-    #for obj_ind, obj in enumerate(task.objectives):
+    # for obj_ind, obj in enumerate(task.objectives):
 
-    if sum([isinstance(obj,WaveHeightObjective) for obj in task.objectives]):
+    if sum([isinstance(obj, WaveHeightObjective) for obj in task.objectives]):
 
         simulation_result = model.run_simulation_for_constructions(proposed_breakers)
 
     else:
 
-        simulation_result = WaveSimulationResult(hs=np.zeros(shape=(model.domain.model_grid.grid_y, model.domain.model_grid.grid_x)),configuration_label=EvoAnalytics.run_id)
+        simulation_result = WaveSimulationResult(
+            hs=np.zeros(shape=(model.domain.model_grid.grid_y, model.domain.model_grid.grid_x)),
+            configuration_label=EvoAnalytics.run_id)
 
-    #simulation_result = model.run_simulation_for_constructions(proposed_breakers)
+    # simulation_result = model.run_simulation_for_constructions(proposed_breakers)
 
     all_breakers = BreakersUtils.merge_breakers_with_modifications(model.domain.base_breakers,
-                                                                       proposed_breakers)
+                                                                   proposed_breakers)
 
+    # print("genitype",genotype)
 
-    #print("genitype",genotype)
-
-
-    visualiser = ModelsVisualization(str(num_of_pop_ind[0]+1)+"_"+str(num_of_pop_ind[1]+1), EvoAnalytics.run_id)
+    visualiser = ModelsVisualization(str(num_of_pop_ind[0] + 1) + "_" + str(num_of_pop_ind[1] + 1), EvoAnalytics.run_id)
 
     visualiser.simple_visualise(simulation_result.get_5percent_output_for_field(), all_breakers,
-                                    model.domain.base_breakers,
-                                    StaticStorage.exp_domain.fairways, StaticStorage.exp_domain.target_points,
-                                    [[2]],dir="wave_gif_imgs",image_for_gif=True,population_and_ind_number=num_of_pop_ind)
+                                model.domain.base_breakers,
+                                StaticStorage.exp_domain.fairways, StaticStorage.exp_domain.target_points,
+                                [[2]], dir="wave_gif_imgs", image_for_gif=True,
+                                population_and_ind_number=num_of_pop_ind)
 
 
-def calculate_objectives(model, task, pop,fromDE=False,check_intersections=False,num_of_pop_ind=[]):
-
-
-    print("pop0",pop)
+def calculate_objectives(model, task, pop, fromDE=False, check_intersections=False, num_of_pop_ind=[]):
+    print("pop0", pop)
     if check_intersections:
 
         genotype = [int(round(g, 0)) for g in pop[0]]
@@ -210,18 +205,18 @@ def calculate_objectives(model, task, pop,fromDE=False,check_intersections=False
         '''
         ####################################
 
-        obj=StructuralObjective(importance=1)
+        obj = StructuralObjective(importance=1)
 
-        obj_in_point=obj.get_obj_value(model.domain, combined_breakers_for_cost_estimation)
+        obj_in_point = obj.get_obj_value(model.domain, combined_breakers_for_cost_estimation)
 
-        #print("obj_in_point",obj_in_point)
+        # print("obj_in_point",obj_in_point)
 
         if obj_in_point:
-            #print("This individ is bad")
+            # print("This individ is bad")
             return True
         else:
             return False
-        #new_obj = obj.get_obj_value(model.domain, proposed_breakers)
+        # new_obj = obj.get_obj_value(model.domain, proposed_breakers)
 
     if model.computational_manager is not None and model.computational_manager.is_lazy_parallel:
         # cycle for the mass simulation run
@@ -231,13 +226,13 @@ def calculate_objectives(model, task, pop,fromDE=False,check_intersections=False
         for p_ind, p in enumerate(pop):
 
             if fromDE:
-                genotype=[int(round(g, 0)) for g in p]
+                genotype = [int(round(g, 0)) for g in p]
             else:
                 genotype = [int(round(g, 0)) for g in p.genotype.genotype_array]
 
             proposed_breakers = BreakersEvoUtils.build_breakers_from_genotype(genotype, task, model.domain.model_grid)
             simulation_result = model.run_simulation_for_constructions(proposed_breakers)
-            print("simulation result",simulation_result._hs)
+            print("simulation result", simulation_result._hs)
             pre_simulated_results.append(simulation_result)
             pre_simulated_results_idx.append(simulation_result.configuration_label)
 
@@ -248,8 +243,7 @@ def calculate_objectives(model, task, pop,fromDE=False,check_intersections=False
                 out.write('{}\n'.format(i._hs))
 
         finalised_values = model.computational_manager.finalise_execution()
-        print("LEN FINALIZED VALUES",len(finalised_values))
-
+        print("LEN FINALIZED VALUES", len(finalised_values))
 
         with open('len.txt', 'w') as out:
             out.write('{}\n'.format("len"))
@@ -262,10 +256,10 @@ def calculate_objectives(model, task, pop,fromDE=False,check_intersections=False
                 label = val[0]
                 hs = val[1]
                 indices = [i for i, x in enumerate(pre_simulated_results_idx) if x == label]
-                if len(indices)>2:
+                if len(indices) > 2:
                     print("STRANGE")
                 for idx in indices:
-                    pre_simulated_results[idx].hs = hs
+                    pre_simulated_results[idx]._hs = hs
 
         for ps in pre_simulated_results:
             if ps._hs is None:
@@ -273,8 +267,7 @@ def calculate_objectives(model, task, pop,fromDE=False,check_intersections=False
     else:
         pre_simulated_results = None
 
-
-    print("pop",pop)
+    print("pop", pop)
     for i_ind, p in enumerate(pop):
         label_to_reference = None
 
@@ -283,7 +276,7 @@ def calculate_objectives(model, task, pop,fromDE=False,check_intersections=False
         else:
             genotype = [int(round(g, 0)) for g in p.genotype.genotype_array]
 
-        #genotype = [int(round(g, 0)) for g in p.genotype.genotype_array]
+        # genotype = [int(round(g, 0)) for g in p.genotype.genotype_array]
 
         proposed_breakers = BreakersEvoUtils.build_breakers_from_genotype(genotype, task, model.domain.model_grid)
 
@@ -305,36 +298,32 @@ def calculate_objectives(model, task, pop,fromDE=False,check_intersections=False
                 else:
                     new_obj = obj.get_obj_value(model.domain, proposed_breakers)
 
-
                 if isinstance(obj, CostObjective):
                     new_obj = (new_obj - base_objectives[obj_ind]) / base_objectives[obj_ind] * 100
 
                 if isinstance(obj, NavigationObjective):
                     new_obj = -(new_obj - base_objectives[obj_ind]) / base_objectives[obj_ind] * 100
                 if isinstance(obj, StructuralObjective):
-
                     new_obj = new_obj - base_objectives[obj_ind]
 
                 objectives.append([new_obj])
-
 
             if isinstance(obj, WaveHeightObjective):
                 if model.computational_manager is None or not model.computational_manager.is_lazy_parallel:
                     simulation_result = model.run_simulation_for_constructions(proposed_breakers)
                 else:
-                    print("num of ind",i_ind)
+                    print("num of ind", i_ind)
                     try:
                         simulation_result = pre_simulated_results[i_ind]
                     except:
                         print("!")
                 label_to_reference = simulation_result.configuration_label
 
-                #print("simulation result",simulation_result._hs)
-
+                # print("simulation result",simulation_result._hs)
 
                 new_obj = (obj.get_obj_value(model.domain, proposed_breakers, simulation_result))
 
-                    # for 3 points it is list
+                # for 3 points it is list
                 new_obj = [(x1 - x2) / x2 * 100 for (x1, x2) in zip(new_obj, base_objectives[obj_ind])]
 
                 objectives.append(new_obj)
@@ -348,7 +337,6 @@ def calculate_objectives(model, task, pop,fromDE=False,check_intersections=False
                     label_to_reference = label
 
         if True:
-
             pass
             '''
             
@@ -374,13 +362,13 @@ def calculate_objectives(model, task, pop,fromDE=False,check_intersections=False
 
         if fromDE:
 
-            #return objectives
+            # return objectives
 
             objectives = [j for i in objectives for j in i]
 
             print("Objectives", objectives)
 
-            return 0.8*objectives[0]+0.9*objectives[1]+0.5*objectives[2]+sum(objectives[3:]),objectives
+            return 0.8 * objectives[0] + 0.9 * objectives[1] + 0.5 * objectives[2] + sum(objectives[3:]), objectives
 
         else:
 
@@ -408,7 +396,7 @@ def _calculate_reference_objectives(model, task):
                     for i, val in enumerate(values):
                         label = val[0]
                         hs = val[1]
-                        simulation_result.hs = hs
+                        simulation_result._hs = hs
             else:
                 simulation_result = model.run_simulation_for_constructions(model.domain.base_breakers)
 
@@ -417,7 +405,8 @@ def _calculate_reference_objectives(model, task):
 
     if not os.path.isdir(f'img/{EvoAnalytics.run_id}/swan_default.png') and simulation_result is not None:
         visualiser = ModelsVisualization(f'swan_default', EvoAnalytics.run_id)
-        visualiser.simple_visualise(simulation_result.get_5percent_output_for_field(), model.domain.base_breakers, model.domain.base_breakers,
+        visualiser.simple_visualise(simulation_result.get_5percent_output_for_field(), model.domain.base_breakers,
+                                    model.domain.base_breakers,
                                     StaticStorage.exp_domain.fairways, StaticStorage.exp_domain.target_points,
                                     objectives)
     return objectives
@@ -580,8 +569,6 @@ def initial_pop_random(size, **kwargs):
                 else:
                     genotype[j] = random.randint(-3, 3) * 15
 
-
-
             is_bad = False
             for objective in strict_objectives:
                 obj_val = objective.get_obj_value(StaticStorage.exp_domain,
@@ -599,6 +586,5 @@ def initial_pop_random(size, **kwargs):
 
             if not is_bad:
                 population_new.append(BreakersParams(copy.deepcopy(genotype)))
-
 
     return population_new
