@@ -105,7 +105,7 @@ class EvoAnalytics:
 
     @staticmethod
     def create_chart(num_of_generation=None, f=None, chart_type='boxplot', data_for_analyze='obj',
-                     analyze_only_last_generation=True,chart_for_gif=False,first_generation=False):
+                     analyze_only_last_generation=True,chart_for_gif=False,first_generation=False,num_of_launches=1):
 
         plt.close("all")
         if not f:
@@ -207,14 +207,14 @@ class EvoAnalytics:
 
         else:
 
+            if not num_of_launches:
+                indexes_of_new_launches = df[df['pop_num'] == 'pop_num'].index  # Начала строк для разделений
 
-            indexes_of_new_launches = df[df['pop_num'] == 'pop_num'].index  # Начала строк для разделений
 
 
+                print("indexes_of_new_launches",indexes_of_new_launches)
 
-            print("indexes_of_new_launches",indexes_of_new_launches)
-
-            num_of_launches = len(indexes_of_new_launches) + 1
+                num_of_launches = len(indexes_of_new_launches) + 1
 
             print("num_of_launches", df.index.stop)
 

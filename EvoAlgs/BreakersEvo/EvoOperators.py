@@ -176,7 +176,7 @@ def print_individuals(model, task, pop, num_of_pop_ind=[]):
 
 
 def calculate_objectives(model, task, pop, fromDE=False, check_intersections=False, num_of_pop_ind=[]):
-    print("pop0", pop)
+
     if check_intersections:
 
         genotype = [int(round(g, 0)) for g in pop[0]]
@@ -230,9 +230,15 @@ def calculate_objectives(model, task, pop, fromDE=False, check_intersections=Fal
             else:
                 genotype = [int(round(g, 0)) for g in p.genotype.genotype_array]
 
+            print("genotype",genotype)
+
             proposed_breakers = BreakersEvoUtils.build_breakers_from_genotype(genotype, task, model.domain.model_grid)
+
+
             simulation_result = model.run_simulation_for_constructions(proposed_breakers)
+
             print("simulation result", simulation_result._hs)
+
             pre_simulated_results.append(simulation_result)
             pre_simulated_results_idx.append(simulation_result.configuration_label)
 
