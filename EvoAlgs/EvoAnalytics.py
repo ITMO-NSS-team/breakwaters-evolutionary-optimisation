@@ -212,7 +212,7 @@ class EvoAnalytics:
 
 
 
-                print("indexes_of_new_launches",indexes_of_new_launches)
+
 
                 num_of_launches = len(indexes_of_new_launches) + 1
 
