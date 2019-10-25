@@ -34,12 +34,13 @@ if __name__ == '__main__':
     #                                                                  is_lazy_parallel=True)
     #wave_model = SwanWaveModel(exp_domain, None)
 
-    parallel_computational_manager = SwanWinRemoteComputationalManager(resources_names=["125", "124", "121", "123"],
+    parallel_computational_manager = SwanWinRemoteComputationalManager(resources_names=["125", "124", "123"],
                                                                       is_lazy_parallel=True)
     wave_model = SwanWaveModel(exp_domain, parallel_computational_manager)
 
     optimiser = DEOptimiser()
 
+    '''
     base_modifications_for_tuning = [
         Breaker('mod1', list(map(xy_to_points, [[-1, -1], [-1, -1], [33, 22], [42, 17]])), 0, 'Ia'),
         Breaker('mod2_top', list(map(xy_to_points, [[-1, -1], [-1, -1], [50, 32], [50, 39]])), 0, 'II'),
@@ -52,7 +53,17 @@ if __name__ == '__main__':
         'mod2_bottom': [1, 0],
     }
 
+    '''
 
+    base_modifications_for_tuning = [
+        Breaker('mod1', list(map(xy_to_points, [[-1, -1], [33, 22], [42, 17]])), 0, 'Ia'),
+        Breaker('mod2_top', list(map(xy_to_points, [[-1, -1], [50, 32], [50, 39]])), 0, 'II')
+    ]
+
+    mod_points_to_optimise = {  # order is important
+        'mod1': [0],
+        'mod2_top': [0],
+    }
 
 
     selected_modifications_for_tuning = base_modifications_for_tuning

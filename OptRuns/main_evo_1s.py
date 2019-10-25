@@ -26,7 +26,7 @@ wave_model = SwanWaveModel(exp_domain, None)
 
 optimiser = ParetoEvolutionaryOptimiser()
 
-'''
+
 base_modifications_for_tuning = [
     Breaker('mod1', list(map(xy_to_points, [[-1, -1], [33, 22], [42, 17]])), 0, 'Ia'),
     Breaker('mod2_top', list(map(xy_to_points, [[-1, -1], [50, 32], [50, 39]])), 0, 'II')
@@ -36,19 +36,6 @@ mod_points_to_optimise = {  # order is important
     'mod1': [0],
     'mod2_top': [0],
 }
-'''
-base_modifications_for_tuning = [
-        Breaker('mod1', list(map(xy_to_points, [[-1, -1], [-1, -1], [33, 22], [42, 17]])), 0, 'Ia'),
-        Breaker('mod2_top', list(map(xy_to_points, [[-1, -1], [-1, -1], [50, 32], [50, 39]])), 0, 'II'),
-        Breaker('mod2_bottom', list(map(xy_to_points, [[-1, -1], [-1, -1], [50, 39], [50, 32]])), 0, '-')
-    ]
-
-mod_points_to_optimise = {  # order is important
-    'mod1': [1, 0],
-    'mod2_top': [1, 0],
-    'mod2_bottom': [1, 0],
-}
-
 
 
 selected_modifications_for_tuning = base_modifications_for_tuning
@@ -58,15 +45,15 @@ selected_mod_points_to_optimise = [mod_points_to_optimise[mod.breaker_id] for mo
 
 objectives = [StructuralObjective(importance=1),
               CostObjective(importance=3),
-              NavigationObjective(importance=1),
-              WaveHeightObjective(importance=2)]
+              NavigationObjective(importance=1)]
+              #WaveHeightObjective(importance=2)]
 
 EvoAnalytics.clear()
 EvoAnalytics.run_id = 'run_{date:%Y_%m_%d_%H_%M_%S}'.format(date=datetime.datetime.now())
 
 #EvoAnalytics.create_chart(None,"history_run_2019_08_26_10_12_05.csv",analyze_only_last_generation=False)
 
-EvoAnalytics.create_chart(None,"HistoryFiles/history_run_2019_10_07_19_55_37.csv",analyze_only_last_generation=False,chart_for_gif=True)
+#EvoAnalytics.create_chart(None,"HistoryFiles/history_run_2019_10_07_19_55_37.csv",analyze_only_last_generation=False,chart_for_gif=True)
 
 task = OptimisationTask(objectives, selected_modifications_for_tuning, mod_points_to_optimise,)
 

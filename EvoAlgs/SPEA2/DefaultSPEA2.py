@@ -88,7 +88,7 @@ class DefaultSPEA2(SPEA2):
 
             gen += 1
 
-
+        #To create one big picture with different plots for each generation
         #EvoAnalytics.chart_series_creator()
         EvoAnalytics.create_chart(data_for_analyze='obj',analyze_only_last_generation=False,chart_for_gif=True)
         EvoAnalytics.create_chart(data_for_analyze='gen_len', analyze_only_last_generation=False,chart_for_gif=True)

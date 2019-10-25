@@ -2,6 +2,7 @@ import uuid
 from multiprocessing import Lock
 
 import pickledb
+import os
 
 from Breakers.BreakersUtils import BreakersUtils
 from Computation.СomputationalEnvironment import SwanComputationalManager, ComputationalManager
@@ -77,8 +78,17 @@ class WaveModel(object):
     def _load_simulation_result_reference(self, serialised_breakers):
         db = pickledb.load(self.model_results_file_name, False)
         responce = db.get(serialised_breakers)
-        if responce == False:
+
+        with open('db.txt', 'a') as out:
+            out.write('{}\n'.format(db.db))
+        with open('response.txt', 'a') as out:
+            out.write('{}\n'.format(responce))
+
+        if responce == False or not os.path.exists(f'D:\\SWAN_sochi\\r\\hs{responce}.d'):
+            print(f'D:\\SWAN_sochi\\r\\hs{responce}.d',os.path.exists(f'D:\\SWAN_sochi\\r\\hs{responce}.d'))
+        #if responce == False:
             return None
+
         configuration_label = responce
         return configuration_label
 

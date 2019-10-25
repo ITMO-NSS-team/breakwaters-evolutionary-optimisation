@@ -33,7 +33,7 @@ if __name__ == '__main__':
 
     #wave_model = SwanWaveModel(exp_domain, None)
 
-    parallel_computational_manager = SwanWinRemoteComputationalManager(resources_names=["125", "124", "121", "123"],
+    parallel_computational_manager = SwanWinRemoteComputationalManager(resources_names=["125", "124", "123"],
                                                                       is_lazy_parallel=True)
     wave_model = SwanWaveModel(exp_domain, parallel_computational_manager)
 

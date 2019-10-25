@@ -1,17 +1,15 @@
 from EvoAlgs.DE.base import *
 import numpy as np
-from Visualisation.ModelVisualization import ModelsVisualization
 from EvoAlgs.EvoAnalytics import EvoAnalytics
 import math
 from tqdm import tqdm
-
 
 class DEIterator:
     def __init__(self, de):
         self.de = de
         self.population = de.init()
-        self.fitness,self.objectives = de.evaluate(self.population, 0)
-        #self.fitness=de.evaluate(self.population, 0)
+        self.fitness, self.objectives = de.evaluate(self.population, 0)
+        # self.fitness=de.evaluate(self.population, 0)
 
         self.best_fitness = min(self.fitness)
         self.index_of_ind = 0
@@ -21,7 +19,6 @@ class DEIterator:
         EvoAnalytics.num_of_best_inds_for_print = 5
         if de.goal == "minimization":
             self.indexes_of_best_individuals = np.argsort(self.fitness)[:EvoAnalytics.num_of_best_inds_for_print]
-
         else:
             self.indexes_of_best_individuals = np.argsort(self.fitness)[::-1][:EvoAnalytics.num_of_best_inds_for_print]
 
@@ -48,85 +45,54 @@ class DEIterator:
             # Compute values for f and cr in each iteration
             # de.print_individuals_with_best_fitness(self.population, self.fitness, self.iteration)
             self.f, self.cr = self.calculate_params()
+
+            mutants = []
             for self.idx_target in range(de.popsize):
                 # Create a mutant using a base vector, and the current f and cr values
-                mutant = self.create_mutant(self.idx_target)
-                # Evaluate and replace if better
-                self.replace(self.idx_target, mutant)
-                # Yield the current state of the algorithm
-                yield self
+                mutants.append(self.create_mutant(self.idx_target))
+            # Transfer mutants to calculate objectives function and get from this function container with 2 containers (first includes fitnesses and 2nd objectives)
+            # Create some function which write this fit and obj-s to population static containers with fit and obj
+            self.replace(mutants)
+            # Yield the current state of the algorithm
+            yield self
             self.iteration += 1
 
     def calculate_params(self):
         return dither(self.de.mutation_bounds, self.de.crossover_bounds)
 
     def create_mutant(self, i):
-        # Simple self-adaptive strategy, where the F and CR control
-        # parameters are inherited from the base vector.
-
-        '''
-        mutant_copy=None
-        while mutant_copy is None or self.check_constructions(mutant_copy) is True:
-            if self.de.adaptive:
-                # Use the params of the target vector
-                dt = self.de.denormalize(self.population[i])
-                self.f, self.cr = dt[-2:]
-            self.mutant = self.de.mutant(i, self.population, self.f, self.cr)
-            mutant_copy=self.mutant
-        '''
-
         if self.de.adaptive:
             # Use the params of the target vector
             dt = self.de.denormalize(self.population[i])
             self.f, self.cr = dt[-2:]
         self.mutant = self.de.mutant(i, self.population, self.f, self.cr)
 
-        print("mutant", self.mutant)
         return self.mutant
 
-    def replace(self, i, mutant):
-        #mutant_fitness,obj = self.de.evaluate(np.asarray([mutant]), i)
-        #return self.replacement(i, mutant, mutant_fitness, obj)
-        mutant_fitness,obj= self.de.evaluate(np.asarray([mutant]), i)
-        mutant_fitness,=mutant_fitness
-        print("mutant fitness", mutant_fitness)
-        return self.replacement(i, mutant, mutant_fitness, obj)
-        #return self.replacement(i, mutant, mutant_fitness)
+    def replace(self, mutants):
+        # mutant_fitness,obj = self.de.evaluate(np.asarray([mutant]), i)
+        # return self.replacement(i, mutant, mutant_fitness, obj)
+        mutant_fitness, obj = self.de.evaluate(np.asarray(mutants))
 
-    def replacement(self, target_idx, mutant, mutant_fitness,obj):
-    #def replacement(self, target_idx, mutant, mutant_fitness):
+        return self.replacement(mutants, mutant_fitness, obj)
+        # return self.replacement(i, mutant, mutant_fitness)
 
-        if mutant_fitness < self.best_fitness:
-            self.best_fitness = mutant_fitness
-            self.best_idx = target_idx
-        if mutant_fitness < self.fitness[target_idx]:
-            self.population[target_idx] = mutant
-            self.fitness[target_idx] = mutant_fitness
-            self.objectives[target_idx]=obj
-            return True
-        return False
+    def replacement(self, mutants, mutant_fitness, obj):
 
+        for target_idx in range(len(mutants)):
 
-class PDEIterator(DEIterator):
-    def __init__(self, de):
-        super().__init__(de)
-        self.mutants = np.zeros((de.popsize, de.dims))
+            if (self.de.goal == "minimization" and mutant_fitness[target_idx] < self.best_fitness) or (
+                    self.de.goal == "maximization" and mutant_fitness[target_idx] > self.best_fitness):
+                self.best_fitnes = mutant_fitness[target_idx]
+                self.best_idx = target_idx
 
-    def create_mutant(self, i):
-        mutant = super().create_mutant(i)
-        # Add to the mutants population for parallel evaluation (later)
-        # self.mutants.append(mutant)
-        self.mutants[i, :] = mutant
-        return mutant
-
-    def replace(self, i, mutant):
-        # Do not analyze after having the whole population (wait until the last individual)
-        if i == self.de.popsize - 1:
-            # Evaluate the whole new population (class PDE implements a parallel version of evaluate)
-            mutant_fitness = self.de.evaluate(self.mutants, i)
-            for j in range(self.de.popsize):
-                super().replacement(j, self.mutants[j], mutant_fitness[j])
-
+            if (self.de.goal == "minimization" and mutant_fitness[target_idx] < self.fitness[target_idx]) or (
+                    self.de.goal == "maximization" and mutant_fitness[target_idx] > self.fitness[target_idx]):
+                self.population[target_idx] = mutants[target_idx]
+                self.fitness[target_idx] = mutant_fitness[target_idx]
+                self.objectives[target_idx] = obj[target_idx]
+        return True
+        # return False!
 
 class DE:
     def __init__(self, fobj, print_func, bounds, mutation=(0.5, 1.0), crossover=0.7, maxiters=30,
@@ -135,9 +101,9 @@ class DE:
         self.save_gif_images = save_gif
         self.print_func = print_func
         self.goal = "minimization"
+        self.memory = "static"
         print("bounds", bounds)
         self.adaptive = self_adaptive
-        self.step_num = 0
         # Indicates the number of extra parameters in an individual that are not used for evaluating
         # If extra_params = d, discards the last d elements from an individual prior to evaluation.
         self.extra_params = 0
@@ -227,16 +193,6 @@ class DE:
 
             new_population.append(new_ind)
 
-        # if self.fobj([new_ind], check_intersections=True):
-        # print("BAD_individ")
-        # else:
-        # print("Good individ")
-
-        # print("randpop", np.random.rand(dimensions))
-        print("new population", new_population)
-
-        print("np.random", np.random.rand(popsize, dimensions))
-
         return np.array(new_population)
         # return np.random.rand(popsize, dimensions)
 
@@ -251,39 +207,37 @@ class DE:
         mutant = self.repair(self.crossover(population[target_idx], trial, cr))
         return mutant
 
-    def evaluate(self, P, iteration):
+    def evaluate(self, P, iteration=0):
         # Denormalize population matrix to obtain the scaled parameters
 
         # print("i",iteration)
         # print("P before denorm",P)
         PD = self.denormalize(P)
-        # print("P after denorm", PD)
+
         if self.extra_params > 0:
             PD = PD[:, :-self.extra_params]
+
         return self.evaluate_denormalized(PD, iteration)
 
     def evaluate_denormalized(self, PD, index_of_ind):
 
-        # print("PD",PD)
         # print("index of ind",index_of_ind)
 
         if len(PD) > 1:
-            fit=[]
-            obj=[]
-            for i, ind in enumerate(PD):
-                fit_and_obj=self.fobj([ind], fromDE=True, num_of_pop_ind=[self.step_num, i])
-                fit.append(fit_and_obj[0])
-                obj.append(fit_and_obj[1])
+            if self.memory == "static":
+                return self.fobj(PD, fromDE=True)
+            elif self.memory == "dynamic":
+                fit = []
+                obj = []
+                for i, ind in enumerate(PD):
+                    fit_and_obj = self.fobj([ind], fromDE=True, num_of_pop_ind=[self.step_num, i])
+                    fit.append(fit_and_obj[0])
+                    obj.append(fit_and_obj[1])
 
-            return fit,obj
-
+                return fit, obj
         else:
-            print("PD when len(PD<1",PD[0])
-
-            fit_and_obj=self.fobj([PD[0]], fromDE=True, num_of_pop_ind=[self.step_num + 1, index_of_ind])
-
-            print("fit and obj",fit_and_obj[0],fit_and_obj[1])
-            return [fit_and_obj[0]],fit_and_obj[1]
+            fit_and_obj = self.fobj([PD[0]], fromDE=True, num_of_pop_ind=[self.step_num + 1, index_of_ind])
+            return [fit_and_obj[0]], fit_and_obj[1]
 
         '''
         if len(PD) > 1:
@@ -322,8 +276,6 @@ class DE:
         num_of_best_individuals = EvoAnalytics.num_of_best_inds_for_print
         if self.goal == "minimization":
             indexes_of_individuals = np.argsort(fitnesses)[:num_of_best_individuals]
-            print("fitness", fitnesses)
-            print("best ind", indexes_of_individuals)
 
             f = open("g.txt", "a+")
             f.write("population")
@@ -331,18 +283,10 @@ class DE:
         else:
             indexes_of_individuals = np.argsort(fitnesses)[::-1][:num_of_best_individuals]
 
-        # for i, j in enumerate(indexes_of_individuals):
-        # visualiser = ModelsVisualization(str(population_number) + "_" + str(j), EvoAnalytics.run_id)
-        # visualiser.Make_directory_for_gif_images()
-        # visualiser.Gif_images_saving(population_number,i)
-
-
         for i, j in enumerate(indexes_of_individuals):
-            #print("num_of_pop_ind ", [population_number, i])
-
+            # print("num_of_pop_ind ", [population_number, i])
 
             self.print_func(self.denormalize([individuals[j]]), num_of_pop_ind=[population_number, i])
-
 
     def solve(self, show_progress=False):
         if show_progress:
@@ -355,36 +299,38 @@ class DE:
         EvoAnalytics.num_of_rows = math.ceil(EvoAnalytics.num_of_generations / EvoAnalytics.num_of_cols)
         EvoAnalytics.pop_size = self.popsize
         EvoAnalytics.set_params()
-        # print("pop in iterator",i in iterator.population)
-        # EvoAnalytics.save_cantidate(iterator., [fitness[i]], ind)
-        # [EvoAnalytics.save_cantidate(step.iteration, [fitness[i]], ind) for i, ind in enumerate(iterator.pop)]
+
+        '''
+        with open('step_idx.txt', 'w') as out:
+            out.write('{}\n'.format("step"))
+        '''
+
         for step_idx, step in enumerate(iterator):
 
-            print("step_idx", step_idx)
+            '''
+            with open('step_idx.txt', 'a') as out:
+                out.write('{}\n'.format(step))
+            '''
 
             idx = step.best_idx
             P = step.population
             fitness = step.fitness
-            obj=step.objectives
+            obj = step.objectives
 
+            [EvoAnalytics.save_cantidate(step.iteration, obj[i], ind) for i, ind in enumerate(P)]
+
+            '''
+            #Create charts during optimization pro#Create charts during optimizationcess
             if step_idx == 0:
-                self.print_individuals_with_best_fitness(P, fitness, self.step_num)
-                print("obj for Evoanalytics",obj)
-                #[EvoAnalytics.save_cantidate(step.iteration, [fitness[i]], ind) for i, ind in enumerate(P)]
-                [EvoAnalytics.save_cantidate(step.iteration, obj[i], ind) for i, ind in enumerate(P)]
-                #EvoAnalytics.create_chart(step.iteration, data_for_analyze='obj', chart_for_gif=True, first_generation=True)
-                #EvoAnalytics.create_chart(step.iteration, data_for_analyze='gen_len', chart_for_gif=True, first_generation=True)
+                EvoAnalytics.create_chart(step.iteration, data_for_analyze='obj', chart_for_gif=True, first_generation=True)
+                EvoAnalytics.create_chart(step.iteration, data_for_analyze='gen_len', chart_for_gif=True, first_generation=True)
+            else:
+                EvoAnalytics.create_chart(step.iteration, data_for_analyze='obj', chart_for_gif=True)
+                EvoAnalytics.create_chart(step.iteration, data_for_analyze='gen_len', chart_for_gif=True)
+            '''
 
-            if self.save_gif_images and step_idx > 0:
-                if step.iteration - 1 == self.step_num:
-                    self.step_num += 1
-                    self.print_individuals_with_best_fitness(P, fitness, self.step_num)
-
-                    print("Fitness",fitness)
-                    #[EvoAnalytics.save_cantidate(step.iteration, [fitness[i]], ind) for i, ind in enumerate(P)]
-                    [EvoAnalytics.save_cantidate(step.iteration, obj[i], ind) for i, ind in enumerate(P)]
-                    #EvoAnalytics.create_chart(step.iteration, data_for_analyze='obj', chart_for_gif=True)
-                    #EvoAnalytics.create_chart(step.iteration, data_for_analyze='gen_len', chart_for_gif=True)
+            if self.save_gif_images:
+                self.print_individuals_with_best_fitness(P, fitness, step_idx)
 
             if step.iteration > self.maxiters:
 
@@ -401,30 +347,3 @@ class DE:
 
         return self.denormalize([P[idx].reshape(-1, 1)]), fitness[idx]
 
-
-class PDE(DE):
-    def __init__(self, fobj, bounds, mutation=(0.5, 1.0), crossover=0.7, maxiters=1000,
-                 self_adaptive=False, popsize=None, seed=None, processes=None, chunksize=None):
-        super().__init__(fobj, bounds, mutation, crossover, maxiters, self_adaptive, popsize, seed)
-        from multiprocessing import Pool
-        self.processes = processes
-        self.chunksize = chunksize
-        self.name = 'Parallel DE'
-        self.pool = None
-        if processes is None or processes > 0:
-            self.pool = Pool(processes=self.processes)
-
-    def iterator(self):
-        it = PDEIterator(self)
-        try:
-            for data in it:
-                yield data
-        finally:
-            if self.pool is not None:
-                self.pool.terminate()
-
-    def evaluate_denormalized(self, PD):
-        if self.pool is not None:
-            return list(self.pool.map(self.fobj, PD, chunksize=self.chunksize))
-        else:
-            return super().evaluate_denormalized(PD)

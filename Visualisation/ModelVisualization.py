@@ -29,6 +29,9 @@ class ModelsVisualization:
                          dir="img", image_for_gif=False, \
                          population_and_ind_number=[]):
 
+        if not os.path.isdir(dir):
+            os.mkdir(dir)
+
         # plt.axis('off')
         # plt.rcParams['xtick.labelsize'] = 10
         # plt.rcParams['ytick.labelsize'] = 0

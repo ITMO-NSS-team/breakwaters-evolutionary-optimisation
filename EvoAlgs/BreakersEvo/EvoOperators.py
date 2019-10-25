@@ -15,10 +15,8 @@ from EvoAlgs.BreakersEvo.BreakersEvoUtils import BreakersEvoUtils
 from EvoAlgs.BreakersEvo.BreakersParams import BreakersParams
 from EvoAlgs.EvoAnalytics import EvoAnalytics
 from Optimisation.Objective import CostObjective, NavigationObjective, WaveHeightObjective, StructuralObjective
-from Visualisation.ModelVisualization import ModelsVisualization
 from Simulation.Results import WaveSimulationResult
-
-from collections import OrderedDict
+from Visualisation.ModelVisualization import ModelsVisualization
 
 # TODO refactor
 len_range = [0, 3]
@@ -176,7 +174,6 @@ def print_individuals(model, task, pop, num_of_pop_ind=[]):
 
 
 def calculate_objectives(model, task, pop, fromDE=False, check_intersections=False, num_of_pop_ind=[]):
-
     if check_intersections:
 
         genotype = [int(round(g, 0)) for g in pop[0]]
@@ -211,11 +208,8 @@ def calculate_objectives(model, task, pop, fromDE=False, check_intersections=Fal
 
         # print("obj_in_point",obj_in_point)
 
-        if obj_in_point:
-            # print("This individ is bad")
-            return True
-        else:
-            return False
+        return obj_in_point
+
         # new_obj = obj.get_obj_value(model.domain, proposed_breakers)
 
     if model.computational_manager is not None and model.computational_manager.is_lazy_parallel:
@@ -230,10 +224,7 @@ def calculate_objectives(model, task, pop, fromDE=False, check_intersections=Fal
             else:
                 genotype = [int(round(g, 0)) for g in p.genotype.genotype_array]
 
-            print("genotype",genotype)
-
             proposed_breakers = BreakersEvoUtils.build_breakers_from_genotype(genotype, task, model.domain.model_grid)
-
 
             simulation_result = model.run_simulation_for_constructions(proposed_breakers)
 
@@ -242,20 +233,8 @@ def calculate_objectives(model, task, pop, fromDE=False, check_intersections=Fal
             pre_simulated_results.append(simulation_result)
             pre_simulated_results_idx.append(simulation_result.configuration_label)
 
-        with open('pre_sem_res.txt', 'w') as out:
-            out.write('{}\n'.format("pre_sem_res"))
-        with open('pre_sem_res.txt', 'a') as out:
-            for i in pre_simulated_results:
-                out.write('{}\n'.format(i._hs))
-
         finalised_values = model.computational_manager.finalise_execution()
-        print("LEN FINALIZED VALUES", len(finalised_values))
 
-        with open('len.txt', 'w') as out:
-            out.write('{}\n'.format("len"))
-        with open('len.txt', 'a') as out:
-            out.write('{}\n'.format(len(pre_simulated_results)))
-            out.write('{}\n'.format(len(finalised_values)))
         # process ids
         if len(finalised_values) > 0:
             for i, val in enumerate(finalised_values):
@@ -273,7 +252,9 @@ def calculate_objectives(model, task, pop, fromDE=False, check_intersections=Fal
     else:
         pre_simulated_results = None
 
-    print("pop", pop)
+    if fromDE:
+        all_objectives = []
+        all_fitnesses = []
     for i_ind, p in enumerate(pop):
         label_to_reference = None
 
@@ -282,15 +263,11 @@ def calculate_objectives(model, task, pop, fromDE=False, check_intersections=Fal
         else:
             genotype = [int(round(g, 0)) for g in p.genotype.genotype_array]
 
-        # genotype = [int(round(g, 0)) for g in p.genotype.genotype_array]
-
         proposed_breakers = BreakersEvoUtils.build_breakers_from_genotype(genotype, task, model.domain.model_grid)
 
         objectives = []
 
         base_objectives = _calculate_reference_objectives(model, task)
-
-        #################
 
         combined_breakers_for_cost_estimation = BreakersUtils.merge_breakers_with_modifications(
             model.domain.base_breakers, proposed_breakers)
@@ -342,14 +319,26 @@ def calculate_objectives(model, task, pop, fromDE=False, check_intersections=Fal
                         configuration_label=label)
                     label_to_reference = label
 
+        if fromDE:
+
+            objectives = [j for i in objectives for j in i]
+
+            all_objectives.append(objectives)
+            all_fitnesses.append(0.8 * objectives[0] + 0.9 * objectives[1] + 0.5 * objectives[2] + sum(objectives[3:]))
+
+        else:
+            p.objectives = list(itertools.chain(*objectives))
+
+            p.referenced_dataset = label_to_reference
+
         if True:
             pass
+
             '''
-            
+
             all_breakers = BreakersUtils.merge_breakers_with_modifications(model.domain.base_breakers,
                                                                            proposed_breakers)
 
-            
             if fromDE:
                 visualiser = ModelsVisualization(str(num_of_pop_ind[0]) + "_" + str(num_of_pop_ind[1]), EvoAnalytics.run_id)
 
@@ -365,22 +354,8 @@ def calculate_objectives(model, task, pop, fromDE=False, check_intersections=Fal
                                             objectives,image_for_gif=False,population_and_ind_number=num_of_pop_ind)
 
             '''
-
-        if fromDE:
-
-            # return objectives
-
-            objectives = [j for i in objectives for j in i]
-
-            print("Objectives", objectives)
-
-            return 0.8 * objectives[0] + 0.9 * objectives[1] + 0.5 * objectives[2] + sum(objectives[3:]), objectives
-
-        else:
-
-            p.objectives = list(itertools.chain(*objectives))
-
-            p.referenced_dataset = label_to_reference
+    if fromDE:
+        return all_fitnesses, all_objectives
 
 
 def _calculate_reference_objectives(model, task):
