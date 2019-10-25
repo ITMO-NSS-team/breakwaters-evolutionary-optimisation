@@ -405,8 +405,12 @@ class EvoAnalytics:
     @staticmethod
     def united_gif_image_maker(directory=None, gif_type="breakers"):
 
+        if not os.path.isdir('series'):
+            os.mkdir('series')
+
         if not directory:
             directory = EvoAnalytics.run_id
+
 
         if not os.path.isdir(f'series/{EvoAnalytics.run_id}'):
             os.mkdir(f'series/{EvoAnalytics.run_id}')
