@@ -60,7 +60,7 @@ def calculate_objectives(model, task, pop):
             genotype = [int(round(g, 0)) for g in p.genotype.genotype_array]
             proposed_breakers = BreakersEvoUtils.build_breakers_from_genotype(genotype, task, model.domain.model_grid)
             simulation_result = model.run_simulation_for_constructions(proposed_breakers)
-            print(simulation_result.configuration_label)
+
             pre_simulated_results.append(simulation_result)
             pre_simulated_results_idx.append(simulation_result.configuration_label)
 
@@ -115,7 +115,7 @@ def calculate_objectives(model, task, pop):
                 if model.computational_manager is None or not model.computational_manager.is_lazy_parallel:
                     simulation_result = model.run_simulation_for_constructions(proposed_breakers)
                 else:
-                    print(i_ind)
+                    # print(i_ind)
                     try:
                         simulation_result = pre_simulated_results[i_ind]
                     except:
@@ -187,56 +187,57 @@ def _calculate_reference_objectives(model, task):
 
 
 def crossover(p1, p2, rate):
-    if random.random() >= 1 - rate:
+    random_val = random.random()
+    if random_val >= rate:
         return p1
 
-    strict_objectives = [NavigationObjective(), StructuralObjective()]
+    strict_objectives = StaticStorage.task.strict_objectives
+    new_individ = BreakersParams(copy.deepcopy(p1.genotype_array))
+    # for gen_ind in range(0, len(p1.genotype_array), 2):
+    gen_ind = [0, 2][random.randint(0, 1)]
     is_bad = True
     iter = 0
-    new_individ = BreakersParams(copy.deepcopy(p1.genotype_array))
-    for gen_ind in range(0, len(p1.genotype_array), 2):
-        is_bad = True
 
-        while is_bad and iter < 50:
-            print(f'CROSSOVER {iter}')
+    while is_bad and iter < 50:
+        print(f'CROSSOVER {iter}')
 
-            angle_parent_id = random.randint(0, 1)
+        angle_parent_id = random.randint(0, 1)
 
-            part1_rate = abs(random.random())
-            part2_rate = 1 - part1_rate
+        part1_rate = abs(random.random())
+        part2_rate = 1 - part1_rate
 
-            genotype_array = copy.copy(new_individ.genotype_array)
+        genotype_array = copy.copy(new_individ.genotype_array)
 
-            len_ind = gen_ind
-            dir_ind = gen_ind + 1
-            genotype_array[len_ind] = round(p1.genotype_array[len_ind] * part1_rate + p2.genotype_array[
-                len_ind] * part2_rate)
+        len_ind = gen_ind
+        dir_ind = gen_ind + 1
+        genotype_array[len_ind] = round(p1.genotype_array[len_ind] * part1_rate + p2.genotype_array[
+            len_ind] * part2_rate)
 
-            # av_angle = average_angles(
-            #    [(p1.genotype_array[dir_ind] + 360) % 360, (p2.genotype_array[dir_ind] + 360) % 360])
-            # if av_angle != 0:
-            #    individ.genotype_array[dir_ind] = round(av_angle)
-            # else:
-            if angle_parent_id == 0:
-                genotype_array[dir_ind] = round((p1.genotype_array[dir_ind] + 360) % 360)
-            if angle_parent_id == 1:
-                genotype_array[dir_ind] = round((p2.genotype_array[dir_ind] + 360) % 360)
-            is_bad = False
-            for objective in strict_objectives:
-                obj_val = objective.get_obj_value(StaticStorage.exp_domain,
-                                                  BreakersEvoUtils.build_breakers_from_genotype(
-                                                      genotype_array,
-                                                      StaticStorage.task, StaticStorage.exp_domain.model_grid))
-                if obj_val >= 0 and isinstance(objective, NavigationObjective):
-                    is_bad = True
-                    print("Unsuccesful crossover N")
+        # av_angle = average_angles(
+        #    [(p1.genotype_array[dir_ind] + 360) % 360, (p2.genotype_array[dir_ind] + 360) % 360])
+        # if av_angle != 0:
+        #    individ.genotype_array[dir_ind] = round(av_angle)
+        # else:
+        if angle_parent_id == 0:
+            genotype_array[dir_ind] = round((p1.genotype_array[dir_ind] + 360) % 360)
+        if angle_parent_id == 1:
+            genotype_array[dir_ind] = round((p2.genotype_array[dir_ind] + 360) % 360)
+        is_bad = False
+        for objective in strict_objectives:
+            obj_val = objective.get_obj_value(StaticStorage.exp_domain,
+                                              BreakersEvoUtils.build_breakers_from_genotype(
+                                                  genotype_array,
+                                                  StaticStorage.task, StaticStorage.exp_domain.model_grid))
+            if obj_val >= 0 and isinstance(objective, NavigationObjective):
+                is_bad = True
+                print("Unsuccesful crossover N")
 
-                    continue
-                if obj_val > 0 and isinstance(objective, StructuralObjective):
-                    is_bad = True
-                    print("Unsuccesful crossover S")
-            if not is_bad: new_individ.genotype_array = copy.copy(genotype_array)
-            iter += 1
+                continue
+            if obj_val > 0 and isinstance(objective, StructuralObjective):
+                is_bad = True
+                print("Unsuccesful crossover S")
+        if not is_bad: new_individ.genotype_array = copy.copy(genotype_array)
+        iter += 1
 
     return new_individ
 
@@ -244,21 +245,24 @@ def crossover(p1, p2, rate):
 def mutation(individ, rate, mutation_value_rate):
     new_individ = BreakersParams(copy.deepcopy(individ.genotype_array))
 
-    if random.random() >= 1 - rate:
+    random_val = random.random()
 
-        strict_objectives = [NavigationObjective(), StructuralObjective()]
+    if random_val >= rate:
+
+        strict_objectives = StaticStorage.task.strict_objectives
         is_bad = True
-        iter = 0
 
         for _ in range(0,
                        random.randint(1, int(round(len(individ.genotype_array) / 2)))):  # number of mutations
             is_bad = True
+            iter = 0
+
             while is_bad and iter < 50:
                 print(f'MUTATION{iter}')
 
                 param_to_mutate = random.randint(0, int(round(len(individ.genotype_array) / 2 - 1)))
-                mutation_ratio = abs(np.random.RandomState().normal(5, 1.5, 1)[0])
-                mutation_ratio_dir = abs(np.random.RandomState().normal(10, 5, 1)[0])
+                mutation_ratio = abs(np.random.RandomState().normal(2, 1.5, 1)[0])
+                mutation_ratio_dir = abs(np.random.RandomState().normal(15, 5, 1)[0])
 
                 sign = 1 if random.random() < 0.5 else -1
 
@@ -269,8 +273,8 @@ def mutation(individ, rate, mutation_value_rate):
                 genotype_array[len_ind] += sign * mutation_ratio
                 genotype_array[len_ind] = abs(genotype_array[len_ind])
                 genotype_array[dir_ind] += sign * mutation_ratio_dir
-                genotype_array[dir_ind] = min(genotype_array[dir_ind], dir_range[0])
-                genotype_array[dir_ind] = max(genotype_array[dir_ind], - dir_range[1])
+                genotype_array[dir_ind] = max(genotype_array[dir_ind], dir_range[0])
+                genotype_array[dir_ind] = min(genotype_array[dir_ind], dir_range[1])
 
                 is_bad = False
                 for objective in strict_objectives:
@@ -311,7 +315,7 @@ def initial_pop_lhs(size, **kwargs):
     population = [BreakersParams(genotype) for genotype in samples_grid]
     population_new = []
 
-    strict_objectives = [NavigationObjective(), StructuralObjective()]
+    strict_objectives = StaticStorage.task.strict_objectives
     for ind in population:
         bad = False
         for objective in strict_objectives:
@@ -329,10 +333,11 @@ def initial_pop_lhs(size, **kwargs):
 
 
 def initial_pop_random(size, **kwargs):
+    print("INITIAL")
     population_new = []
     for _ in range(0, size):
 
-        strict_objectives = [NavigationObjective(), StructuralObjective()]
+        strict_objectives = StaticStorage.task.strict_objectives
         while len(population_new) < size:
             genotype = np.zeros(StaticStorage.genotype_length)
             for j, g in enumerate(genotype):
@@ -358,5 +363,26 @@ def initial_pop_random(size, **kwargs):
 
             if not is_bad:
                 population_new.append(BreakersParams(copy.deepcopy(genotype)))
+
+    return population_new
+
+
+def initial_pop_stat(size, **kwargs):
+    print("INITIAL STAT")
+    population_new = []
+    genotypes = [[4, -90, 0, 0],
+                 [4, -60, 0, 0],
+                 [4, -45, 0, 0],
+                 [4, -30, 0, 0],
+                 [4, -15, 0, 0],
+                 [4, 0, 0, 0],
+                 [4, 15, 0, 0],
+                 [4, 30, 0, 0],
+                 [4, 45, 0, 0],
+                 [4, 60, 0, 0],
+                 [4, 90, 0, 0]]
+    # for _ in range(0, size):
+    for genotype in genotypes:
+        population_new.append(BreakersParams(copy.deepcopy(genotype)))
 
     return population_new

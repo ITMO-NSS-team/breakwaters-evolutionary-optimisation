@@ -1,8 +1,8 @@
 import csv
-import os
 import random
 
 import numpy as np
+import os
 
 from Breakers.Breaker import xy_to_points, Breaker
 from CommonUtils.StaticStorage import StaticStorage
@@ -25,165 +25,198 @@ wave_model = SwanWaveModel(exp_domain, None)
 
 optimiser = ParetoEvolutionaryOptimiser()
 
-indices = ['11', '12', '10', '5', '9', '6', '8', '7.2', '7.1']
+for mod_id in ['n11_cover','n11_25c', 'n11_50', 'n11_75', 'n11_125', 'n11_250', 'n11_125_2', 'n11_125realaga_2', 'n11_50_3',
+               'n11_75_3',
+               'n11_50_3ext', 'n11_closed', 'n11_0']:
 
-max2 = 3
-
-for _, mod_id in enumerate(['MKG9_Т8_75', 'MKG10_Т6_75', 'newvar',
-                            '904dff5a-6946-434d-8d1d-aaa4e553e6cc',
-                            '5-8',
-                            '53b30020-35a1-49aa-a4fd-b4d68e240c23',
-                            'default_shpora2',
-                            'n7_2fix', 'n7_1']):
-
-    real_name = indices[_]
     lensb = ([breaker.get_length() for breaker in exp_domain.base_breakers])
-
-    if mod_id == '53b30020-35a1-49aa-a4fd-b4d68e240c23':
+    if mod_id == 'n11_0':
         base_modifications_for_tuning = [
             Breaker('mod1', list(map(xy_to_points, [[-1, -1], [33, 22], [42, 17]])), 0, 'Ia'),
-            Breaker('mod2_bottom', list(map(xy_to_points, [[-1, -1], [50, 39]])), 0, '--'),
-            Breaker('mod3long', list(map(xy_to_points, [[-1, -1], [-1, -1], [56, 32], [67, 35]])), 0.9, 'IIIa')]
-
-        mod_points_to_optimise = {  # order is important
-            'mod1': [0],
-            'mod2_bottom': [0],
-            'mod3long': [1, 0]
-        }
-
-        newg = [30, 30, 57, 41, 56, 30, 58, 29]
-
-        lensb_real = [lensb[0], 0, lensb[3]]
-
-
-    elif mod_id == '904dff5a-6946-434d-8d1d-aaa4e553e6cc':
-        base_modifications_for_tuning = [
-            Breaker('mod1', list(map(xy_to_points, [[-1, -1], [-1, -1], [33, 22], [42, 17]])), 0, 'Ia'),
-            Breaker('mod2_bottom', list(map(xy_to_points, [[-1, -1], [50, 39]])), 0, '--'),
-            Breaker('mod3long', list(map(xy_to_points, [[-1, -1], [56, 32], [67, 35]])), 0.9, 'IIIa')]
-
-        mod_points_to_optimise = {  # order is important
-            'mod1': [1, 0],
-            'mod2_bottom': [0],
-            'mod3long': [0]
-        }
-
-        lensb_real = [lensb[0], 0, lensb[3]]
-
-        newg = [33, 25, 36, 26, 57, 41, 56, 29]
-
-    elif mod_id == '5-3':
-        base_modifications_for_tuning = [
-            Breaker('mod1', list(map(xy_to_points, [[-1, -1], [-1, -1], [33, 22], [42, 17]])), 0, 'Ia'),
-            Breaker('mod2_bottom', list(map(xy_to_points, [[-1, -1], [50, 39]])), 0, '--'),
-            Breaker('mod3long', list(map(xy_to_points, [[-1, -1], [-1, -1], [56, 32], [67, 35]])), 0.9, 'IIIa')]
-
-        mod_points_to_optimise = {  # order is important
-            'mod1': [1, 0],
-            'mod2_bottom': [0],
-            'mod3long': [1, 0]
-        }
-
-        lensb_real = [lensb[0], 0, lensb[3]]
-
-        newg = [33, 25, 36, 26, 57, 41, 56, 26, 60, 24]
-
-    elif mod_id == '5-8':
-        base_modifications_for_tuning = [
-            Breaker('mod1', list(map(xy_to_points, [[-1, -1], [-1, -1], [33, 22], [42, 17]])), 0, 'Ia'),
-            Breaker('mod2_bottom', list(map(xy_to_points, [[-1, -1], [50, 39]])), 0, '--'),
-            Breaker('mod3long', list(map(xy_to_points, [[-1, -1], [-1, -1], [56, 32], [67, 35]])), 0.9, 'IIIa')]
-
-        mod_points_to_optimise = {  # order is important
-            'mod1': [1, 0],
-            'mod2_bottom': [0],
-            'mod3long': [1, 0]
-        }
-
-        lensb_real = [lensb[0], 0, lensb[3]]
-
-        newg = [33, 29, 36, 31, 57, 41, 56, 28, 61, 26]
-    elif mod_id == 'default_shpora2':
-        base_modifications_for_tuning = [
-            Breaker('mod_shpora', list(map(xy_to_points, [[-1, -1], [-1, -1], [56, 32], [67, 35]])), 0, 'IIIa')
-        ]
-        mod_points_to_optimise = {  # order is important
-            'mod_shpora': [1, 0]
-        }
-
-        newg = [56, 33, 58, 35]
-
-        lensb_real = [lensb[3]]
-
-    elif mod_id == 'n7_1':
-        base_modifications_for_tuning = [
-            Breaker('mod1', list(map(xy_to_points, [[-1, -1], [33, 22], [42, 17]])), 0, 'Ia'),
-            Breaker('mod2', list(map(xy_to_points, [[-1, -1], [50, 32], [50, 39]])), 0, 'II')
-        ]
-        mod_points_to_optimise = {  # order is important
-            'mod1': [0],
-            'mod2': [0],
-        }
-        newg = [30, 25, 50, 30]
-
-        lensb_real = [lensb[0], lensb[2]]
-    elif mod_id == 'n7_2fix':
-        base_modifications_for_tuning = [
-            Breaker('mod1', list(map(xy_to_points, [[-1, -1], [33, 22], [42, 17]])), 0, 'Ia'),
-            Breaker('mod2', list(map(xy_to_points, [[-1, -1], [50, 32], [50, 39]])), 0, 'II')
-        ]
-        mod_points_to_optimise = {  # order is important
-            'mod1': [0],
-            'mod2': [0],
-        }
-        newg = [31, 25, 50, 30]
-
-        lensb_real = [lensb[0], lensb[2]]
-
-    elif mod_id == 'newvar':
-        base_modifications_for_tuning = [
-            Breaker('mod2_top', list(map(xy_to_points, [[-1, -1], [50, 32], [50, 39]])), 0, 'II'),
             Breaker('mod2_bottom', list(map(xy_to_points, [[-1, -1], [50, 39], [50, 32]])), 0, '-'),
-            Breaker('mod_add', list(map(xy_to_points, [[-1, -1], [56, 40]])), 0.9, '-')
         ]
 
         mod_points_to_optimise = {  # order is important
+            'mod1': [0],
+            'mod2_bottom': [0],
+        }
+
+        lensb_real = [lensb[0], lensb[2]]
+
+        newg = [30, 25, 50, 39]
+    elif mod_id == 'n11_25c':
+        base_modifications_for_tuning = [
+            Breaker('mod1', list(map(xy_to_points, [[-1, -1], [33, 22], [42, 17]])), 0, 'Ia'),
+            Breaker('mod2_bottom', list(map(xy_to_points, [[-1, -1], [50, 39], [50, 32]])), 0, '-'),
+        ]
+
+        mod_points_to_optimise = {  # order is important
+            'mod1': [0],
+            'mod2_bottom': [0],
+        }
+
+        lensb_real = [lensb[0], lensb[2]]
+
+        newg = [30, 25, 50, 39 + 1]
+    elif mod_id == 'n11_50':
+        base_modifications_for_tuning = [
+            Breaker('mod1', list(map(xy_to_points, [[-1, -1], [33, 22], [42, 17]])), 0, 'Ia'),
+            Breaker('mod2_bottom', list(map(xy_to_points, [[-1, -1], [50, 39], [50, 32]])), 0, '-'),
+        ]
+
+        mod_points_to_optimise = {  # order is important
+            'mod1': [0],
+            'mod2_bottom': [0],
+        }
+
+        lensb_real = [lensb[0], lensb[2]]
+
+        newg = [30, 25, 50, 39 + 2]
+    elif mod_id == 'n11_75':
+        base_modifications_for_tuning = [
+            Breaker('mod1', list(map(xy_to_points, [[-1, -1], [33, 22], [42, 17]])), 0, 'Ia'),
+            Breaker('mod2_bottom', list(map(xy_to_points, [[-1, -1], [50, 39], [50, 32]])), 0, '-'),
+        ]
+
+        mod_points_to_optimise = {  # order is important
+            'mod1': [0],
+            'mod2_bottom': [0],
+        }
+
+        lensb_real = [lensb[0], lensb[2]]
+
+        newg = [30, 25, 50, 39 + 3]
+
+    elif mod_id == 'n11_125':
+        base_modifications_for_tuning = [
+            Breaker('mod1', list(map(xy_to_points, [[-1, -1], [33, 22], [42, 17]])), 0, 'Ia'),
+            Breaker('mod2_bottom', list(map(xy_to_points, [[-1, -1], [50, 39], [50, 32]])), 0, '-'),
+        ]
+
+        mod_points_to_optimise = {  # order is important
+            'mod1': [0],
+            'mod2_bottom': [0],
+        }
+
+        lensb_real = [lensb[0], lensb[2]]
+
+        newg = [30, 25, 50, 39 + 5]
+    elif mod_id == 'n11_250':
+        base_modifications_for_tuning = [
+            Breaker('mod1', list(map(xy_to_points, [[-1, -1], [33, 22], [42, 17]])), 0, 'Ia'),
+            Breaker('mod2_bottom', list(map(xy_to_points, [[-1, -1], [50, 39], [50, 32]])), 0, '-'),
+        ]
+
+        mod_points_to_optimise = {  # order is important
+            'mod1': [0],
+            'mod2_bottom': [0],
+        }
+
+        lensb_real = [lensb[0], lensb[2]]
+
+        newg = [30, 25, 50, 39 + 10]
+    elif mod_id == 'n11_cover':
+        base_modifications_for_tuning = [
+            Breaker('mod1', list(map(xy_to_points, [[-1, -1], [33, 22], [42, 17]])), 0, 'Ia'),
+            Breaker('mod2_bottom', list(map(xy_to_points, [[-1, -1], [50, 39], [50, 32]])), 0, '-'),
+        ]
+
+        mod_points_to_optimise = {  # order is important
+            'mod1': [0],
+            'mod2_bottom': [0],
+        }
+
+        lensb_real = [lensb[0], lensb[2]]
+
+        newg = [30, 25, 56,41]
+    elif mod_id == 'n11_closed':
+        base_modifications_for_tuning = [
+            Breaker('mod1', list(map(xy_to_points, [[-1, -1], [33, 22], [42, 17]])), 0, 'Ia'),
+            Breaker('mod2_top', list(map(xy_to_points, [[-1, -1], [50, 32], [50, 39]])), 0, 'II'),
+            Breaker('mod2_bottom', list(map(xy_to_points, [[-1, -1], [50, 39], [50, 32]])), 0, '-')
+        ]
+
+        mod_points_to_optimise = {  # order is important
+            'mod1': [0],
             'mod2_top': [0],
+            'mod2_bottom': [0]
+        }
+
+        lensb_real = [lensb[0], lensb[2]]
+
+        newg = [30, 25, 56, 32, 50, 39 + 10]
+    elif mod_id == 'n11_125_2':  # really 75
+        base_modifications_for_tuning = [
+            Breaker('mod1', list(map(xy_to_points, [[-1, -1], [33, 22], [42, 17]])), 0, 'Ia'),
+            Breaker('mod2_bottom', list(map(xy_to_points, [[-1, -1], [50, 39], [50, 32]])), 0, '-'),
+        ]
+
+        mod_points_to_optimise = {  # order is important
+            'mod1': [0],
+            'mod2_bottom': [0],
+        }
+
+        lensb_real = [lensb[0], lensb[2]]
+
+        newg = [30, 25, 50 - 2, 39 + 2]
+    elif mod_id == 'n11_125realaga_2':
+        base_modifications_for_tuning = [
+            Breaker('mod1', list(map(xy_to_points, [[-1, -1], [33, 22], [42, 17]])), 0, 'Ia'),
+            Breaker('mod2_bottom', list(map(xy_to_points, [[-1, -1], [50, 39], [50, 32]])), 0, '-'),
+        ]
+
+        mod_points_to_optimise = {  # order is important
+            'mod1': [0],
+            'mod2_bottom': [0],
+        }
+
+        lensb_real = [lensb[0], lensb[2]]
+
+        newg = [30, 25, 50 - 3, 39 + 4]
+    elif mod_id == 'n11_50_3':
+        base_modifications_for_tuning = [
+            Breaker('mod1', list(map(xy_to_points, [[-1, -1], [33, 22], [42, 17]])), 0, 'Ia'),
+            Breaker('mod_add', list(map(xy_to_points, [[-1, -1], [56, 40], [56, 41]])), 0.9, '-')
+        ]
+
+        mod_points_to_optimise = {  # order is important
+            'mod1': [0],
+            'mod_add': [0]
+        }
+
+        lensb_real = [lensb[0], lensb[2]]
+
+        newg = [30, 25, 54, 40]
+    elif mod_id == 'n11_75_3':
+        base_modifications_for_tuning = [
+            Breaker('mod1', list(map(xy_to_points, [[-1, -1], [33, 22], [42, 17]])), 0, 'Ia'),
+            Breaker('mod_add', list(map(xy_to_points, [[-1, -1], [56, 40], [56, 41]])), 0.9, '-')
+        ]
+
+        mod_points_to_optimise = {  # order is important
+            'mod1': [0],
+            'mod_add': [0]
+        }
+
+        lensb_real = [lensb[0], 25]
+
+        newg = [30, 25, 53, 40]
+    elif mod_id == 'n11_50_3ext':  # +75
+        base_modifications_for_tuning = [
+            Breaker('mod1', list(map(xy_to_points, [[-1, -1], [33, 22], [42, 17]])), 0, 'Ia'),
+            Breaker('mod2_bottom', list(map(xy_to_points, [[-1, -1], [50, 39], [50, 32]])), 0, '-'),
+            Breaker('mod_add', list(map(xy_to_points, [[-1, -1], [56, 40], [56, 41]])), 0.9, '-')
+        ]
+
+        mod_points_to_optimise = {  # order is important
+            'mod1': [0],
             'mod2_bottom': [0],
             'mod_add': [0]
         }
 
-        lensb_real = [lensb[2], lensb[2], 0]
+        lensb_real = [lensb[0], 25]
 
-        newg = [50 + 1, 32 - 1, 50, 39 + 3, 56, 40 - 2]
-    elif mod_id == 'MKG10_Т6_75':
-        base_modifications_for_tuning = [
-            Breaker('mod1', list(map(xy_to_points, [[-1, -1], [33, 22], [42, 17]])), 0, 'Ia'),
-            Breaker('mod2_top', list(map(xy_to_points, [[-1, -1], [50, 32], [50, 39]])), 0, 'II'),
-        ]
-
-        mod_points_to_optimise = {  # order is important
-            'mod1': [0],
-            'mod2_top': [0],
-        }
-
-        lensb_real = [lensb[0], lensb[2]]
-
-        newg = [33, 26, 48, 29]
-    elif mod_id == 'MKG9_Т8_75':
-        base_modifications_for_tuning = [
-            Breaker('mod1', list(map(xy_to_points, [[-1, -1], [33, 22], [42, 17]])), 0, 'Ia'),
-            Breaker('mod2_top', list(map(xy_to_points, [[-1, -1], [50, 32], [50, 39]])), 0, 'II'),
-        ]
-
-        mod_points_to_optimise = {  # order is important
-            'mod1': [0],
-            'mod2_top': [0],
-        }
-
-        lensb_real = [lensb[0], lensb[2]]
-
-        newg = [32, 26, 48, 29]
+        newg = [30, 25, 50, 39 + 3, 54, 40]
 
     selected_modifications_for_tuning = base_modifications_for_tuning
     selected_mod_points_to_optimise = [mod_points_to_optimise[mod.breaker_id] for mod in base_modifications_for_tuning]
@@ -274,18 +307,18 @@ for _, mod_id in enumerate(['MKG9_Т8_75', 'MKG10_Т6_75', 'newvar',
         "15.0 202.5", "25.0 202.5"
     ]
 
-    if not os.path.isdir(f'img/experiments/{real_name}'):
-        os.mkdir(f'img/experiments/{real_name}')
+    if not os.path.isdir(f'img/experiments/{mod_id}'):
+        os.mkdir(f'img/experiments/{mod_id}')
 
-    with open(f'img/experiments/{real_name}/{mod_id}-base-fortab.csv', 'w', newline='') as csvfile:
+    with open(f'img/experiments/{mod_id}/{mod_id}-base-fortab.csv', 'w', newline='') as csvfile:
         writer = csv.writer(csvfile, delimiter='\t',
                             quotechar='|', quoting=csv.QUOTE_MINIMAL)
         writer.writerow(['hs1', 'hs2', 'hs3'])
 
     bord = 0
-    for wi in [0, 1]:
-        for sign in [0, 1, 2]:
-            for i in [0, 1]:
+    for wi in [1]:  # [0, 1]:
+        for sign in [1]:  # [0, 1]:
+            for i in [1]:  # [0, 1]:
                 StaticStorage.is_custom_conditions = True
                 if wi == 0:
                     StaticStorage.wind = "0 0"
@@ -296,14 +329,14 @@ for _, mod_id in enumerate(['MKG9_Т8_75', 'MKG10_Т6_75', 'newvar',
                 label_to_reference = f'{mod_id}_w{wi}p{i}_s'
                 simulation_result = wave_model.run_simulation_for_constructions(brks,
                                                                                 label_to_reference)
-                if sign == 2 and wi == 1 and i == 1:
-                    visualiser = ModelsVisualization(label_to_reference, real_name)
-                    visualiser.experimental_visualise(simulation_result.get_mean_output_for_field(), brks,
+                if sign == 1:
+                    visualiser = ModelsVisualization(label_to_reference, mod_id)
+                    visualiser.experimental_visualise(simulation_result.get_13percent_output_for_field(), brks,
                                                       wave_model.domain.base_breakers,
                                                       StaticStorage.exp_domain.fairways,
                                                       StaticStorage.exp_domain.target_points,
-                                                      "mean",
-                                                      [2, max2][i],
+                                                      13,
+                                                      [2, 6][i],
                                                       # ['а)', 'б)', 'а)', 'б)'][bord],
                                                       'а)',
                                                       wi == 1, [1, 50][i],
@@ -315,37 +348,34 @@ for _, mod_id in enumerate(['MKG9_Т8_75', 'MKG10_Т6_75', 'newvar',
                     hs0 = simulation_result.get_5percent_output_for_target_points(exp_domain.target_points[0])
                     hs1 = simulation_result.get_5percent_output_for_target_points(exp_domain.target_points[1])
                     hs2 = simulation_result.get_5percent_output_for_target_points(exp_domain.target_points[2])
-                if sign == 1:
+                else:
                     hs0 = simulation_result.get_13percent_output_for_target_points(exp_domain.target_points[0])
                     hs1 = simulation_result.get_13percent_output_for_target_points(exp_domain.target_points[1])
                     hs2 = simulation_result.get_13percent_output_for_target_points(exp_domain.target_points[2])
-                if sign == 2:
-                    hs0 = simulation_result.get_mean_output_for_target_points(exp_domain.target_points[0])
-                    hs1 = simulation_result.get_mean_output_for_target_points(exp_domain.target_points[1])
-                    hs2 = simulation_result.get_mean_output_for_target_points(exp_domain.target_points[2])
 
                 print(f'{hs0},{hs1},{hs2}')
 
-                with open(f'img/experiments/{real_name}/{mod_id}-base-fortab.csv', 'a', newline='') as csvfile:
+                with open(f'img/experiments/{mod_id}/{mod_id}-base-fortab.csv', 'a', newline='') as csvfile:
                     writer = csv.writer(csvfile, delimiter='\t',
                                         quotechar='|', quoting=csv.QUOTE_MINIMAL)
                     writer.writerow([round(hs0, 2), round(hs1, 2), round(hs2, 2)])
 
                 bord += 1
 
+if False:
     wave_model.model_results_file_name = "D:\\SWAN_sochi\\model_results.db"
 
-    with open(f'img/experiments/{real_name}/{mod_id}.csv', 'w', newline='') as csvfile:
+    with open(f'img/experiments/{mod_id}/{mod_id}.csv', 'w', newline='') as csvfile:
         writer = csv.writer(csvfile, delimiter=' ',
                             quotechar='|', quoting=csv.QUOTE_MINIMAL)
         writer.writerow(['is_wind', 'rep', 'dir', 'hs1', 'hs2', 'hs3'])
 
-    with open(f'img/experiments/{real_name}/{mod_id}-fortab.csv', 'w', newline='') as csvfile:
+    with open(f'img/experiments/{mod_id}/{mod_id}-fortab.csv', 'w', newline='') as csvfile:
         writer = csv.writer(csvfile, delimiter='\t',
                             quotechar='|', quoting=csv.QUOTE_MINIMAL)
         writer.writerow(['hs1', 'hs2', 'hs3'])
 
-    for sign in [0, 1, 2]:
+    for sign in [0, 1]:
         ord = 0
         for wi in [0, 1]:
             for i in range(0, len(bcond_values)):
@@ -361,16 +391,16 @@ for _, mod_id in enumerate(['MKG9_Т8_75', 'MKG10_Т6_75', 'newvar',
                 simulation_result = wave_model.run_simulation_for_constructions(brks,
                                                                                 label_to_reference)
 
-                if sign == 2 and i == 9 - 1:  #
+                if sign == 1 and i == 9 - 1:  #
                     # ord == 14+15 and sign == 1 #and [1, 1, 1, 1, 1, 1, 1, 50, 50, 50, 50, 50, 50, 50][i]==50:
                     print("SSE")
-                    visualiser = ModelsVisualization(f'{mod_id}_p{year_periodicity_labels[i]}_w{wi}', real_name)
-                    visualiser.experimental_visualise(simulation_result.get_mean_output_for_field(), brks,
+                    visualiser = ModelsVisualization(f'{mod_id}_p{year_periodicity_labels[i]}_w{wi}', mod_id)
+                    visualiser.experimental_visualise(simulation_result.get_13percent_output_for_field(), brks,
                                                       wave_model.domain.base_breakers,
                                                       StaticStorage.exp_domain.fairways,
                                                       StaticStorage.exp_domain.target_points,
-                                                      "mean",
-                                                      [2, 2, 2, 2, 2, 2, 2, max2, max2, max2, max2, max2, max2, max2][i],
+                                                      13,
+                                                      [2, 2, 2, 2, 2, 2, 2, 6, 6, 6, 6, 6, 6, 6][i],
                                                       # f'{ord})',
                                                       'б)',
                                                       wi == 1, [1, 1, 1, 1, 1, 1, 1, 50, 50, 50, 50, 50, 50, 50][i],
@@ -384,24 +414,24 @@ for _, mod_id in enumerate(['MKG9_Т8_75', 'MKG10_Т6_75', 'newvar',
                     hs0 = simulation_result.get_5percent_output_for_target_points(exp_domain.target_points[0])
                     hs1 = simulation_result.get_5percent_output_for_target_points(exp_domain.target_points[1])
                     hs2 = simulation_result.get_5percent_output_for_target_points(exp_domain.target_points[2])
-                if sign == 1:
+                else:
                     hs0 = simulation_result.get_13percent_output_for_target_points(exp_domain.target_points[0])
                     hs1 = simulation_result.get_13percent_output_for_target_points(exp_domain.target_points[1])
                     hs2 = simulation_result.get_13percent_output_for_target_points(exp_domain.target_points[2])
-                if sign == 2:
-                    hs0 = simulation_result.get_mean_output_for_target_points(exp_domain.target_points[0])
-                    hs1 = simulation_result.get_mean_output_for_target_points(exp_domain.target_points[1])
-                    hs2 = simulation_result.get_mean_output_for_target_points(exp_domain.target_points[2])
+                print(f'{hs0},{hs1},{hs2}')
+
+                print(f'{hs0},{hs1},{hs2}')
 
                 ord += 1
-                with open(f'img/experiments/{real_name}/{mod_id}.csv', 'a', newline='') as csvfile:
+                with open(f'img/experiments/{mod_id}/{mod_id}.csv', 'a', newline='') as csvfile:
                     writer = csv.writer(csvfile, delimiter=' ',
                                         quotechar='|', quoting=csv.QUOTE_MINIMAL)
                     writer.writerow([wi, [1, 1, 1, 1, 1, 1, 1, 50, 50, 50, 50, 50, 50, 50][i],
                                      ['ЮВ', 'ЮЮВ', 'Ю', 'ЮЮЗ', 'ЮЗ', 'ЗЮЗ', 'З', 'ЮВ', 'ЮЮВ',
-                                      'Ю', 'ЮЮЗ', 'ЮЗ', 'ЗЮЗ', 'З'][i], round(hs0, 2), round(hs1, 2), round(hs2, 2)])
+                                      'Ю', 'ЮЮЗ', 'ЮЗ', 'ЗЮЗ', 'З'][i], round(hs0, 2), round(hs1, 2),
+                                     round(hs2, 2)])
 
-                with open(f'img/experiments/{real_name}/{mod_id}-fortab.csv', 'a', newline='') as csvfile:
+                with open(f'img/experiments/{mod_id}/{mod_id}-fortab.csv', 'a', newline='') as csvfile:
                     writer = csv.writer(csvfile, delimiter='\t',
                                         quotechar='|', quoting=csv.QUOTE_MINIMAL)
                     writer.writerow([round(hs0, 2), round(hs1, 2), round(hs2, 2)])

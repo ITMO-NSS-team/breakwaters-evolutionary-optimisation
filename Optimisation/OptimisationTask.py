@@ -11,3 +11,4 @@ class OptimisationTask(object):
         self.objectives = objectives
         self.possible_modifications = possible_modifications
         self.mod_points_to_optimise = mod_points_to_optimise
+        self.strict_objectives=[]

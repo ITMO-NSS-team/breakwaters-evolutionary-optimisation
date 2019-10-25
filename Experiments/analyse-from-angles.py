@@ -7,13 +7,11 @@ import numpy as np
 from Breakers.Breaker import xy_to_points, Breaker
 from CommonUtils.StaticStorage import StaticStorage
 from Configuration.Domains import SochiHarbor
-from EvoAlgs.BreakersEvo.BreakersEvoUtils import BreakersEvoUtils
 from Optimisation.Objective import CostObjective, NavigationObjective, WaveHeightObjective, StructuralObjective
 from Optimisation.OptimisationTask import OptimisationTask
 from Optimisation.Optimiser import ParetoEvolutionaryOptimiser
 from Simulation.WaveModel import SwanWaveModel
 from Visualisation.ModelVisualization import ModelsVisualization
-from Simulation.Results import SimulationResult
 
 seed = 42
 np.random.seed(seed)

@@ -17,11 +17,10 @@ class ModelsVisualization:
         # to clear to plot
         plt.rcParams.update({'figure.max_open_warning': 0})
         plt.rcParams['figure.figsize'] = [15, 10]
-        #fig = plt.figure(edgecolor='black')
+        # fig = plt.figure(edgecolor='black')
         ax = plt.subplot()
         ax.axes.set_aspect('equal')
-        #plt.savefig('dump.png')
-
+        # plt.savefig('dump.png')
 
     def simple_visualise(self, hs: np.ndarray, all_breakers, base_breakers, fairways, target_points, fitness=None):
 
@@ -39,7 +38,7 @@ class ModelsVisualization:
             fit_str = ",".join(
                 [str(round(f)) if not isinstance(f, list) else ",".join([str(int(round(hs))) for hs in f]) for f in
                  fitness])
-            ax.set_title(f'Высоты волн с 5%-ной обеспеченносью в целевых точках: {values}, \r\n'
+            ax.set_title(f'Высоты волн с 5%-ной обеспеченностью в целевых точках: {values}, \r\n'
                          f'fitness {fit_str}')
 
         map_of_place = hs
@@ -111,10 +110,9 @@ class ModelsVisualization:
         ax = plt.subplot()
         ax.axes.set_aspect('equal')
 
-        #plt.axis('o')
+        # plt.axis('o')
         plt.tick_params(axis='both', left='off', top='off', right='off', bottom='off', labelleft='off', labeltop='off',
                         labelright='off', labelbottom='off')
-
 
         rect = patches.Rectangle((0, 0), hs.shape[1], hs.shape[0], linewidth=1, edgecolor='black', facecolor='none')
         ax.add_patch(rect)
@@ -130,8 +128,12 @@ class ModelsVisualization:
         if is_wind:
             wind_str = "с учетом локального ветра."
 
-        ax.set_title(
-            f'\n        {order_id} Высоты волн с {title_mod}% обеспеченностью в целевых точках: {values} м. \n Направление волнения {dir_info} для повторяемости раз в  {rep_info} лет,\n {wind_str} Длины доп. сооружений:\n {len_info}')
+        if title_mod == "mean":
+            ax.set_title(
+                f'\n        {order_id} Средняя высота волн в целевых точках: {values} м. \n Направление волнения {dir_info} для повторяемости раз в  {rep_info} лет,\n {wind_str} Длины доп. сооружений:\n {len_info}')
+        else:
+            ax.set_title(
+                f'\n        {order_id} Высоты волн с {title_mod}% обеспеченностью в целевых точках: {values} м. \n Направление волнения {dir_info} для повторяемости раз в  {rep_info} лет,\n {wind_str} Длины доп. сооружений:\n {len_info}')
 
         map_of_place = hs
 
@@ -157,14 +159,14 @@ class ModelsVisualization:
 
                 if [all_breakers[i].points[j - 1].x, all_breakers[i].points[j - 1].y] not in breaker_points:
                     breaker_points.append([all_breakers[i].points[j - 1].x, all_breakers[i].points[j - 1].y])
-                    #plt.annotate(
+                    # plt.annotate(
                     #    f'({all_breakers[i].points[j-1].x},{all_breakers[i].points[j-1].y})',
                     #    (all_breakers[i].points[j - 1].x, all_breakers[i].points[j - 1].y))
 
                 if j == len(all_breakers[i].points) - 1:
                     if [all_breakers[i].points[j].x, all_breakers[i].points[j].y] not in breaker_points:
                         breaker_points.append([all_breakers[i].points[j].x, all_breakers[i].points[j].y])
-                        #plt.annotate(
+                        # plt.annotate(
                         #    f'({all_breakers[i].points[j].x},{all_breakers[i].points[j].y})',
                         #    (all_breakers[i].points[j].x, all_breakers[i].points[j].y))
 
@@ -179,14 +181,13 @@ class ModelsVisualization:
             plt.plot(p1, p2, '--', c='g', linewidth=2, marker='.')
             # print(self.fairways[0].x1)
 
-
         wind_names = ["С", "СВ", "В", "ЮВ", "Ю", "ЮЗ", "З", "СЗ"]
 
         base_x = 9
         base_y = 9
         k = 5
         for ang_ind, ang in enumerate([0, 45, 90, 135, 180, 225, 270, 315]):
-            ang2 = (ang+120) % 360
+            ang2 = (ang + 120) % 360
             new_x = np.sin(ang2 / 180 * math.pi) * k
             new_y = -np.cos(ang2 / 180 * math.pi) * k
 
@@ -197,7 +198,7 @@ class ModelsVisualization:
 
             plt.annotate(wind_names[ang_ind], (base_x + new_x, base_y + new_y), color='black')
 
-        real_ang = (real_ang + 120 + 180 ) % 360
+        real_ang = (real_ang + 120 + 180) % 360
 
         new_x = np.sin(real_ang / 180 * math.pi) * (k + 2)
         new_y = -np.cos(real_ang / 180 * math.pi) * (k + 2)

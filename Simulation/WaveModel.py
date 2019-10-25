@@ -86,7 +86,7 @@ class WaveModel(object):
         db = pickledb.load(self.model_results_file_name, False)
         for key in db.db:
             if db.db[key] == id:
-                print(key)
+                #print(key)
                 return key
         return None
 

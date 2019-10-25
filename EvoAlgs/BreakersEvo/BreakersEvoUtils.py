@@ -10,23 +10,24 @@ class BreakersEvoUtils:
 
         for modification in task.possible_modifications:
 
-            point_ids_to_optimise_in_modification = task.mod_points_to_optimise[modification.breaker_id]
+            if modification.breaker_id in task.mod_points_to_optimise:
+                point_ids_to_optimise_in_modification = task.mod_points_to_optimise[modification.breaker_id]
 
-            anchor_point = modification.points[max(point_ids_to_optimise_in_modification) + 1]
-            prev_anchor = modification.points[max(point_ids_to_optimise_in_modification) + 2]
+                anchor_point = modification.points[max(point_ids_to_optimise_in_modification) + 1]
+                prev_anchor = modification.points[max(point_ids_to_optimise_in_modification) + 2]
 
-            for point_ind in point_ids_to_optimise_in_modification:
-                anchor_angle = anchor_point.point_to_relative_polar(prev_anchor)["angle"]
-                length = genotype[gen_id]
-                direction = (genotype[gen_id + 1] + anchor_angle + 360) % 360
+                for point_ind in point_ids_to_optimise_in_modification:
+                    anchor_angle = anchor_point.point_to_relative_polar(prev_anchor)["angle"]
+                    length = genotype[gen_id]
+                    direction = (genotype[gen_id + 1] + anchor_angle + 360) % 360
 
-                modification.points[point_ind] = modification.points[point_ind].from_polar(length,
-                                                                                           direction,
-                                                                                           anchor_point, grid)
-                gen_id += 2
-                prev_anchor = anchor_point
-                anchor_point = modification.points[point_ind]
-            new_modifications.append(modification)
+                    modification.points[point_ind] = modification.points[point_ind].from_polar(length,
+                                                                                               direction,
+                                                                                               anchor_point, grid)
+                    gen_id += 2
+                    prev_anchor = anchor_point
+                    anchor_point = modification.points[point_ind]
+                new_modifications.append(modification)
         return new_modifications
 
     @staticmethod
