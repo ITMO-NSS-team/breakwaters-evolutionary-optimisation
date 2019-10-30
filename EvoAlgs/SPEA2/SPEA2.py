@@ -94,9 +94,13 @@ class SPEA2:
     def solution(self, verbose=True, **kwargs):
         pass
 
-    def fitness(self):
+    def fitness(self,gen):
 
-        self.objectives(self._pop)
+        all_objectives,labels_to_reference=self.objectives(pop=self._pop,population_number=gen,multi_objective_optimization=True)
+
+        for i, p in enumerate(self._pop):
+            p.objectives=all_objectives[i]
+            p.referenced_dataset=labels_to_reference[i]
 
         union = self._archive + self._pop
 

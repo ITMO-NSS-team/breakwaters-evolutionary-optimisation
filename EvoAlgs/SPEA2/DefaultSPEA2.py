@@ -31,7 +31,7 @@ class DefaultSPEA2(SPEA2):
             print("GEN!!!!! ", gen)
 
 
-            self.fitness()
+            self.fitness(gen)
 
             [EvoAnalytics.save_cantidate(gen, ind.objectives, ind.genotype.genotype_array, ind.referenced_dataset) for ind in self._pop]
 
@@ -41,8 +41,6 @@ class DefaultSPEA2(SPEA2):
             #####Visualize best individuals
 
             #individuals=[[int(ind.genotype.genotype_array[j]) for j in range(len(ind.genotype.genotype_array))] for ind in self._pop]
-
-            print("FITNESSES IN SPEA2",self._pop[0].objectives)
 
             #self.print_func(individuals=individuals, fitnesses=fitnesses, num_of_pop=population_number)
 
@@ -60,8 +58,10 @@ class DefaultSPEA2(SPEA2):
 
             best_for_print=  [i.genotype.genotype_array  for i in sorted(self._archive, key=lambda p: mean_obj(p))[:EvoAnalytics.num_of_best_inds_for_print]]
 
-            for i, j in enumerate(best_for_print):
-                self.print_func([j], num_of_pop_ind=[gen, i])
+            #for i, j in enumerate(best_for_print):
+                #self.print_func([j], num_of_pop_ind=[gen, i])
+
+            self.print_func(best_for_print, num_of_population=gen)
 
             print("best for PRINT",best_for_print)
 

@@ -11,6 +11,9 @@ from Simulation.WaveModel import SwanWaveModel
 from Computation.СomputationalEnvironment import SwanWinRemoteComputationalManager
 from EvoAlgs.EvoAnalytics import EvoAnalytics
 from CommonUtils.StaticStorage import StaticStorage
+from Visualisation.ModelVisualization import ModelsVisualization
+from Visualisation.Visualiser import Visualiser
+
 import datetime
 
 seed = 42
@@ -47,6 +50,8 @@ wave_model = SwanWaveModel(exp_domain, None)
 #wave_model = SwanWaveModel(exp_domain, computational_manager)
 
 optimiser = DEOptimiser()
+
+visualiser=Visualiser(num_of_best_individuals_from_population_for_print=5,)
 
 base_modifications_for_tuning = [
     Breaker('mod1', list(map(xy_to_points, [[-1, -1], [33, 22], [42, 17]])), 0, 'Ia'),

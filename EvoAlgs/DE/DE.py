@@ -138,7 +138,7 @@ class DE:
         # self.dims=fobj.dimensions
 
         self.dims = dimensions
-
+        self.step_num=0
         self.fobj = fobj
         self.maxiters = maxiters
         if popsize is None:
@@ -172,7 +172,7 @@ class DE:
     def check_constructions(self, new_ind):
 
         new_ind_denormalized = [i for i in self.denormalize([new_ind])[0]]
-        return self.fobj([new_ind_denormalized], check_intersections=True)
+        return self.fobj(pop=[new_ind_denormalized], check_intersections=True)
 
     def random_init(self, popsize, dimensions):
         # print("dim-ions",dimensions)
@@ -197,6 +197,9 @@ class DE:
         # return np.random.rand(popsize, dimensions)
 
     def denormalize(self, population):
+
+        #if not isinstance(population[0], (list, tuple)):
+            #population=[population]
 
         return denormalize(self._MIN, self._DIFF, population)
 
@@ -225,18 +228,18 @@ class DE:
 
         if len(PD) > 1:
             if self.memory == "static":
-                return self.fobj(PD, fromDE=True)
+                return self.fobj(pop=PD, multi_objective_optimization=False,population_number=self.step_num)
             elif self.memory == "dynamic":
                 fit = []
                 obj = []
                 for i, ind in enumerate(PD):
-                    fit_and_obj = self.fobj([ind], fromDE=True, num_of_pop_ind=[self.step_num, i])
+                    fit_and_obj = self.fobj([ind], multi_objective_optimization=False, num_of_pop_ind=[self.step_num, i])
                     fit.append(fit_and_obj[0])
                     obj.append(fit_and_obj[1])
 
                 return fit, obj
         else:
-            fit_and_obj = self.fobj([PD[0]], fromDE=True, num_of_pop_ind=[self.step_num + 1, index_of_ind])
+            fit_and_obj = self.fobj([PD[0]], multi_objective_optimization=False, num_of_pop_ind=[self.step_num + 1, index_of_ind])
             return [fit_and_obj[0]], fit_and_obj[1]
 
         '''
@@ -283,10 +286,22 @@ class DE:
         else:
             indexes_of_individuals = np.argsort(fitnesses)[::-1][:num_of_best_individuals]
 
+        denorm_individuals=[]
+        for i, j in enumerate(indexes_of_individuals):
+            print(j,individuals[j])
+            denorm_individuals.append(self.denormalize([individuals[j]])[0])
+
+        print("individuals after denormalize",denorm_individuals)
+
+        self.print_func(pop=denorm_individuals, num_of_population=population_number)
+
+        '''
         for i, j in enumerate(indexes_of_individuals):
             # print("num_of_pop_ind ", [population_number, i])
 
             self.print_func(self.denormalize([individuals[j]]), num_of_pop_ind=[population_number, i])
+        '''
+
 
     def solve(self, show_progress=False):
         if show_progress:
@@ -300,17 +315,15 @@ class DE:
         EvoAnalytics.pop_size = self.popsize
         EvoAnalytics.set_params()
 
-        '''
-        with open('step_idx.txt', 'w') as out:
-            out.write('{}\n'.format("step"))
-        '''
+
+        #with open('step_idx.txt', 'w') as out:
+            #out.write('{}\n'.format("step"))
+
 
         for step_idx, step in enumerate(iterator):
 
-            '''
-            with open('step_idx.txt', 'a') as out:
-                out.write('{}\n'.format(step))
-            '''
+
+            self.step_num=step_idx
 
             idx = step.best_idx
             P = step.population

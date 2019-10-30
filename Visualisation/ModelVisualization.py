@@ -5,14 +5,14 @@ import shutil
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sb
+from EvoAlgs.EvoAnalytics import EvoAnalytics
 
 
 class ModelsVisualization:
 
-    def __init__(self, configuration_label, exp_name):
+    def __init__(self, configuration_label):
         self.configuration_label = configuration_label
-        self.exp_name = exp_name
-
+        self.exp_name = EvoAnalytics.run_id
         # to clear to plot
 
         plt.rcParams.update({'figure.max_open_warning': 0})
@@ -221,11 +221,15 @@ class ModelsVisualization:
         # plt.show()
         plt.clf()
 
-    def Make_directory_for_gif_images(self):
+    #def visualise_individuals_to_storage(self):
+
+    #def visualise_best_individuals(self):
+
+    def make_directory_for_gif_images(self):
         if not os.path.isdir(f'wave_gif_imgs/{self.exp_name}'):
             os.mkdir(f'wave_gif_imgs/{self.exp_name}')
 
-    def Gif_images_saving(self, population_num, num_in_best_ind_set):
+    def gif_images_saving(self, population_num, num_in_best_ind_set):
 
         dir = str(os.path.abspath(os.curdir)).replace('\\', '/')
         # dir = str(os.path.abspath(os.curdir))
