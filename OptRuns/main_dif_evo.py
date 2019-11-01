@@ -51,8 +51,6 @@ wave_model = SwanWaveModel(exp_domain, None)
 
 optimiser = DEOptimiser()
 
-visualiser=Visualiser(num_of_best_individuals_from_population_for_print=5,)
-
 base_modifications_for_tuning = [
     Breaker('mod1', list(map(xy_to_points, [[-1, -1], [33, 22], [42, 17]])), 0, 'Ia'),
     Breaker('mod2_top', list(map(xy_to_points, [[-1, -1], [50, 32], [50, 39]])), 0, 'II')
@@ -79,7 +77,7 @@ EvoAnalytics.run_id = 'run_{date:%Y_%m_%d_%H_%M_%S}'.format(date=datetime.dateti
 
 #EvoAnalytics.create_chart(None,"history_run_2019_08_26_10_12_05.csv",analyze_only_last_generation=False)
 
-task = OptimisationTask(objectives, selected_modifications_for_tuning, mod_points_to_optimise )
+task = OptimisationTask(objectives, selected_modifications_for_tuning, mod_points_to_optimise,goal="minimization" )
 
 StaticStorage.task = task
 StaticStorage.genotype_length = len(selected_mod_points_to_optimise) * 2
@@ -87,8 +85,9 @@ StaticStorage.genotype_length = len(selected_mod_points_to_optimise) * 2
 #print("exp domain",StaticStorage.exp_domain.base_grid.grid_x,"  ",StaticStorage.exp_domain.base_grid.grid_y )
 #print("genotype length",StaticStorage.genotype_length)
 
+visualiser=Visualiser(store_all_individuals=True, store_best_individuals=True,num_of_best_individuals_from_population_for_print=5,model=wave_model,task=task)
 
-opt_result = optimiser.optimise(wave_model, task)
+opt_result = optimiser.optimise(wave_model, task,visualiser,)
 print("opt_result",opt_result)
 
 

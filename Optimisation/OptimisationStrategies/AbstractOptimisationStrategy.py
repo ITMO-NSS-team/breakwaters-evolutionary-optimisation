@@ -4,6 +4,7 @@ from Optimisation import OptimisationTask
 from Optimisation.Objective import *
 from Configuration.Grid import BreakerPoint
 from Simulation import WaveModel
+from Visualisation.Visualiser import Visualiser
 from Simulation.WaveModel import SwanWaveModel
 import csv
 import uuid
@@ -26,7 +27,7 @@ class OptimisationResults(object):
 class OptimisationStrategyAbstract(metaclass=ABCMeta):
 
     @abstractmethod
-    def optimise(self, model: WaveModel, task: OptimisationTask) -> OptimisationResults:
+    def optimise(self, model: WaveModel, task: OptimisationTask, visualiser: Visualiser ) -> OptimisationResults:
         return
 
 

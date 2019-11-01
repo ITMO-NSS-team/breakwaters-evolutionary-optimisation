@@ -56,14 +56,11 @@ class DefaultSPEA2(SPEA2):
 
             best = sorted(self._archive, key=lambda p: mean_obj(p))[0]
 
-            best_for_print=  [i.genotype.genotype_array  for i in sorted(self._archive, key=lambda p: mean_obj(p))[:EvoAnalytics.num_of_best_inds_for_print]]
+            #best_for_print=  [i.genotype.genotype_array  for i in sorted(self._archive, key=lambda p: mean_obj(p))[:EvoAnalytics.num_of_best_inds_for_print]]
 
-            #for i, j in enumerate(best_for_print):
-                #self.print_func([j], num_of_pop_ind=[gen, i])
 
-            self.print_func(best_for_print, num_of_population=gen)
+            #self.print_func(best_for_print, num_of_population=gen)
 
-            print("best for PRINT",best_for_print)
 
             last_fit = history.last().fitness_value
             if last_fit > mean_obj(best):

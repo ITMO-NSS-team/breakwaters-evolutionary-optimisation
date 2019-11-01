@@ -7,7 +7,7 @@ from EvoAlgs.SPEA2.RawFitness import raw_fitness
 
 
 class SPEA2:
-    def __init__(self, params, objectives, evolutionary_operators, print_func):
+    def __init__(self, params, objectives, evolutionary_operators, print_func,min_or_max):
         '''
          Strength Pareto Evolutionary Algorithm
         :param params: Meta-parameters of the SPEA2
@@ -15,6 +15,7 @@ class SPEA2:
         :param evolutionary_operators: EvoOperators class that encapsulates all evolutionary operators
         '''
 
+        self.goal=min_or_max
         self.params = params
         self.print_func=print_func
 

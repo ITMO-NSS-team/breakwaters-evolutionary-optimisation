@@ -5,6 +5,7 @@ from Optimisation.OptimisationStrategies.SPEA2Strategy import SPEA2OptimisationS
 
 from Optimisation.OptimisationStrategies.DEStrategy import DEStrategy
 
+
 from Optimisation.OptimisationTask import OptimisationTask
 
 
@@ -12,8 +13,8 @@ class Optimiser(object):
     def __init__(self, optimisation_strategy):
         self._optimisation_strategy = optimisation_strategy
 
-    def optimise(self, model, task: OptimisationTask):
-        return self._optimisation_strategy.optimise(model, task)
+    def optimise(self, model, task: OptimisationTask,visualiser):
+        return self._optimisation_strategy.optimise(model, task,visualiser)
 
 
 class StubOptimiser(Optimiser):

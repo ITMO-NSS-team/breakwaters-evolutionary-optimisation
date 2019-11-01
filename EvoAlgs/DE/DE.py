@@ -96,11 +96,11 @@ class DEIterator:
 
 class DE:
     def __init__(self, fobj, print_func, bounds, mutation=(0.5, 1.0), crossover=0.7, maxiters=30,
-                 self_adaptive=False, popsize=None, seed=None, dimensions=2, save_gif=True):
+                 self_adaptive=False, popsize=None, seed=None, dimensions=2, save_gif=True,min_or_max=None):
 
         self.save_gif_images = save_gif
         self.print_func = print_func
-        self.goal = "minimization"
+        self.goal = min_or_max
         self.memory = "static"
         print("bounds", bounds)
         self.adaptive = self_adaptive
@@ -342,8 +342,8 @@ class DE:
                 EvoAnalytics.create_chart(step.iteration, data_for_analyze='gen_len', chart_for_gif=True)
             '''
 
-            if self.save_gif_images:
-                self.print_individuals_with_best_fitness(P, fitness, step_idx)
+            #if self.save_gif_images:
+            #    self.print_individuals_with_best_fitness(P, fitness, step_idx)
 
             if step.iteration > self.maxiters:
 

@@ -4,6 +4,7 @@ import os
 import random
 import uuid
 from itertools import chain
+import copy
 
 import numpy as np
 from pyDOE import lhs
@@ -49,39 +50,7 @@ def obtain_numerical_chromosome(task):
     return list(chain.from_iterable(chromosome))
 
 
-def fitness_function_of_single_objective_optimization(model, task, ind):
-    pre_simulated_results = None
-
-    proposed_breakers = BreakersEvoUtils.build_breakers_from_genotype(ind, task, model.domain.model_grid)
-
-    objectives = []
-
-    base_objectives = _calculate_reference_objectives(model, task)
-
-    combined_breakers_for_cost_estimation = BreakersUtils.merge_breakers_with_modifications(model.domain.base_breakers,
-                                                                                            proposed_breakers)
-
-    for obj_ind, obj in enumerate(task.objectives):
-        if isinstance(obj, (CostObjective, NavigationObjective, StructuralObjective)):
-            # TODO expensive check can be missed? investigate
-            if not isinstance(obj, StructuralObjective):
-                new_obj = obj.get_obj_value(model.domain, combined_breakers_for_cost_estimation)
-            else:
-                new_obj = obj.get_obj_value(model.domain, proposed_breakers)
-
-            if isinstance(obj, CostObjective):
-                new_obj = (new_obj - base_objectives[obj_ind]) / base_objectives[obj_ind] * 100
-            if isinstance(obj, NavigationObjective):
-                new_obj = -(new_obj - base_objectives[obj_ind]) / base_objectives[obj_ind] * 100
-            if isinstance(obj, StructuralObjective):
-                new_obj = new_obj - base_objectives[obj_ind]
-
-            objectives.append([new_obj])
-
-
-
-
-def build_decision(model, task,genotype,num_of_population, num_of_ind,dir,image_for_gif=False,objectives=None):
+def build_decision(model, task,genotype):
 
     proposed_breakers = BreakersEvoUtils.build_breakers_from_genotype(genotype, task, model.domain.model_grid)
 
@@ -103,28 +72,25 @@ def build_decision(model, task,genotype,num_of_population, num_of_ind,dir,image_
                                                                    proposed_breakers)
 
     return simulation_result,all_breakers
-    '''
-    visualiser = ModelsVisualization(str(num_of_population + 1) + "_" + str(num_of_ind + 1))
 
-    visualiser.simple_visualise(simulation_result.get_5percent_output_for_field(), all_breakers,
-                                model.domain.base_breakers,
-                                StaticStorage.exp_domain.fairways, StaticStorage.exp_domain.target_points,fitness=objectives, dir=dir, image_for_gif=image_for_gif,
-                                population_and_ind_number=[num_of_population,num_of_ind])
-    '''
+
 def print_best_individuals_for_gif(model, task, pop, num_of_population):
     genotypes = [[int(round(g, 0)) for g in individ] for individ in pop]
     for ind_num, genotype in enumerate(genotypes):
-        simulation_result,all_breakers=build_decision(model,task,genotype,num_of_population,ind_num,dir="wave_gif_imgs",image_for_gif=True)
+        simulation_result,all_breakers=build_decision(model,task,genotype)
         visualiser = Visualiser()
         visualiser.print_configuration(model=model, simulation_result=simulation_result, all_breakers=all_breakers, num_of_population=num_of_population, fitness=None,ind_num=ind_num, dir="wave_gif_imgs", image_for_gif=True)
 
 def print_individ(model,task,pop,num_of_population, num_of_ind=None,objectives=None):
 
-    simulation_result,all_breakers=build_decision(model, task, pop, num_of_population, num_of_ind,dir="img",objectives=objectives)
+    simulation_result,all_breakers=build_decision(model, task, pop)
     visualiser=Visualiser()
     visualiser.print_configuration(model=model, simulation_result=simulation_result, all_breakers=all_breakers, num_of_population=num_of_population, fitness=objectives,ind_num=num_of_ind,  dir="img", image_for_gif=False)
 
-def calculate_objectives(model, task, pop, multi_objective_optimization, check_intersections=False, population_number=None):
+
+def calculate_objectives(model, task, visualiser,pop, multi_objective_optimization, check_intersections=False, population_number=None):
+
+
     if check_intersections:
 
         genotype = [int(round(g, 0)) for g in pop[0]]
@@ -150,7 +116,7 @@ def calculate_objectives(model, task, pop, multi_objective_optimization, check_i
 
         for p_ind, p in enumerate(pop):
 
-            if not multi_objective_optimization:
+            if not StaticStorage.multi_objective_optimization:
                 genotype = [int(round(g, 0)) for g in p]
             else:
                 genotype = [int(round(g, 0)) for g in p.genotype.genotype_array]
@@ -184,17 +150,23 @@ def calculate_objectives(model, task, pop, multi_objective_optimization, check_i
         pre_simulated_results = None
 
         all_objectives = []
-    if not multi_objective_optimization:
+    if not StaticStorage.multi_objective_optimization:
         all_fitnesses = []
     else:
         labels_to_reference=[]
+
+    genotypes=[]#genotypes store
+    simulation_results_store = []
+    all_breakers_store = []
     for i_ind, p in enumerate(pop):
         label_to_reference = None
 
-        if not multi_objective_optimization:
+        if not StaticStorage.multi_objective_optimization:
             genotype = [int(round(g, 0)) for g in p]
         else:
             genotype = [int(round(g, 0)) for g in p.genotype.genotype_array]
+
+
 
         proposed_breakers = BreakersEvoUtils.build_breakers_from_genotype(genotype, task, model.domain.model_grid)
 
@@ -251,13 +223,12 @@ def calculate_objectives(model, task, pop, multi_objective_optimization, check_i
                         hs=np.zeros(shape=(model.domain.model_grid.grid_y, model.domain.model_grid.grid_x)),
                         configuration_label=label)
                     label_to_reference = label
-
         #objectives = [j for i in objectives for j in i]
         objectives=list(itertools.chain(*objectives))
 
         all_objectives.append(objectives)
 
-        if not multi_objective_optimization:
+        if not StaticStorage.multi_objective_optimization:
 
             all_fitnesses.append(0.8 * objectives[0] + 0.9 * objectives[1] + 0.5 * objectives[2] + sum(objectives[3:]))
 
@@ -270,13 +241,27 @@ def calculate_objectives(model, task, pop, multi_objective_optimization, check_i
             labels_to_reference.append(label_to_reference)
 
         if True:
-            if not population_number is None:
-                print("objectives!!0",objectives)
-                print_individ(model,task,genotype,population_number,i_ind,objectives=objectives)
+            simulation_result, all_breakers = build_decision(model, task, genotype)
+            simulation_results_store.append(copy.deepcopy(simulation_result))
+            all_breakers_store.append(copy.deepcopy(all_breakers))
+            genotypes.append(genotype)
+            #visualiser.print_individ(objectives,population_number,i_ind,simulation_result,all_breakers)
 
-    if not multi_objective_optimization:
+
+
+        #for g in genotypes:
+            #simulation_result, all_breakers = build_decision(model, task, g)
+            #simulation_results_store.append(simulation_result)
+            #all_breakers_store.append(all_breakers)
+
+
+    if not StaticStorage.multi_objective_optimization:
+        print("pop number",population_number)
+
+        visualiser.print_individuals(all_objectives, population_number, simulation_results_store, all_breakers_store,all_fitnesses)
         return all_fitnesses, all_objectives
     else:
+        visualiser.print_individuals(all_objectives, population_number, simulation_results_store, all_breakers_store)
         return all_objectives,labels_to_reference
 
 
