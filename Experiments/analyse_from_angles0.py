@@ -25,6 +25,8 @@ wave_model = SwanWaveModel(exp_domain, None)
 
 indices = ['default', '1', '2', '3', '4']
 
+max2=3
+
 for _, mod_id in enumerate(['default',
                             '2bae29f1bf1d4b21a7c0fc45c1f48d43',
                             '9b3a1e81cd694d8a892ec1aa69391a9b',
@@ -219,7 +221,7 @@ for _, mod_id in enumerate(['default',
                                                       StaticStorage.exp_domain.fairways,
                                                       StaticStorage.exp_domain.target_points,
                                                       "mean",
-                                                      [2, 6][i],
+                                                      [2, max2][i],
                                                       # ['а)', 'б)', 'а)', 'б)'][bord],
                                                       'а)',
                                                       wi == 1, [1, 50][i],
@@ -286,7 +288,7 @@ for _, mod_id in enumerate(['default',
                                                       StaticStorage.exp_domain.fairways,
                                                       StaticStorage.exp_domain.target_points,
                                                       "mean",
-                                                      [2, 2, 2, 2, 2, 2, 2, 6, 6, 6, 6, 6, 6, 6][i],
+                                                      [2, 2, 2, 2, 2, 2, 2, max2, max2, max2, max2, max2, max2, max2][i],
                                                       # f'{ord})',
                                                       'б)',
                                                       wi == 1, [1, 1, 1, 1, 1, 1, 1, 50, 50, 50, 50, 50, 50, 50][i],

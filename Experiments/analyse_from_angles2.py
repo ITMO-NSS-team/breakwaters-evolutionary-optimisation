@@ -218,8 +218,10 @@ for _, mod_id in enumerate(['MKG9_Т8_75', 'MKG10_Т6_75', 'newvar',
             if lind % 2 == 1:
                 new1 = ',\n '
             lind += 1
-
-            len_info += f'{all_labels[i]}: {_len} м{new1}'
+            if mod_id in ['MKG9_Т8_75','MKG10_Т6_75'] and i == 1:
+                len_info += f'{all_labels[i]}: 75 м{new1}'
+            else:
+                len_info += f'{all_labels[i]}: {_len} м{new1}'
 
     len_info = len_info[0:(len(len_info) - 3)]
     len_info += '.\n'

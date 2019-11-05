@@ -8,16 +8,16 @@ indices0 = ['default', '1', '2', '3', '4', '11', '12', '10', '5', '9', '6', '8',
 indices = ['default', '1', '2', '3', '4', '5', '6', '7.1', '7.2', '8', '9', '10', '11', '12']
 
 exps0 = ['default',
-        '2bae29f1bf1d4b21a7c0fc45c1f48d43',
-        '9b3a1e81cd694d8a892ec1aa69391a9b',
-        '15cfec8f704f4d3b96fe64a89d270a2a',
-        'f5ceed9e0b86467bbdf88b948582cd31',
-        'MKG9_Т8_75', 'MKG10_Т6_75', 'newvar',
-        '904dff5a-6946-434d-8d1d-aaa4e553e6cc',
-        '5-8',
-        '53b30020-35a1-49aa-a4fd-b4d68e240c23',
-        'default_shpora2',
-        'n7_2fix', 'n7_1']
+         '2bae29f1bf1d4b21a7c0fc45c1f48d43',
+         '9b3a1e81cd694d8a892ec1aa69391a9b',
+         '15cfec8f704f4d3b96fe64a89d270a2a',
+         'f5ceed9e0b86467bbdf88b948582cd31',
+         'MKG9_Т8_75', 'MKG10_Т6_75', 'newvar',
+         '904dff5a-6946-434d-8d1d-aaa4e553e6cc',
+         '5-8',
+         '53b30020-35a1-49aa-a4fd-b4d68e240c23',
+         'default_shpora2',
+         'n7_2fix', 'n7_1']
 
 exps = ['default',
         '2bae29f1bf1d4b21a7c0fc45c1f48d43',
@@ -35,7 +35,7 @@ exps = ['default',
 id = "default"
 line_idx = 4
 line_idx2 = 6
-line_idx3 = 12#
+line_idx3 = 12  #
 
 with open(f'D:\\Projects\\Sochi-prichal\\breakwater-evo-opt\\img\\experiments\\{id}\\{id}-base-fortab.csv',
           newline='') as csvfile:
