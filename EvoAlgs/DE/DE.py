@@ -17,10 +17,6 @@ class DEIterator:
         # de.print_individuals_with_best_fitness(self.population, self.fitness, 0)
 
         EvoAnalytics.num_of_best_inds_for_print = 5
-        if de.goal == "minimization":
-            self.indexes_of_best_individuals = np.argsort(self.fitness)[:EvoAnalytics.num_of_best_inds_for_print]
-        else:
-            self.indexes_of_best_individuals = np.argsort(self.fitness)[::-1][:EvoAnalytics.num_of_best_inds_for_print]
 
         # print("indexes",self.indexes_of_best_individuals)
 
@@ -228,18 +224,18 @@ class DE:
 
         if len(PD) > 1:
             if self.memory == "static":
-                return self.fobj(pop=PD, multi_objective_optimization=False,population_number=self.step_num)
+                return self.fobj(pop=PD, multi_objective_optimization=False,population_number=self.step_num,maxiters=self.maxiters)
             elif self.memory == "dynamic":
                 fit = []
                 obj = []
                 for i, ind in enumerate(PD):
-                    fit_and_obj = self.fobj([ind], multi_objective_optimization=False, num_of_pop_ind=[self.step_num, i])
+                    fit_and_obj = self.fobj([ind], multi_objective_optimization=False, num_of_pop_ind=[self.step_num, i],maxiters=self.maxiters)
                     fit.append(fit_and_obj[0])
                     obj.append(fit_and_obj[1])
 
                 return fit, obj
         else:
-            fit_and_obj = self.fobj([PD[0]], multi_objective_optimization=False, num_of_pop_ind=[self.step_num + 1, index_of_ind])
+            fit_and_obj = self.fobj([PD[0]], multi_objective_optimization=False, num_of_pop_ind=[self.step_num + 1, index_of_ind],maxiters=self.maxiters)
             return [fit_and_obj[0]], fit_and_obj[1]
 
         '''
@@ -310,11 +306,12 @@ class DE:
             iterator = self.iterator()
 
         # Analytics
+        '''
         EvoAnalytics.num_of_generations = self.maxiters
         EvoAnalytics.num_of_rows = math.ceil(EvoAnalytics.num_of_generations / EvoAnalytics.num_of_cols)
         EvoAnalytics.pop_size = self.popsize
         EvoAnalytics.set_params()
-
+        '''
 
         #with open('step_idx.txt', 'w') as out:
             #out.write('{}\n'.format("step"))
@@ -323,7 +320,7 @@ class DE:
         for step_idx, step in enumerate(iterator):
 
 
-            self.step_num=step_idx
+            self.step_num+=1
 
             idx = step.best_idx
             P = step.population
@@ -353,10 +350,13 @@ class DE:
                     iterator.close()
                 break
 
+        '''
         EvoAnalytics.create_chart(data_for_analyze='obj', analyze_only_last_generation=False,
                                   chart_for_gif=True)
         EvoAnalytics.create_chart(data_for_analyze='gen_len', analyze_only_last_generation=False,
                                   chart_for_gif=True)
+        '''
+
 
         return self.denormalize([P[idx].reshape(-1, 1)]), fitness[idx]
 

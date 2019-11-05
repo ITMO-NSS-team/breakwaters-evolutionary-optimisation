@@ -88,8 +88,9 @@ def print_individ(model,task,pop,num_of_population, num_of_ind=None,objectives=N
     visualiser.print_configuration(model=model, simulation_result=simulation_result, all_breakers=all_breakers, num_of_population=num_of_population, fitness=objectives,ind_num=num_of_ind,  dir="img", image_for_gif=False)
 
 
-def calculate_objectives(model, task, visualiser,pop, multi_objective_optimization, check_intersections=False, population_number=None):
 
+
+def calculate_objectives(model, task, visualiser,pop, multi_objective_optimization, check_intersections=False, population_number=None, maxiters=None):
 
     if check_intersections:
 
@@ -246,9 +247,6 @@ def calculate_objectives(model, task, visualiser,pop, multi_objective_optimizati
             all_breakers_store.append(copy.deepcopy(all_breakers))
             genotypes.append(genotype)
             #visualiser.print_individ(objectives,population_number,i_ind,simulation_result,all_breakers)
-
-
-
         #for g in genotypes:
             #simulation_result, all_breakers = build_decision(model, task, g)
             #simulation_results_store.append(simulation_result)
@@ -258,10 +256,10 @@ def calculate_objectives(model, task, visualiser,pop, multi_objective_optimizati
     if not StaticStorage.multi_objective_optimization:
         print("pop number",population_number)
 
-        visualiser.print_individuals(all_objectives, population_number, simulation_results_store, all_breakers_store,all_fitnesses)
+        visualiser.print_individuals(all_objectives, population_number, simulation_results_store, all_breakers_store,all_fitnesses,maxiters)
         return all_fitnesses, all_objectives
     else:
-        visualiser.print_individuals(all_objectives, population_number, simulation_results_store, all_breakers_store)
+        visualiser.print_individuals(all_objectives, population_number, simulation_results_store, all_breakers_store,maxiters)
         return all_objectives,labels_to_reference
 
 

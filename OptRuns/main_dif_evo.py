@@ -85,7 +85,7 @@ StaticStorage.genotype_length = len(selected_mod_points_to_optimise) * 2
 #print("exp domain",StaticStorage.exp_domain.base_grid.grid_x,"  ",StaticStorage.exp_domain.base_grid.grid_y )
 #print("genotype length",StaticStorage.genotype_length)
 
-visualiser=Visualiser(store_all_individuals=True, store_best_individuals=True,num_of_best_individuals_from_population_for_print=5,model=wave_model,task=task)
+visualiser=Visualiser(store_all_individuals=True, store_best_individuals=True,num_of_best_individuals_from_population_for_print=5,create_gif_image=True,create_boxplots=True,model=wave_model,task=task)
 
 opt_result = optimiser.optimise(wave_model, task,visualiser,)
 print("opt_result",opt_result)

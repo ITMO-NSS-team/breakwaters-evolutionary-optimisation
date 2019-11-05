@@ -192,6 +192,10 @@ class EvoAnalytics:
                 plt.close('all')
 
             else:
+
+                if not os.path.isdir("boxplots/" + str(data_for_analyze) + "/" + str(EvoAnalytics.run_id)):
+                    os.mkdir("boxplots/" + str(data_for_analyze) + "/" + str(EvoAnalytics.run_id))
+
                 if chart_type == 'boxplot':
                     EvoAnalytics.axs[EvoAnalytics.gener[num_of_generation][0]][
                         EvoAnalytics.gener[num_of_generation][1]].set_title("Population " + str(num_of_generation))
