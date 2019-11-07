@@ -7,17 +7,14 @@ from EvoAlgs.SPEA2.RawFitness import raw_fitness
 
 
 class SPEA2:
-    def __init__(self, params, objectives, evolutionary_operators, print_func,min_or_max):
+    def __init__(self, params, objectives, evolutionary_operators):
         '''
          Strength Pareto Evolutionary Algorithm
         :param params: Meta-parameters of the SPEA2
         :param objectives: function to calculate objective functions for each individual in population
         :param evolutionary_operators: EvoOperators class that encapsulates all evolutionary operators
         '''
-
-        self.goal=min_or_max
         self.params = params
-        self.print_func=print_func
 
         self.objectives = objectives
         self.operators = evolutionary_operators
@@ -38,12 +35,12 @@ class SPEA2:
         self._archive = []
 
     class Params:
-        def __init__(self, max_gens, pop_size, archive_size, crossover_rate, mutation_rate, mutation_value_rate):
+        def __init__(self, max_gens, pop_size, archive_size, crossover_rate, mutation_rate, mutation_value_rate,min_or_max):
             self.max_gens = max_gens
             self.pop_size = pop_size
 
             self.archive_size = archive_size
-
+            self.goal = min_or_max
             self.crossover_rate = crossover_rate
             self.mutation_rate = mutation_rate
             self.mutation_value_rate = mutation_value_rate
@@ -97,7 +94,8 @@ class SPEA2:
 
     def fitness(self,gen):
 
-        all_objectives,labels_to_reference=self.objectives(pop=self._pop,population_number=gen,multi_objective_optimization=True)
+
+        all_objectives,labels_to_reference=self.objectives(pop=self._pop,population_number=gen,multi_objective_optimization=True,maxiters=self.params.max_gens)
 
         for i, p in enumerate(self._pop):
             p.objectives=all_objectives[i]
@@ -140,9 +138,6 @@ class SPEA2:
         return sqrt(sum)
 
     def environmental_selection(self, pop, archive):
-
-        print("Archive",archive)
-
 
         union = archive + pop
         env = [p for p in union if p.fitness() < 1.0]

@@ -90,7 +90,8 @@ def print_individ(model,task,pop,num_of_population, num_of_ind=None,objectives=N
 
 
 
-def calculate_objectives(model, task, visualiser,pop, multi_objective_optimization, check_intersections=False, population_number=None, maxiters=None):
+def calculate_objectives(model, task, visualiser,pop, multi_objective_optimization, check_intersections=False, population_number=None, maxiters=None,toadd=False):
+
 
     if check_intersections:
 
@@ -150,7 +151,7 @@ def calculate_objectives(model, task, visualiser,pop, multi_objective_optimizati
     else:
         pre_simulated_results = None
 
-        all_objectives = []
+    all_objectives = []
     if not StaticStorage.multi_objective_optimization:
         all_fitnesses = []
     else:
@@ -246,6 +247,8 @@ def calculate_objectives(model, task, visualiser,pop, multi_objective_optimizati
             simulation_results_store.append(copy.deepcopy(simulation_result))
             all_breakers_store.append(copy.deepcopy(all_breakers))
             genotypes.append(genotype)
+
+
             #visualiser.print_individ(objectives,population_number,i_ind,simulation_result,all_breakers)
         #for g in genotypes:
             #simulation_result, all_breakers = build_decision(model, task, g)
@@ -253,13 +256,16 @@ def calculate_objectives(model, task, visualiser,pop, multi_objective_optimizati
             #all_breakers_store.append(all_breakers)
 
 
+    [EvoAnalytics.save_cantidate(population_number, all_objectives[i], ind) for i, ind in enumerate(genotypes)]
+
     if not StaticStorage.multi_objective_optimization:
         print("pop number",population_number)
 
         visualiser.print_individuals(all_objectives, population_number, simulation_results_store, all_breakers_store,all_fitnesses,maxiters)
         return all_fitnesses, all_objectives
     else:
-        visualiser.print_individuals(all_objectives, population_number, simulation_results_store, all_breakers_store,maxiters)
+        if not toadd:
+            visualiser.print_individuals(all_objectives, population_number, simulation_results_store, all_breakers_store,fitnesses=None, maxiters=maxiters)
         return all_objectives,labels_to_reference
 
 

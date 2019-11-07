@@ -10,9 +10,12 @@ from EvoAlgs.EvoAnalytics import EvoAnalytics
 
 class ModelsVisualization:
 
-    def __init__(self, configuration_label):
+    def __init__(self, configuration_label,exp_name=None):
         self.configuration_label = configuration_label
-        self.exp_name = EvoAnalytics.run_id
+        if not exp_name:
+            self.exp_name = EvoAnalytics.run_id
+        else:
+            self.exp_name=exp_name
         # to clear to plot
 
         plt.rcParams.update({'figure.max_open_warning': 0})

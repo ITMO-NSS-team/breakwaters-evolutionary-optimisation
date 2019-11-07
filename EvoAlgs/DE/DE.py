@@ -4,15 +4,16 @@ from EvoAlgs.EvoAnalytics import EvoAnalytics
 import math
 from tqdm import tqdm
 
+
 class DEIterator:
     def __init__(self, de):
         self.de = de
         self.population = de.init()
+        #self.fitness, self.objectives = de.evaluate(self.population, 0)
         self.fitness, self.objectives = de.evaluate(self.population, 0)
-        # self.fitness=de.evaluate(self.population, 0)
-
         self.best_fitness = min(self.fitness)
         self.index_of_ind = 0
+
         # if de.save_gif_images:
         # de.print_individuals_with_best_fitness(self.population, self.fitness, 0)
 
@@ -37,6 +38,7 @@ class DEIterator:
         # population, a mutant is created by combining different vectors in
         # the population (depending on the strategy selected). If the mutant
         # is better than the target vector, the target vector is replaced.
+
         while self.iteration < self.de.maxiters:
             # Compute values for f and cr in each iteration
             # de.print_individuals_with_best_fitness(self.population, self.fitness, self.iteration)
@@ -68,7 +70,10 @@ class DEIterator:
     def replace(self, mutants):
         # mutant_fitness,obj = self.de.evaluate(np.asarray([mutant]), i)
         # return self.replacement(i, mutant, mutant_fitness, obj)
-        mutant_fitness, obj = self.de.evaluate(np.asarray(mutants))
+        if self.iteration!=0:
+            mutant_fitness, obj = self.de.evaluate(np.asarray(mutants))
+        else:
+            mutant_fitness,obj=self.fitness, self.objectives
 
         return self.replacement(mutants, mutant_fitness, obj)
         # return self.replacement(i, mutant, mutant_fitness)
@@ -90,12 +95,12 @@ class DEIterator:
         return True
         # return False!
 
+
 class DE:
-    def __init__(self, fobj, print_func, bounds, mutation=(0.5, 1.0), crossover=0.7, maxiters=30,
-                 self_adaptive=False, popsize=None, seed=None, dimensions=2, save_gif=True,min_or_max=None):
+    def __init__(self, fobj, bounds, mutation=(0.5, 1.0), crossover=0.7, maxiters=30,
+                 self_adaptive=False, popsize=None, seed=None, dimensions=2, save_gif=True, min_or_max=None):
 
         self.save_gif_images = save_gif
-        self.print_func = print_func
         self.goal = min_or_max
         self.memory = "static"
         print("bounds", bounds)
@@ -134,7 +139,7 @@ class DE:
         # self.dims=fobj.dimensions
 
         self.dims = dimensions
-        self.step_num=0
+        self.step_num = 0
         self.fobj = fobj
         self.maxiters = maxiters
         if popsize is None:
@@ -194,8 +199,8 @@ class DE:
 
     def denormalize(self, population):
 
-        #if not isinstance(population[0], (list, tuple)):
-            #population=[population]
+        # if not isinstance(population[0], (list, tuple)):
+        # population=[population]
 
         return denormalize(self._MIN, self._DIFF, population)
 
@@ -224,18 +229,21 @@ class DE:
 
         if len(PD) > 1:
             if self.memory == "static":
-                return self.fobj(pop=PD, multi_objective_optimization=False,population_number=self.step_num,maxiters=self.maxiters)
+                return self.fobj(pop=PD, multi_objective_optimization=False, population_number=self.step_num,
+                                 maxiters=self.maxiters)
             elif self.memory == "dynamic":
                 fit = []
                 obj = []
                 for i, ind in enumerate(PD):
-                    fit_and_obj = self.fobj([ind], multi_objective_optimization=False, num_of_pop_ind=[self.step_num, i],maxiters=self.maxiters)
+                    fit_and_obj = self.fobj([ind], multi_objective_optimization=False,
+                                            num_of_pop_ind=[self.step_num, i], maxiters=self.maxiters)
                     fit.append(fit_and_obj[0])
                     obj.append(fit_and_obj[1])
 
                 return fit, obj
         else:
-            fit_and_obj = self.fobj([PD[0]], multi_objective_optimization=False, num_of_pop_ind=[self.step_num + 1, index_of_ind],maxiters=self.maxiters)
+            fit_and_obj = self.fobj([PD[0]], multi_objective_optimization=False,
+                                    num_of_pop_ind=[self.step_num + 1, index_of_ind], maxiters=self.maxiters)
             return [fit_and_obj[0]], fit_and_obj[1]
 
         '''
@@ -257,48 +265,6 @@ class DE:
                 iteration = step.iteration
                 yield step
 
-    '''
-    def print_individuals_with_best_fitness(self, individuals, fitnesses, population_number):
-
-
-        individuals=[self.denormalize([i]) for i in individuals]
-        print("INDIVIDUALS AFTER DENORM",individuals)
-        individuals=[[ int(round(j)) for j in i[0]] for i in individuals ]
-        print("INDIVIDUALS AFTER ROUND", individuals)
-
-        self.print_func(individuals=individuals,fitnesses=fitnesses, num_of_pop=population_number)
-
-    '''
-
-    def print_individuals_with_best_fitness(self, individuals, fitnesses, population_number):
-
-        num_of_best_individuals = EvoAnalytics.num_of_best_inds_for_print
-        if self.goal == "minimization":
-            indexes_of_individuals = np.argsort(fitnesses)[:num_of_best_individuals]
-
-            f = open("g.txt", "a+")
-            f.write("population")
-
-        else:
-            indexes_of_individuals = np.argsort(fitnesses)[::-1][:num_of_best_individuals]
-
-        denorm_individuals=[]
-        for i, j in enumerate(indexes_of_individuals):
-            print(j,individuals[j])
-            denorm_individuals.append(self.denormalize([individuals[j]])[0])
-
-        print("individuals after denormalize",denorm_individuals)
-
-        self.print_func(pop=denorm_individuals, num_of_population=population_number)
-
-        '''
-        for i, j in enumerate(indexes_of_individuals):
-            # print("num_of_pop_ind ", [population_number, i])
-
-            self.print_func(self.denormalize([individuals[j]]), num_of_pop_ind=[population_number, i])
-        '''
-
-
     def solve(self, show_progress=False):
         if show_progress:
             iterator = tqdm(self.iterator(), total=self.maxiters, desc='Optimizing ({0})'.format(self.name))
@@ -306,41 +272,18 @@ class DE:
             iterator = self.iterator()
 
         # Analytics
-        '''
         EvoAnalytics.num_of_generations = self.maxiters
-        EvoAnalytics.num_of_rows = math.ceil(EvoAnalytics.num_of_generations / EvoAnalytics.num_of_cols)
-        EvoAnalytics.pop_size = self.popsize
-        EvoAnalytics.set_params()
-        '''
 
-        #with open('step_idx.txt', 'w') as out:
-            #out.write('{}\n'.format("step"))
 
 
         for step_idx, step in enumerate(iterator):
 
-
-            self.step_num+=1
+            self.step_num += 1
 
             idx = step.best_idx
             P = step.population
             fitness = step.fitness
             obj = step.objectives
-
-            [EvoAnalytics.save_cantidate(step.iteration, obj[i], ind) for i, ind in enumerate(P)]
-
-            '''
-            #Create charts during optimization pro#Create charts during optimizationcess
-            if step_idx == 0:
-                EvoAnalytics.create_chart(step.iteration, data_for_analyze='obj', chart_for_gif=True, first_generation=True)
-                EvoAnalytics.create_chart(step.iteration, data_for_analyze='gen_len', chart_for_gif=True, first_generation=True)
-            else:
-                EvoAnalytics.create_chart(step.iteration, data_for_analyze='obj', chart_for_gif=True)
-                EvoAnalytics.create_chart(step.iteration, data_for_analyze='gen_len', chart_for_gif=True)
-            '''
-
-            #if self.save_gif_images:
-            #    self.print_individuals_with_best_fitness(P, fitness, step_idx)
 
             if step.iteration > self.maxiters:
 
@@ -350,13 +293,5 @@ class DE:
                     iterator.close()
                 break
 
-        '''
-        EvoAnalytics.create_chart(data_for_analyze='obj', analyze_only_last_generation=False,
-                                  chart_for_gif=True)
-        EvoAnalytics.create_chart(data_for_analyze='gen_len', analyze_only_last_generation=False,
-                                  chart_for_gif=True)
-        '''
-
 
         return self.denormalize([P[idx].reshape(-1, 1)]), fitness[idx]
-

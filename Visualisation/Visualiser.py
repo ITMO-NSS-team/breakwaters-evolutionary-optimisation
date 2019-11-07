@@ -29,6 +29,9 @@ class Visualiser:
 
     def print_configuration(self, simulation_result,all_breakers,objective,dir,image_for_gif,num_of_population,ind_num):
 
+        print("population_number", num_of_population)
+        print("ind num", ind_num)
+
         visualiser = ModelsVisualization(str(num_of_population + 1) + "_" + str(ind_num + 1))
 
         visualiser.simple_visualise(simulation_result.get_5percent_output_for_field(),
@@ -41,6 +44,7 @@ class Visualiser:
         del visualiser
 
     def print_individuals(self,objectives,num_of_population,simulation_result_store,all_breakers_store,fitnesses=None,maxiters=None):
+
 
         print("maxiters",maxiters)
 
@@ -55,7 +59,7 @@ class Visualiser:
                 best_for_print=np.argsort(mean_fit)[:self.num_of_best_individuals]
             else:
                 best_for_print=np.argsort(mean_fit)[::-1][:self.num_of_best_individuals]
-                #best_for_print = [i.genotype.genotype_array for i in sorted(enumerate(objectives), key=lambda fit: np.mean(fit[1]) )[:EvoAnalytics.num_of_best_inds_for_print]]
+                #best_for_print = [i.genotype.genotype_array for i in sorted(enumerate(obj.ectives), key=lambda fit: np.mean(fit[1]) )[:EvoAnalytics.num_of_best_inds_for_print]]
 
         if self.store_all_individuals:
             image_for_gif=False
@@ -66,22 +70,28 @@ class Visualiser:
 
 
         if self.store_best_individuals:
+
             for i,ind_num in enumerate(best_for_print):
                 self.print_configuration(simulation_result_store[ind_num], all_breakers_store[ind_num], objectives[ind_num], dir="wave_gif_imgs", image_for_gif=True, num_of_population=num_of_population, ind_num=i)
 
         if num_of_population+1==maxiters:
             if self.create_boxplots:
+
                 EvoAnalytics.num_of_rows = math.ceil(EvoAnalytics.num_of_generations / EvoAnalytics.num_of_cols)
-                EvoAnalytics.pop_size = len(objectives)
+                EvoAnalytics.pop_size =len(objectives)
                 EvoAnalytics.set_params()
+                print("EvoAnalytics.num_of_generations",EvoAnalytics.num_of_generations)
+                print("EvoAnalytics.num_of_cols",EvoAnalytics.num_of_cols)
+                print("num_of_rows", EvoAnalytics.num_of_rows)
+                print("pop_size", EvoAnalytics.pop_size)
+
 
                 EvoAnalytics.create_chart(data_for_analyze='obj', analyze_only_last_generation=False,
                                           chart_for_gif=True)
                 EvoAnalytics.create_chart(data_for_analyze='gen_len', analyze_only_last_generation=False,
                                           chart_for_gif=True)
-
             if self.create_gif_image:
-                self.maxiters=maxiters
+                self.maxiters=EvoAnalytics.num_of_generations
                 self.gif_images_maker()
                 self.gif_series_maker()
 
