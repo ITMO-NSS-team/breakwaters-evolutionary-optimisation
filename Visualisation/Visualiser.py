@@ -209,3 +209,4 @@ class Visualiser:
         images[0].save("gif_img/{}/Graphs.gif".format(directory), save_all=True, append_images=images[1:], duration=100,
                        loop=0)
 
+    #def print_pareto_front(self, objectives):
