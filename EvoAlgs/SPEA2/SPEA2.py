@@ -7,21 +7,23 @@ from EvoAlgs.SPEA2.RawFitness import raw_fitness
 
 
 class SPEA2:
-    def __init__(self, params, objectives, evolutionary_operators):
+    def __init__(self, params, calculate_objectives, evolutionary_operators):
         '''
          Strength Pareto Evolutionary Algorithm
         :param params: Meta-parameters of the SPEA2
-        :param objectives: function to calculate objective functions for each individual in population
+        :param calculate_objectives: function to calculate objective functions for each individual in population
         :param evolutionary_operators: EvoOperators class that encapsulates all evolutionary operators
         '''
 
         self.params = params
 
-        self.objectives = objectives
+        self.calculate_objectives = calculate_objectives
         self.operators = evolutionary_operators
 
         self.__init_operators()
         self.__init_populations()
+
+        self.genotype_mask = None
 
     def __init_operators(self):
         self.init_population = self.operators.init_population
@@ -66,8 +68,8 @@ class SPEA2:
         def fitness(self):
             return self.raw_fitness + self.density
 
-        #def weighted_sum(self):
-            #return sum(list(self.objectives))
+        # def weighted_sum(self):
+        # return sum(list(self.calculate_objectives))
 
     class ErrorHistory:
         class Point:
@@ -92,7 +94,7 @@ class SPEA2:
         pass
 
     def fitness(self):
-        self.objectives(self._pop)
+        self.calculate_objectives(self._pop)
         union = self._archive + self._pop
 
         raw_values = raw_fitness(union)
@@ -185,8 +187,9 @@ class SPEA2:
             if idx == len(selected) - 1:
                 p2 = selected[0]
 
-            child_gen = self.crossover(p1.genotype, p2.genotype, self.params.crossover_rate)
-            child_gen = self.mutation(child_gen, self.params.mutation_rate, self.params.mutation_value_rate)
+            child_gen = self.crossover(p1.genotype, p2.genotype, self.params.crossover_rate, self.genotype_mask)
+            child_gen = self.mutation(child_gen, self.params.mutation_rate, self.params.mutation_value_rate,
+                                      self.genotype_mask)
             child = SPEA2.Individ(genotype=child_gen)
             children.append(child)
 

@@ -105,3 +105,40 @@ class SochiHarborNew(Domain):
                          #add
                          Fairway(GridPoint(46, 48), GridPoint(53, 44), importance=0.8),
                          Fairway(GridPoint(53, 44), GridPoint(53, 32), importance=0.8)]
+
+
+class ExpHarbor(Domain):
+
+    def __init__(self):
+        all_base_breakers = [
+            Breaker('Ia', list(map(xy_to_points, [[33, 22], [42, 17]])), 0, ''),
+            Breaker('Ib', list(map(xy_to_points, [[42, 17], [59, 17], [72, 25]])), 0.9, ''),
+            Breaker('II', list(map(xy_to_points, [[50, 32], [50, 39]])), 0, ''),
+            Breaker('IIIa', list(map(xy_to_points, [[67, 35], [56, 32]])), 0.9, ''),
+            Breaker('IIIb', list(map(xy_to_points, [[67, 39], [63, 38]])), 0.9, '')
+        ]
+
+        self.target_points = [TargetPoint(x=57, y=18, weight=1)]
+
+        self.base_grid = Grid(grid_x=84,
+                              grid_y=59,
+                              spatial_step=25)
+
+        self.model_grid = self.base_grid
+
+        self.base_breakers = [breaker for breaker in all_base_breakers if
+                              (breaker.breaker_id in ['Ia', 'Ib', 'II', 'IIIa', 'IIIb'])]
+
+        self.wind_direction = 135
+        self.wind_enabled = True
+
+        self.fairways = [Fairway(GridPoint(20, 20), GridPoint(30, 28), importance=0.5),
+                         Fairway(GridPoint(30, 28), GridPoint(60, 22), importance=0.3),
+                         Fairway(GridPoint(60, 22), GridPoint(67, 27), importance=0.7),
+                         # internal
+                         Fairway(GridPoint(50, 24), GridPoint(51, 30), importance=1),
+                         Fairway(GridPoint(51, 30), GridPoint(71, 49), importance=0.7),
+                         Fairway(GridPoint(71, 49), GridPoint(71, 55), importance=0.7),
+                         Fairway(GridPoint(55, 34), GridPoint(65, 37), importance=0.7),
+                         Fairway(GridPoint(59, 38), GridPoint(64, 39), importance=0.8),
+                         Fairway(GridPoint(51, 30), GridPoint(65, 33), importance=0.78)]

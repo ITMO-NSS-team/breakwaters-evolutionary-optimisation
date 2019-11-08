@@ -14,11 +14,10 @@ from CommonUtils.StaticStorage import StaticStorage
 from EvoAlgs.BreakersEvo.BreakersEvoUtils import BreakersEvoUtils
 from EvoAlgs.BreakersEvo.BreakersParams import BreakersParams
 from EvoAlgs.EvoAnalytics import EvoAnalytics
-from Optimisation.Objective import CostObjective, NavigationObjective, WaveHeightObjective, StructuralObjective
-from Visualisation.ModelVisualization import ModelsVisualization
+from Optimisation.Objective import CostObjective, NavigationObjective, WaveHeightObjective, StructuralObjective, \
+    RelativeQuailityObjective
 from Simulation.Results import WaveSimulationResult
-
-from collections import OrderedDict
+from Visualisation.ModelVisualization import ModelsVisualization
 
 # TODO refactor
 len_range = [0, 3]
@@ -30,7 +29,7 @@ def obtain_numerical_chromosome(task):
     for modification in task.possible_modifications:
         points_to_opt = task.mod_points_to_optimise[modification.breaker_id]
         points_to_encode = []
-        prev_anchor = None
+
         for i in points_to_opt:
             anchor = modification.points[i + 1]
             prev_anchor = modification.points[i + 2]
@@ -82,7 +81,7 @@ def calculate_objectives(model, task, pop):
     else:
         pre_simulated_results = None
 
-    for i_ind, p in enumerate(pop):
+    for individ_index, p in enumerate(pop):
         label_to_reference = None
         genotype = [int(round(g, 0)) for g in p.genotype.genotype_array]
 
@@ -95,6 +94,33 @@ def calculate_objectives(model, task, pop):
             model.domain.base_breakers, proposed_breakers)
 
         for obj_ind, obj in enumerate(task.objectives):
+            if isinstance(obj, RelativeQuailityObjective):
+
+                if model.computational_manager is not None and model.computational_manager.is_lazy_parallel:
+                    base_simulation_result = model.run_simulation_for_constructions(model.domain.base_breakers)
+                    base_fin_values = model.computational_manager.finalise_execution()
+                    # process ids
+                    if len(base_fin_values) > 0:
+                        for i, val in enumerate(base_fin_values):
+                            label = val[0]
+                            hs = val[1]
+                            base_simulation_result._hs = hs
+                else:
+                    base_simulation_result = model.run_simulation_for_constructions(model.domain.base_breakers)
+
+                if model.computational_manager is None or not model.computational_manager.is_lazy_parallel:
+                    simulation_result = model.run_simulation_for_constructions(proposed_breakers)
+                else:
+                    simulation_result = pre_simulated_results[individ_index]
+
+                label_to_reference = simulation_result.configuration_label
+
+                new_obj = obj.get_obj_value(model.domain, proposed_breakers, model.domain.base_breakers,
+                                            simulation_result,
+                                            base_simulation_result)
+
+                objectives.append([new_obj])
+
             if isinstance(obj, (CostObjective, NavigationObjective, StructuralObjective)):
                 # TODO expensive check can be missed? investigate
                 if not isinstance(obj, StructuralObjective):
@@ -115,27 +141,28 @@ def calculate_objectives(model, task, pop):
                 if model.computational_manager is None or not model.computational_manager.is_lazy_parallel:
                     simulation_result = model.run_simulation_for_constructions(proposed_breakers)
                 else:
-                    # print(i_ind)
+                    # print(individ_index)
                     try:
-                        simulation_result = pre_simulated_results[i_ind]
+                        simulation_result = pre_simulated_results[individ_index]
                     except:
                         print("!")
-                    label_to_reference = simulation_result.configuration_label
-                    new_obj = (obj.get_obj_value(model.domain, proposed_breakers, simulation_result))
+                label_to_reference = simulation_result.configuration_label
 
-                    # for 3 points it is list
-                    new_obj = [(x1 - x2) / x2 * 100 for (x1, x2) in zip(new_obj, base_objectives[obj_ind])]
+                new_obj = obj.get_obj_value(model.domain, proposed_breakers, simulation_result)
 
-                    objectives.append(new_obj)
+                # for 3 points it is list
+                new_obj = [(x1 - x2) / x2 * 100 for (x1, x2) in zip(new_obj, base_objectives[obj_ind])]
+
+                objectives.append(new_obj)
+
             else:
-                if len(task.objectives) < 4:
+                if not any(isinstance(o, (WaveHeightObjective, RelativeQuailityObjective)) for o in task.objectives):
                     label = uuid.uuid4().hex
                     simulation_result = WaveSimulationResult(
                         hs=np.zeros(shape=(model.domain.model_grid.grid_y, model.domain.model_grid.grid_x)),
                         configuration_label=label)
                     label_to_reference = label
 
-        # print(objectives)
         if True:
             all_breakers = BreakersUtils.merge_breakers_with_modifications(model.domain.base_breakers,
                                                                            proposed_breakers)
@@ -186,7 +213,7 @@ def _calculate_reference_objectives(model, task):
     return objectives
 
 
-def crossover(p1, p2, rate):
+def crossover(p1, p2, rate, genotype_mask):
     random_val = random.random()
     if random_val >= rate:
         return p1
@@ -208,16 +235,14 @@ def crossover(p1, p2, rate):
 
         genotype_array = copy.copy(new_individ.genotype_array)
 
-        len_ind = gen_ind
-        dir_ind = gen_ind + 1
-        genotype_array[len_ind] = round(p1.genotype_array[len_ind] * part1_rate + p2.genotype_array[
-            len_ind] * part2_rate)
+        if genotype_mask is None or gen_ind not in genotype_mask:
+            len_ind = gen_ind
+            dir_ind = gen_ind + 1
+            genotype_array[len_ind] = round(p1.genotype_array[len_ind] * part1_rate + p2.genotype_array[
+                len_ind] * part2_rate)
+        else:
+            next()
 
-        # av_angle = average_angles(
-        #    [(p1.genotype_array[dir_ind] + 360) % 360, (p2.genotype_array[dir_ind] + 360) % 360])
-        # if av_angle != 0:
-        #    individ.genotype_array[dir_ind] = round(av_angle)
-        # else:
         if angle_parent_id == 0:
             genotype_array[dir_ind] = round((p1.genotype_array[dir_ind] + 360) % 360)
         if angle_parent_id == 1:
@@ -242,7 +267,7 @@ def crossover(p1, p2, rate):
     return new_individ
 
 
-def mutation(individ, rate, mutation_value_rate):
+def mutation(individ, rate, mutation_value_rate, genotype_mask):
     new_individ = BreakersParams(copy.deepcopy(individ.genotype_array))
 
     random_val = random.random()
@@ -260,16 +285,20 @@ def mutation(individ, rate, mutation_value_rate):
             while is_bad and iter < 50:
                 print(f'MUTATION{iter}')
 
-                param_to_mutate = random.randint(0, int(round(len(individ.genotype_array) / 2 - 1)))
+                param_ind_to_mutate = random.randint(0, int(round(len(individ.genotype_array) / 2 - 1)))
+
                 mutation_ratio = abs(np.random.RandomState().normal(2, 1.5, 1)[0])
                 mutation_ratio_dir = abs(np.random.RandomState().normal(15, 5, 1)[0])
+
+                if not (genotype_mask is None or param_ind_to_mutate not in genotype_mask):
+                    next()
 
                 sign = 1 if random.random() < 0.5 else -1
 
                 genotype_array = copy.copy(new_individ.genotype_array)
 
-                len_ind = param_to_mutate * 2
-                dir_ind = param_to_mutate * 2 + 1
+                len_ind = param_ind_to_mutate * 2
+                dir_ind = param_ind_to_mutate * 2 + 1
                 genotype_array[len_ind] += sign * mutation_ratio
                 genotype_array[len_ind] = abs(genotype_array[len_ind])
                 genotype_array[dir_ind] += sign * mutation_ratio_dir

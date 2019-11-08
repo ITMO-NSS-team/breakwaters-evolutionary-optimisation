@@ -1,10 +1,12 @@
-from abc import ABCMeta, abstractmethod
-import numpy as np
-from Configuration.Domains import Domain, Fairway
-from Breakers.Breaker import Breaker
+from abc import abstractmethod
 from typing import List
-from Simulation.Results import SimulationResult, WaveSimulationResult
+
+import numpy as np
 from shapely.geometry import LineString
+
+from Breakers.Breaker import Breaker
+from Configuration.Domains import Domain, Fairway
+from Simulation.Results import WaveSimulationResult
 
 
 class Objective(object):
@@ -125,3 +127,22 @@ class WaveHeightObjective(Objective):
         hs_weigtened = [hs * pt.weight for hs, pt in zip(hs_vals, domain.target_points)]
 
         return [round(hs * 100, -1) for hs in hs_weigtened]  # to avoid zero
+
+
+class RelativeQuailityObjective(Objective):
+    def get_obj_value(self, domain, breakers, base_breakers, simulation_result: WaveSimulationResult,
+                      simulation_result_base: WaveSimulationResult):
+        cost_obj_new = CostObjective().get_obj_value(domain, breakers)
+        cost_obj_base = CostObjective().get_obj_value(domain, base_breakers)
+
+        rel_cost_obj = ((cost_obj_new - cost_obj_base) / cost_obj_base) * 100
+
+        wh_obj_new = WaveHeightObjective().get_obj_value(domain, breakers, simulation_result)
+        wh_obj_old = WaveHeightObjective().get_obj_value(domain, base_breakers, simulation_result_base)
+
+        rel_wh_obj = [(x1 - x2) / x2 * 100 for (x1, x2) in zip(wh_obj_new, wh_obj_old)]
+
+        relative_quality_obj_value = (100 + np.mean(rel_wh_obj)) / (100 + rel_cost_obj)
+        print(
+            f'{relative_quality_obj_value},{rel_wh_obj},{rel_cost_obj},{cost_obj_new},{cost_obj_base},{wh_obj_new},{cost_obj_base}')
+        return relative_quality_obj_value * 100

@@ -69,13 +69,6 @@ class SimpleGeomSimulationStrategy(SimulationStrategyAbstract):
             num_of_iteration += 1
             # print(num_of_iteration)
 
-        if False:
-            with open('out.txt', 'w') as out:
-                for i in range(len(hs)):
-                    for j in range(len(hs[0])):
-                        out.write('{}    '.format(hs[i][j]))
-                    out.write("\r\n")
-
         # self.heatmap2d(hs, configuration_info.info, configuration_info.domain.fairways)
         visualiser.simple_visualise(hs, configuration_info.breakers, model.domain.base_breakers,
                                     configuration_info.domain.fairways, \
