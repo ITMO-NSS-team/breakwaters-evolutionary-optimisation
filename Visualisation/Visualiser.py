@@ -208,4 +208,3 @@ class Visualiser:
 
         images[0].save("gif_img/{}/Graphs.gif".format(directory), save_all=True, append_images=images[1:], duration=100,
                        loop=0)
-
