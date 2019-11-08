@@ -18,6 +18,7 @@ class Objective(object):
         self.importance = importance
 
 
+
 class StructuralObjective(Objective):
 
     def _selfintersection(self, breaker1, breaker2):
@@ -65,6 +66,7 @@ class StructuralObjective(Objective):
         return False
 
     def get_obj_value(self, domain, breakers):
+
 
         num_self_intersection = sum(
             [sum([int(self._selfintersection(breaker1, breaker2)) for breaker2 in breakers]) for breaker1 in breakers])

@@ -13,21 +13,35 @@ class DefaultSPEA2(SPEA2):
         archive_history = []
         history = SPEA2.ErrorHistory()
 
-        EvoAnalytics.num_of_generations = self.params.max_gens
-        EvoAnalytics.num_of_rows = math.ceil(EvoAnalytics.num_of_generations / EvoAnalytics.num_of_cols)
-        EvoAnalytics.pop_size = self.params.pop_size
+        EvoAnalytics.num_of_generations=self.params.max_gens
+        EvoAnalytics.num_of_rows=math.ceil(EvoAnalytics.num_of_generations / EvoAnalytics.num_of_cols)
+
+        EvoAnalytics.pop_size=self.params.pop_size
         EvoAnalytics.set_params()
 
         gen = 0
+
+        with open('out.txt', 'w') as out:
+            out.write('{}\n'.format("archive"))
+
+
         while gen < self.params.max_gens:
-            print("gen", gen)
 
-            self.fitness()
 
-            [EvoAnalytics.save_cantidate(gen, ind.objectives, ind.genotype.genotype_array, ind.referenced_dataset) for
-             ind in self._pop]
+            print("GEN!!!!! ", gen)
+
+
+            self.fitness(gen)
+
+            #[EvoAnalytics.save_cantidate(gen, ind.objectives, ind.genotype.genotype_array, ind.referenced_dataset) for ind in self._pop]
 
             self._archive = self.environmental_selection(self._pop, self._archive)
+
+            with open('out.txt', 'a') as out:
+                out.write('{}\n'.format(self._archive))
+                out.write('{}\n'.format(len(self._archive)))
+
+
             best = sorted(self._archive, key=lambda p: mean_obj(p))[0]
 
             last_fit = history.last().fitness_value
@@ -46,14 +60,12 @@ class DefaultSPEA2(SPEA2):
             self._pop = self.reproduce(selected, self.params.pop_size)
 
             to_add = copy.deepcopy(self._archive + self._pop)
-            self.calculate_objectives(to_add)
+            self.objectives(to_add,toadd=True)
             archive_history.append(to_add)
 
             #EvoAnalytics.create_chart(gen)
 
             gen += 1
-
-        # EvoAnalytics.chart_series_creator()
 
         return history, archive_history
 

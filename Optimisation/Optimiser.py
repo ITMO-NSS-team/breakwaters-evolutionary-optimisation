@@ -2,7 +2,8 @@ from Optimisation.OptimisationStrategies.DiffirentialEvoStrategy import Differen
 from Optimisation.OptimisationStrategies.ManualStrategy import ManualOptimisationStrategy
 from Optimisation.OptimisationStrategies.EmptyStrategy import EmptyOptimisationStrategy
 from Optimisation.OptimisationStrategies.SPEA2Strategy import SPEA2OptimisationStrategy
-#from Optimisation.OptimisationStrategies.DifEvolutionOneCriterionStrategy import DifferentialEvoOneCriterionOptimisationStrategy
+from Optimisation.OptimisationStrategies.DEStrategy import DEStrategy
+
 
 from Optimisation.OptimisationTask import OptimisationTask
 
@@ -26,10 +27,10 @@ class ManualOptimiser(Optimiser):
         man_strategy = ManualOptimisationStrategy()
         super(ManualOptimiser, self).__init__(man_strategy)
 
-#class DifferentialEvolutionaryOneCriterionOptimizer(Optimiser):
-    #def __init__(self):
-        #deoptim_strategy = DifferentialEvoOneCriterionOptimisationStrategy()
-        #super(DifferentialEvolutionaryOneCriterionOptimizer, self).__init__(deoptim_strategy)
+class DEOptimiser(Optimiser):
+    def __init__(self):
+        strategy = DEStrategy()
+        super(DEOptimiser, self).__init__(strategy)
 
 
 class DifferentialEvolutionaryOptimiser(Optimiser):

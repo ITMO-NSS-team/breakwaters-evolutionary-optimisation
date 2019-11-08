@@ -4,6 +4,7 @@ import os
 import random
 import uuid
 from itertools import chain
+import copy
 
 import numpy as np
 from pyDOE import lhs
@@ -14,10 +15,10 @@ from CommonUtils.StaticStorage import StaticStorage
 from EvoAlgs.BreakersEvo.BreakersEvoUtils import BreakersEvoUtils
 from EvoAlgs.BreakersEvo.BreakersParams import BreakersParams
 from EvoAlgs.EvoAnalytics import EvoAnalytics
-from Optimisation.Objective import CostObjective, NavigationObjective, WaveHeightObjective, StructuralObjective, \
-    RelativeQuailityObjective
+from Optimisation.Objective import CostObjective, NavigationObjective, WaveHeightObjective, StructuralObjective, RelativeQuailityObjective
 from Simulation.Results import WaveSimulationResult
 from Visualisation.ModelVisualization import ModelsVisualization
+from Visualisation.Visualiser import Visualiser
 
 # TODO refactor
 len_range = [0, 3]
@@ -29,7 +30,7 @@ def obtain_numerical_chromosome(task):
     for modification in task.possible_modifications:
         points_to_opt = task.mod_points_to_optimise[modification.breaker_id]
         points_to_encode = []
-
+        prev_anchor = None
         for i in points_to_opt:
             anchor = modification.points[i + 1]
             prev_anchor = modification.points[i + 2]
@@ -48,18 +49,57 @@ def obtain_numerical_chromosome(task):
         chromosome.append(list(chain.from_iterable(points_to_encode)))
     return list(chain.from_iterable(chromosome))
 
+def build_decision(model, task,genotype):
 
-def calculate_objectives(model, task, pop):
+    proposed_breakers = BreakersEvoUtils.build_breakers_from_genotype(genotype, task, model.domain.model_grid)
+
+    if sum([isinstance(obj, WaveHeightObjective) for obj in task.objectives]):
+
+        simulation_result = model.run_simulation_for_constructions(proposed_breakers)
+
+    else:
+
+        simulation_result = WaveSimulationResult(
+            hs=np.zeros(shape=(model.domain.model_grid.grid_y, model.domain.model_grid.grid_x)),
+            configuration_label=EvoAnalytics.run_id)
+
+    all_breakers = BreakersUtils.merge_breakers_with_modifications(model.domain.base_breakers,
+                                                                   proposed_breakers)
+
+    return simulation_result,all_breakers
+
+def calculate_objectives(model, task, visualiser, pop, multi_objective_optimization, check_intersections=False,population_number=None, maxiters=None, toadd=False):
+    if check_intersections:
+
+        genotype = [int(round(g, 0)) for g in pop[0]]
+        proposed_breakers = BreakersEvoUtils.build_breakers_from_genotype(genotype, task, model.domain.model_grid)
+
+        combined_breakers_for_cost_estimation = BreakersUtils.merge_breakers_with_modifications(
+            model.domain.base_breakers, proposed_breakers)
+
+        obj = StructuralObjective(importance=1)
+
+        obj_in_point = obj.get_obj_value(model.domain, combined_breakers_for_cost_estimation)
+
+        return obj_in_point
+
+
+
     if model.computational_manager is not None and model.computational_manager.is_lazy_parallel:
         # cycle for the mass simulation run
         pre_simulated_results = []
         pre_simulated_results_idx = []
 
         for p_ind, p in enumerate(pop):
-            genotype = [int(round(g, 0)) for g in p.genotype.genotype_array]
+
+            if not StaticStorage.multi_objective_optimization:
+                genotype = [int(round(g, 0)) for g in p]
+            else:
+                genotype = [int(round(g, 0)) for g in p.genotype.genotype_array]
+
             proposed_breakers = BreakersEvoUtils.build_breakers_from_genotype(genotype, task, model.domain.model_grid)
             simulation_result = model.run_simulation_for_constructions(proposed_breakers)
-
+            print("simulation result", simulation_result._hs)
             pre_simulated_results.append(simulation_result)
             pre_simulated_results_idx.append(simulation_result.configuration_label)
 
@@ -70,20 +110,33 @@ def calculate_objectives(model, task, pop):
                 label = val[0]
                 hs = val[1]
                 indices = [i for i, x in enumerate(pre_simulated_results_idx) if x == label]
-                if len(indices) > 2:
+                if len(indices)>2:
                     print("STRANGE")
                 for idx in indices:
-                    pre_simulated_results[idx]._hs = hs
+                    pre_simulated_results[idx].hs = hs
 
         for ps in pre_simulated_results:
-            if ps._hs is None:
+            if ps.hs is None:
                 print("NONE FOUND")
     else:
         pre_simulated_results = None
 
+    all_objectives = []
+    if not StaticStorage.multi_objective_optimization:
+        all_fitnesses = []
+    else:
+        labels_to_reference=[]
+
+    genotypes=[]#genotypes store
+    simulation_results_store = []
+    all_breakers_store = []
     for individ_index, p in enumerate(pop):
         label_to_reference = None
-        genotype = [int(round(g, 0)) for g in p.genotype.genotype_array]
+
+        if not StaticStorage.multi_objective_optimization:
+            genotype = [int(round(g, 0)) for g in p]
+        else:
+            genotype = [int(round(g, 0)) for g in p.genotype.genotype_array]
 
         proposed_breakers = BreakersEvoUtils.build_breakers_from_genotype(genotype, task, model.domain.model_grid)
         objectives = []
@@ -95,7 +148,6 @@ def calculate_objectives(model, task, pop):
 
         for obj_ind, obj in enumerate(task.objectives):
             if isinstance(obj, RelativeQuailityObjective):
-
                 if model.computational_manager is not None and model.computational_manager.is_lazy_parallel:
                     base_simulation_result = model.run_simulation_for_constructions(model.domain.base_breakers)
                     base_fin_values = model.computational_manager.finalise_execution()
@@ -141,20 +193,22 @@ def calculate_objectives(model, task, pop):
                 if model.computational_manager is None or not model.computational_manager.is_lazy_parallel:
                     simulation_result = model.run_simulation_for_constructions(proposed_breakers)
                 else:
+
                     # print(individ_index)
                     try:
-                        simulation_result = pre_simulated_results[individ_index]
+                        simulation_result = pre_simulated_results[i_ind]
                     except:
                         print("!")
                 label_to_reference = simulation_result.configuration_label
 
-                new_obj = obj.get_obj_value(model.domain, proposed_breakers, simulation_result)
+                    # print("simulation result",simulation_result._hs)
 
-                # for 3 points it is list
+                new_obj = (obj.get_obj_value(model.domain, proposed_breakers, simulation_result))
+
+                    # for 3 points it is list
                 new_obj = [(x1 - x2) / x2 * 100 for (x1, x2) in zip(new_obj, base_objectives[obj_ind])]
 
                 objectives.append(new_obj)
-
             else:
                 if not any(isinstance(o, (WaveHeightObjective, RelativeQuailityObjective)) for o in task.objectives):
                     label = uuid.uuid4().hex
@@ -162,20 +216,39 @@ def calculate_objectives(model, task, pop):
                         hs=np.zeros(shape=(model.domain.model_grid.grid_y, model.domain.model_grid.grid_x)),
                         configuration_label=label)
                     label_to_reference = label
+        #objectives = [j for i in objectives for j in i]
+        objectives=list(itertools.chain(*objectives))
+
+        all_objectives.append(objectives)
+
+        if not StaticStorage.multi_objective_optimization:
+
+            all_fitnesses.append(0.8 * objectives[0] + 0.9 * objectives[1] + 0.5 * objectives[2] + sum(objectives[3:]))
+        else:
+
+            #p.objectives = list(itertools.chain(*objectives))
+
+            #p.referenced_dataset = label_to_reference
+
+            labels_to_reference.append(label_to_reference)
 
         if True:
-            all_breakers = BreakersUtils.merge_breakers_with_modifications(model.domain.base_breakers,
-                                                                           proposed_breakers)
+            simulation_result, all_breakers = build_decision(model, task, genotype)
+            simulation_results_store.append(copy.deepcopy(simulation_result))
+            all_breakers_store.append(copy.deepcopy(all_breakers))
+            genotypes.append(genotype)
 
-            visualiser = ModelsVisualization(f'swan_{simulation_result.configuration_label}', EvoAnalytics.run_id)
+    [EvoAnalytics.save_cantidate(population_number, all_objectives[i], ind) for i, ind in enumerate(genotypes)]
 
-            visualiser.simple_visualise(simulation_result.get_5percent_output_for_field(), all_breakers,
-                                        model.domain.base_breakers,
-                                        StaticStorage.exp_domain.fairways, StaticStorage.exp_domain.target_points,
-                                        objectives)
-        p.objectives = list(itertools.chain(*objectives))
+    if not StaticStorage.multi_objective_optimization:
+        print("pop number",population_number)
 
-        p.referenced_dataset = label_to_reference
+        visualiser.print_individuals(all_objectives, population_number, simulation_results_store, all_breakers_store,all_fitnesses,maxiters)
+        return all_fitnesses, all_objectives
+    else:
+        if not toadd:
+            visualiser.print_individuals(all_objectives, population_number, simulation_results_store, all_breakers_store,fitnesses=None, maxiters=maxiters)
+        return all_objectives,labels_to_reference
 
 
 def _calculate_reference_objectives(model, task):
@@ -197,7 +270,7 @@ def _calculate_reference_objectives(model, task):
                     for i, val in enumerate(values):
                         label = val[0]
                         hs = val[1]
-                        simulation_result._hs = hs
+                        simulation_result.hs = hs
             else:
                 simulation_result = model.run_simulation_for_constructions(model.domain.base_breakers)
 
@@ -206,8 +279,7 @@ def _calculate_reference_objectives(model, task):
 
     if not os.path.isdir(f'img/{EvoAnalytics.run_id}/swan_default.png') and simulation_result is not None:
         visualiser = ModelsVisualization(f'swan_default', EvoAnalytics.run_id)
-        visualiser.simple_visualise(simulation_result.get_5percent_output_for_field(), model.domain.base_breakers,
-                                    model.domain.base_breakers,
+        visualiser.simple_visualise(simulation_result.get_5percent_output_for_field(), model.domain.base_breakers, model.domain.base_breakers,
                                     StaticStorage.exp_domain.fairways, StaticStorage.exp_domain.target_points,
                                     objectives)
     return objectives

@@ -1,7 +1,19 @@
+from scipy import optimize
+from itertools import chain
 from Optimisation import OptimisationTask
 from Optimisation.Objective import *
+from Configuration.Grid import BreakerPoint
 from Simulation import WaveModel
-from abc import ABCMeta 
+from Visualisation.Visualiser import Visualiser
+from Simulation.WaveModel import SwanWaveModel
+import csv
+import uuid
+from functools import partial
+
+from EvoAlgs.SPEA2.DefaultSPEA2 import DefaultSPEA2
+from EvoAlgs.BreakersEvo.EvoOperators import calculate_objectives
+from EvoAlgs.SPEA2.Operators import default_operators
+
 
 # ,EvoOperators, BreakersParams
 
@@ -15,5 +27,12 @@ class OptimisationResults(object):
 class OptimisationStrategyAbstract(metaclass=ABCMeta):
 
     @abstractmethod
-    def optimise(self, model: WaveModel, task: OptimisationTask) -> OptimisationResults:
+    def optimise(self, model: WaveModel, task: OptimisationTask, visualiser: Visualiser ) -> OptimisationResults:
         return
+
+
+
+
+
+
+

@@ -20,6 +20,8 @@ class WaveSimulationResult(SimulationResult):
         self.coeff_5_to_mean = 1.81
 
     def _get_output_for_target_points(self, points):
+
+        print("self._hs",self._hs)
         if isinstance(points, list):
             return [self._hs[point.y, point.x] for point in points]
         else:

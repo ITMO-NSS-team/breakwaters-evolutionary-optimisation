@@ -7,11 +7,11 @@ from EvoAlgs.SPEA2.RawFitness import raw_fitness
 
 
 class SPEA2:
-    def __init__(self, params, calculate_objectives, evolutionary_operators):
+    def __init__(self, params, objectives, evolutionary_operators):
         '''
          Strength Pareto Evolutionary Algorithm
         :param params: Meta-parameters of the SPEA2
-        :param calculate_objectives: function to calculate objective functions for each individual in population
+        :param objectives: function to calculate objective functions for each individual in population
         :param evolutionary_operators: EvoOperators class that encapsulates all evolutionary operators
         '''
 
@@ -31,6 +31,7 @@ class SPEA2:
         self.mutation = self.operators.mutation
 
     def __init_populations(self):
+
         gens = self.init_population(self.params.pop_size)
         self._pop = [SPEA2.Individ(genotype=gen) for gen in gens]
         self._archive = []
@@ -68,8 +69,8 @@ class SPEA2:
         def fitness(self):
             return self.raw_fitness + self.density
 
-        # def weighted_sum(self):
-        # return sum(list(self.calculate_objectives))
+        #def weighted_sum(self):
+            #return sum(list(self.objectives))
 
     class ErrorHistory:
         class Point:
@@ -93,11 +94,19 @@ class SPEA2:
     def solution(self, verbose=True, **kwargs):
         pass
 
-    def fitness(self):
-        self.calculate_objectives(self._pop)
+    def fitness(self,gen):
+
+
+        all_objectives,labels_to_reference=self.calculate_objectives(pop=self._pop,population_number=gen,multi_objective_optimization=True,maxiters=self.params.max_gens)
+
+        for i, p in enumerate(self._pop):
+            p.objectives=all_objectives[i]
+            p.referenced_dataset=labels_to_reference[i]
+
         union = self._archive + self._pop
 
         raw_values = raw_fitness(union)
+
         for idx in range(len(union)):
             union[idx].raw_fitness = raw_values[idx]
 
@@ -129,6 +138,7 @@ class SPEA2:
         return sqrt(sum)
 
     def environmental_selection(self, pop, archive):
+
         union = archive + pop
         env = [p for p in union if p.fitness() < 1.0]
 
