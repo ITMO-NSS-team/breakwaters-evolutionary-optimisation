@@ -64,6 +64,7 @@ if __name__ == '__main__':
 
     StaticStorage.task = task
     StaticStorage.genotype_length = sum([len(_) * 2 for _ in selected_mod_points_to_optimise])
+
     visualiser = Visualiser(store_all_individuals=False, store_best_individuals=True,
                             num_of_best_individuals_from_population_for_print=5, create_gif_image=True,
                             create_boxplots=True, model=wave_model, task=task)

@@ -5,7 +5,6 @@ class BreakersEvoUtils:
     @staticmethod
     def build_breakers_from_genotype(genotype, task, grid):
         gen_id = 0
-
         new_modifications = []
 
         for modification in task.possible_modifications:
@@ -18,6 +17,7 @@ class BreakersEvoUtils:
 
                 for point_ind in point_ids_to_optimise_in_modification:
                     anchor_angle = anchor_point.point_to_relative_polar(prev_anchor)["angle"]
+
                     length = genotype[gen_id]
                     direction = (genotype[gen_id + 1] + anchor_angle + 360) % 360
 

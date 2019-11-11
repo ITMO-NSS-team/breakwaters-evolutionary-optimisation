@@ -15,5 +15,5 @@ class EvoOperators:
 
 
 def default_operators():
-    return EvoOperators(init_population=initial_pop_stat, crossover=crossover, mutation=mutation)
+    return EvoOperators(init_population=initial_pop_random, crossover=crossover, mutation=mutation)
    

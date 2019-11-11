@@ -91,7 +91,7 @@ class Visualiser:
                 EvoAnalytics.create_chart(data_for_analyze='gen_len', analyze_only_last_generation=False,
                                           chart_for_gif=True)
             if self.create_gif_image:
-                self.maxiters=EvoAnalytics.num_of_generations
+                self.maxiters=maxiters
                 self.gif_images_maker()
                 self.gif_series_maker()
 

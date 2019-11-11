@@ -83,12 +83,12 @@ def calculate_objectives(model, task, visualiser, pop, multi_objective_optimizat
 
         return obj_in_point
 
-
-
     if model.computational_manager is not None and model.computational_manager.is_lazy_parallel:
         # cycle for the mass simulation run
         pre_simulated_results = []
         pre_simulated_results_idx = []
+
+
 
         for p_ind, p in enumerate(pop):
 
@@ -97,7 +97,9 @@ def calculate_objectives(model, task, visualiser, pop, multi_objective_optimizat
             else:
                 genotype = [int(round(g, 0)) for g in p.genotype.genotype_array]
 
+
             proposed_breakers = BreakersEvoUtils.build_breakers_from_genotype(genotype, task, model.domain.model_grid)
+
             simulation_result = model.run_simulation_for_constructions(proposed_breakers)
             print("simulation result", simulation_result._hs)
             pre_simulated_results.append(simulation_result)
@@ -113,10 +115,10 @@ def calculate_objectives(model, task, visualiser, pop, multi_objective_optimizat
                 if len(indices)>2:
                     print("STRANGE")
                 for idx in indices:
-                    pre_simulated_results[idx].hs = hs
+                    pre_simulated_results[idx]._hs = hs
 
         for ps in pre_simulated_results:
-            if ps.hs is None:
+            if ps._hs is None:
                 print("NONE FOUND")
     else:
         pre_simulated_results = None
@@ -196,7 +198,7 @@ def calculate_objectives(model, task, visualiser, pop, multi_objective_optimizat
 
                     # print(individ_index)
                     try:
-                        simulation_result = pre_simulated_results[i_ind]
+                        simulation_result = pre_simulated_results[individ_index]
                     except:
                         print("!")
                 label_to_reference = simulation_result.configuration_label
@@ -270,7 +272,7 @@ def _calculate_reference_objectives(model, task):
                     for i, val in enumerate(values):
                         label = val[0]
                         hs = val[1]
-                        simulation_result.hs = hs
+                        simulation_result._hs = hs
             else:
                 simulation_result = model.run_simulation_for_constructions(model.domain.base_breakers)
 

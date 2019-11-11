@@ -6,18 +6,12 @@ import math
 
 from EvoAlgs.SPEA2.SPEA2 import SPEA2
 from EvoAlgs.EvoAnalytics import EvoAnalytics
-
+from CommonUtils.StaticStorage import StaticStorage
 
 class DefaultSPEA2(SPEA2):
     def solution(self, verbose=True, **kwargs):
         archive_history = []
         history = SPEA2.ErrorHistory()
-
-        EvoAnalytics.num_of_generations=self.params.max_gens
-        EvoAnalytics.num_of_rows=math.ceil(EvoAnalytics.num_of_generations / EvoAnalytics.num_of_cols)
-
-        EvoAnalytics.pop_size=self.params.pop_size
-        EvoAnalytics.set_params()
 
         gen = 0
 
@@ -26,10 +20,6 @@ class DefaultSPEA2(SPEA2):
 
 
         while gen < self.params.max_gens:
-
-
-            print("GEN!!!!! ", gen)
-
 
             self.fitness(gen)
 
@@ -60,7 +50,7 @@ class DefaultSPEA2(SPEA2):
             self._pop = self.reproduce(selected, self.params.pop_size)
 
             to_add = copy.deepcopy(self._archive + self._pop)
-            self.objectives(to_add,toadd=True)
+            self.calculate_objectives(to_add,toadd=True)
             archive_history.append(to_add)
 
             #EvoAnalytics.create_chart(gen)

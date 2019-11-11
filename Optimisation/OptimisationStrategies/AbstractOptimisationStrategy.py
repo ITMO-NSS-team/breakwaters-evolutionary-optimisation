@@ -5,6 +5,7 @@ from Optimisation.Objective import *
 from Configuration.Grid import BreakerPoint
 from Simulation import WaveModel
 from Visualisation.Visualiser import Visualiser
+from abc import ABCMeta
 from Simulation.WaveModel import SwanWaveModel
 import csv
 import uuid

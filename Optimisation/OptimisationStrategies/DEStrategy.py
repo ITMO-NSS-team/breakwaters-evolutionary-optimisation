@@ -1,7 +1,7 @@
 from functools import partial
 
 from CommonUtils.StaticStorage import StaticStorage
-from EvoAlgs.BreakersEvo.EvoOperators import calculate_objectives, print_best_individuals_for_gif
+from EvoAlgs.BreakersEvo.EvoOperators import calculate_objectives
 from EvoAlgs.DE.DE import DE
 from Optimisation import OptimisationTask
 from Optimisation.OptimisationStrategies.AbstractOptimisationStrategy import OptimisationStrategyAbstract

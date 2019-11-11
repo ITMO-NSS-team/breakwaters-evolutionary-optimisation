@@ -2,6 +2,7 @@ from Optimisation.OptimisationStrategies.DiffirentialEvoStrategy import Differen
 from Optimisation.OptimisationStrategies.ManualStrategy import ManualOptimisationStrategy
 from Optimisation.OptimisationStrategies.EmptyStrategy import EmptyOptimisationStrategy
 from Optimisation.OptimisationStrategies.SPEA2Strategy import SPEA2OptimisationStrategy
+
 from Optimisation.OptimisationStrategies.DEStrategy import DEStrategy
 
 
@@ -12,8 +13,8 @@ class Optimiser(object):
     def __init__(self, optimisation_strategy):
         self._optimisation_strategy = optimisation_strategy
 
-    def optimise(self, model, task: OptimisationTask):
-        return self._optimisation_strategy.optimise(model, task)
+    def optimise(self, model, task: OptimisationTask,visualiser):
+        return self._optimisation_strategy.optimise(model, task,visualiser)
 
 
 class StubOptimiser(Optimiser):

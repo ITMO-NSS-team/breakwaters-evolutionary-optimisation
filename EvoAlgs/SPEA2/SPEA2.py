@@ -7,7 +7,7 @@ from EvoAlgs.SPEA2.RawFitness import raw_fitness
 
 
 class SPEA2:
-    def __init__(self, params, objectives, evolutionary_operators):
+    def __init__(self, params, calculate_objectives, evolutionary_operators):
         '''
          Strength Pareto Evolutionary Algorithm
         :param params: Meta-parameters of the SPEA2
@@ -37,12 +37,12 @@ class SPEA2:
         self._archive = []
 
     class Params:
-        def __init__(self, max_gens, pop_size, archive_size, crossover_rate, mutation_rate, mutation_value_rate):
+        def __init__(self, max_gens, pop_size, archive_size, crossover_rate, mutation_rate, mutation_value_rate,min_or_max):
             self.max_gens = max_gens
             self.pop_size = pop_size
 
             self.archive_size = archive_size
-
+            self.goal = min_or_max
             self.crossover_rate = crossover_rate
             self.mutation_rate = mutation_rate
             self.mutation_value_rate = mutation_value_rate
