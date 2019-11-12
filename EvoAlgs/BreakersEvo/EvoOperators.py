@@ -53,7 +53,8 @@ def build_decision(model, task,genotype):
 
     proposed_breakers = BreakersEvoUtils.build_breakers_from_genotype(genotype, task, model.domain.model_grid)
 
-    if sum([isinstance(obj, WaveHeightObjective) for obj in task.objectives]):
+    #if sum([isinstance(obj, WaveHeightObjective) for obj in task.objectives]):
+    if any(isinstance(o, (WaveHeightObjective, RelativeQuailityObjective)) for o in task.objectives):
 
         simulation_result = model.run_simulation_for_constructions(proposed_breakers)
 
@@ -243,8 +244,6 @@ def calculate_objectives(model, task, visualiser, pop, multi_objective_optimizat
     [EvoAnalytics.save_cantidate(population_number, all_objectives[i], ind) for i, ind in enumerate(genotypes)]
 
     if not StaticStorage.multi_objective_optimization:
-        print("pop number",population_number)
-
         visualiser.print_individuals(all_objectives, population_number, simulation_results_store, all_breakers_store,all_fitnesses,maxiters)
         return all_fitnesses, all_objectives
     else:

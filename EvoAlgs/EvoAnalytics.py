@@ -294,7 +294,7 @@ class EvoAnalytics:
                         EvoAnalytics.df_min_len = min([df_of_launch[0][i].min() for i in df_of_launch[0].columns])
                         EvoAnalytics.df_max_len = max([df_of_launch[0][i].max() for i in df_of_launch[0].columns])
 
-
+                        print("min and max", EvoAnalytics.df_min_len, "and", EvoAnalytics.df_max_len)
                         plt.ylim(EvoAnalytics.df_min_len, EvoAnalytics.df_max_len)
 
                         ax = plt.subplot()
