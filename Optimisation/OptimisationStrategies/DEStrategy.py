@@ -13,6 +13,6 @@ class DEStrategy(OptimisationStrategyAbstract):
         StaticStorage.multi_objective_optimization = False
         problem = partial(calculate_objectives, model, task,visualiser,multi_objective_optimization=False)
 
-        solution1 = DE(problem,[(0, -45), (20, 45)], popsize=10, dimensions=StaticStorage.genotype_length,maxiters=5,min_or_max=task.goal).solve()
+        solution1 = DE(problem,[(0, -45), (5, 45)], popsize=50, dimensions=StaticStorage.genotype_length,maxiters=50,min_or_max=task.goal).solve()
 
         return solution1

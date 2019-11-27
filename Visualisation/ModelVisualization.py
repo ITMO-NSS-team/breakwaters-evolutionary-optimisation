@@ -8,6 +8,7 @@ import matplotlib.patches as patches
 import numpy as np
 import seaborn as sb
 from EvoAlgs.EvoAnalytics import EvoAnalytics
+import math
 
 
 class ModelsVisualization:

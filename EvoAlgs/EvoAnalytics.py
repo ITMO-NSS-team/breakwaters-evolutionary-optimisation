@@ -63,12 +63,19 @@ class EvoAnalytics:
             os.remove(hist_file_name)
 
     @staticmethod
-    def save_cantidate(pop_num, objectives, genotype, referenced_dataset="None"):
+    def save_cantidate(pop_num, objectives, genotype, referenced_dataset="None",subfolder_name=None):
 
         if not os.path.isdir(f'HistoryFiles'):
             os.mkdir(f'HistoryFiles')
 
-        hist_file_name = f'HistoryFiles/history_{EvoAnalytics.run_id}.csv'
+        if subfolder_name:
+            if not os.path.isdir(f'HistoryFiles/{subfolder_name}'):
+                os.mkdir(f'HistoryFiles/{subfolder_name}')
+
+            hist_file_name = f'HistoryFiles/{subfolder_name}/history_{EvoAnalytics.run_id}.csv'
+
+        else:
+            hist_file_name = f'HistoryFiles/history_{EvoAnalytics.run_id}.csv'
         if not os.path.isfile(hist_file_name):
             with open(hist_file_name, 'w', newline='') as f:
                 EvoAnalytics._write_header_to_csv(f, objectives, genotype, referenced_dataset)
@@ -107,8 +114,50 @@ class EvoAnalytics:
             f.write(txt)
 
     @staticmethod
-    def create_chart(num_of_generation=None, f=None, chart_type='boxplot', data_for_analyze='obj',
-                     analyze_only_last_generation=True, chart_for_gif=False, first_generation=False, num_of_launches=1):
+    def print_pareto_set_2D(data,save_directory,population_num,types_of_data,min_max_x_y):
+
+        print("data",data)
+        print("population_num", population_num)
+        print("types_of_data", types_of_data)
+        print("min_max_x_y", min_max_x_y)
+
+        fig, ax = plt.subplots()
+
+        ax.set_title("Популяция " + str(population_num + 1))
+        for i in range(len(types_of_data)):
+
+            if types_of_data[i]=="cost":
+                if i==0:
+                    ax.invert_xaxis()
+                    plt.xlim(min_max_x_y[0][1] - 1, min_max_x_y[0][0] + 1)
+                    plt.ylim(min_max_x_y[1][0] - 1, min_max_x_y[1][1] + 1)
+                    ax.set_xlabel("Цена", fontsize=15)
+                elif i==1:
+                    ax.invert_yaxis()
+                    plt.ylim(min_max_x_y[1][1] - 1, min_max_x_y[1][0] + 1)
+                    plt.xlim(min_max_x_y[0][0] - 1, min_max_x_y[0][1] + 1)
+                    ax.set_ylabel("Цена", fontsize=15)
+            else:
+                plt.ylim(min_max_x_y[1][0] - 1, min_max_x_y[1][1] + 1)
+                plt.xlim(min_max_x_y[0][0] - 1, min_max_x_y[0][1] + 1)
+
+                if types_of_data[i]=="hs average decrease":
+                    if i==0:
+                        ax.set_xlabel("Среднее снижение hs по всем точкам", fontsize=15)
+                    elif i==1:
+                        ax.set_ylabel("Среднее снижение hs по всем точкам", fontsize=15)
+
+
+        ax.scatter(data[0], data[1], linewidths=7, color='g')
+        plt.tick_params(axis='both', labelsize=15)
+        #plt.ylim(min_max_x_y[1][0] - 1, min_max_x_y[1][1] + 1)
+        #plt.xlim(min_max_x_y[0][0] - 1, min_max_x_y[0][1] + 1)
+        fig.set_figwidth(7)
+        fig.set_figheight(7)
+        plt.savefig(save_directory, bbox_inches='tight')
+
+    @staticmethod
+    def create_chart(num_of_generation=None, f=None, data_for_analyze='obj', analyze_only_last_generation=True, chart_for_gif=False, first_generation=False, num_of_launches=1):
 
         if not os.path.isdir("boxplots"):
             os.mkdir("boxplots")
@@ -120,7 +169,8 @@ class EvoAnalytics:
         if not f:
             f = f'HistoryFiles/history_{EvoAnalytics.run_id}.csv'
         else:
-            f = f'HistoryFiles/history_{f}.csv'
+            f=f
+            #f = f'HistoryFiles/history_{f}.csv'
 
         EvoAnalytics.change_symbol_in_file(f)
         df = pd.read_csv(f, header=0)
@@ -139,6 +189,7 @@ class EvoAnalytics:
             df = df.drop(
                 df[df['pop_num'] != num_of_generations].index)  # Удаление строк не содержащих последнее поколение
             # Начать индексирование в dataframe с 0-ля
+
             df = df.reset_index(drop=True)
 
             num = 0
@@ -176,12 +227,14 @@ class EvoAnalytics:
 
                 ax.set_title("Population " + str(num_of_generation + 1))
 
+                '''
                 if data_for_analyze == "gen_len":
 
                     # plt.ylim(EvoAnalytics.df_min_len, EvoAnalytics.df_max_len)
                     plt.ylim(0, 1.2)
                 else:
                     plt.ylim(0, 400)
+                '''
 
                 sns.boxplot(data=df, palette="Blues")
 
@@ -196,23 +249,21 @@ class EvoAnalytics:
                 if not os.path.isdir("boxplots/" + str(data_for_analyze) + "/" + str(EvoAnalytics.run_id)):
                     os.mkdir("boxplots/" + str(data_for_analyze) + "/" + str(EvoAnalytics.run_id))
 
-                if chart_type == 'boxplot':
-                    EvoAnalytics.axs[EvoAnalytics.gener[num_of_generation][0]][
-                        EvoAnalytics.gener[num_of_generation][1]].set_title("Population " + str(num_of_generation))
-                    sns.boxplot(data=df, palette="Blues", ax=EvoAnalytics.axs[EvoAnalytics.gener[num_of_generation][0]][
-                        EvoAnalytics.gener[num_of_generation][1]], linewidth=2)
-                    plt.close('all')
+
+                EvoAnalytics.axs[EvoAnalytics.gener[num_of_generation][0]][EvoAnalytics.gener[num_of_generation][1]].set_title("Population " + str(num_of_generation))
+                sns.boxplot(data=df, palette="Blues", ax=EvoAnalytics.axs[EvoAnalytics.gener[num_of_generation][0]][EvoAnalytics.gener[num_of_generation][1]], linewidth=2)
+                plt.close('all')
 
                     # EvoAnalytics.fig.savefig(data_for_analyze + "_boxplots.png",bbox_inches='tight')
 
-                    saving_process_is_completed = 0
-                    while saving_process_is_completed < 1:
-                        saving_process_is_completed = EvoAnalytics.try_to_save_new_picture(data_for_analyze)
+                saving_process_is_completed = 0
+                while saving_process_is_completed < 1:
+                    saving_process_is_completed = EvoAnalytics.try_to_save_new_picture(data_for_analyze)
 
-                    gc.collect()
-                    plt.cla()
-                    plt.clf()
-                    plt.close('all')
+                gc.collect()
+                plt.cla()
+                plt.clf()
+                plt.close('all')
 
 
         else:
@@ -263,81 +314,78 @@ class EvoAnalytics:
 
             plt.close("all")
 
-            if chart_type == 'boxplot':
+            if not chart_for_gif:
+                num_of_cols = 4
+                num_of_rows = math.ceil(num_of_generations / num_of_cols)
+
+                plt.rcParams['figure.figsize'] = [40, 4 * num_of_rows]
+                #plt.rcParams['figure.figsize'] = [40, 40]
+                plt.rcParams['xtick.labelsize'] = 15
+                plt.rcParams['ytick.labelsize'] = 15
+
+            for num_of_launch in range(len(df_of_launch)):
 
                 if not chart_for_gif:
-                    num_of_cols = 4
-                    num_of_rows = math.ceil(num_of_generations / num_of_cols)
+                    fig, axs = plt.subplots(ncols=num_of_cols, nrows=num_of_rows)
 
-                    plt.rcParams['figure.figsize'] = [40, 4 * num_of_rows]
-                    #plt.rcParams['figure.figsize'] = [40, 40]
-                    plt.rcParams['xtick.labelsize'] = 15
-                    plt.rcParams['ytick.labelsize'] = 15
+                    gener = [[j, k] for j in range(num_of_rows) for k in range(num_of_cols)]
 
-                for num_of_launch in range(len(df_of_launch)):
+                    axs[gener[0][0]][gener[0][0]].set_title("Population " + str(0))
 
+                    sns.boxplot(data=df_of_launch[num_of_launch][:pop_size], palette="Blues", ax=axs[0][0],
+                                linewidth=2)
+
+                else:
+                    if not os.path.isdir("boxplots/" + str(data_for_analyze) + "/" + str(EvoAnalytics.run_id)):
+                        os.mkdir("boxplots/" + str(data_for_analyze) + "/" + str(EvoAnalytics.run_id))
+
+                    EvoAnalytics.df_min_len = min([df_of_launch[0][i].min() for i in df_of_launch[0].columns])
+                    EvoAnalytics.df_max_len = max([df_of_launch[0][i].max() for i in df_of_launch[0].columns])
+
+                    #print("min and max", EvoAnalytics.df_min_len, "and", EvoAnalytics.df_max_len)
+                    plt.ylim(EvoAnalytics.df_min_len, EvoAnalytics.df_max_len)
+
+                    ax = plt.subplot()
+
+                    ax.set_title("Population " + str(1))
+
+                    sns.boxplot(data=df_of_launch[num_of_launch][:pop_size], palette="Blues")
+
+                    for j in range(EvoAnalytics.num_of_best_inds_for_print):
+                        plt.savefig(
+                            "boxplots/" + str(data_for_analyze) + "/" + str(EvoAnalytics.run_id) + "/" + "1_" + str(j + 1) + ".png")
+
+                    # for i in range(EvoAnalytics.num_of_best_inds_for_print):
+                    # plt.savefig(
+                    # "boxplots/" + str(data_for_analyze) + "/" + str(EvoAnalytics.run_id) + "/" + str(
+                    # num_of_generation + 1) + "_" + str(i + 1) + ".png")
+
+                for i in range(1, int(df_of_launch[0].shape[0] / pop_size)):
                     if not chart_for_gif:
-                        fig, axs = plt.subplots(ncols=num_of_cols, nrows=num_of_rows)
-
-                        gener = [[j, k] for j in range(num_of_rows) for k in range(num_of_cols)]
-
-                        axs[gener[0][0]][gener[0][0]].set_title("Population " + str(0))
-
-                        sns.boxplot(data=df_of_launch[num_of_launch][:pop_size], palette="Blues", ax=axs[0][0],
-                                    linewidth=2)
+                        axs[gener[i][0]][gener[i][1]].set_title("Population " + str(i))
+                        sns.boxplot(data=df_of_launch[num_of_launch][pop_size * i:pop_size * i + pop_size],
+                                    palette="Blues",
+                                    ax=axs[gener[i][0]][gener[i][1]], linewidth=2)
 
                     else:
-                        if not os.path.isdir("boxplots/" + str(data_for_analyze) + "/" + str(EvoAnalytics.run_id)):
-                            os.mkdir("boxplots/" + str(data_for_analyze) + "/" + str(EvoAnalytics.run_id))
-
-                        print("DF OF LAUNCH 0", df_of_launch[0])
-                        EvoAnalytics.df_min_len = min([df_of_launch[0][i].min() for i in df_of_launch[0].columns])
-                        EvoAnalytics.df_max_len = max([df_of_launch[0][i].max() for i in df_of_launch[0].columns])
-
-                        print("min and max", EvoAnalytics.df_min_len, "and", EvoAnalytics.df_max_len)
-                        plt.ylim(EvoAnalytics.df_min_len, EvoAnalytics.df_max_len)
-
+                        plt.close("all")
+                        fig = plt.figure()
                         ax = plt.subplot()
-
-                        ax.set_title("Population " + str(1))
-
-                        sns.boxplot(data=df_of_launch[num_of_launch][:pop_size], palette="Blues")
-
+                        ax.set_title("Population " + str(i + 1))
+                        plt.ylim(EvoAnalytics.df_min_len, EvoAnalytics.df_max_len)
+                        sns.boxplot(data=df_of_launch[num_of_launch][pop_size * i:pop_size * i + pop_size],
+                                    palette="Blues")
                         for j in range(EvoAnalytics.num_of_best_inds_for_print):
                             plt.savefig(
-                                "boxplots/" + str(data_for_analyze) + "/" + str(EvoAnalytics.run_id) + "/" + "1_" + str(j + 1) + ".png")
+                                "boxplots/" + str(data_for_analyze) + "/" + str(EvoAnalytics.run_id) + "/" + str(
+                                    i + 1) + "_" + str(j + 1) + ".png")
 
-                        # for i in range(EvoAnalytics.num_of_best_inds_for_print):
-                        # plt.savefig(
-                        # "boxplots/" + str(data_for_analyze) + "/" + str(EvoAnalytics.run_id) + "/" + str(
-                        # num_of_generation + 1) + "_" + str(i + 1) + ".png")
+                if not chart_for_gif:
+                    plt.savefig(data_for_analyze + '_for_' + str(num_of_launch) + '_launch.png')
 
-                    for i in range(1, int(df_of_launch[0].shape[0] / pop_size)):
-                        if not chart_for_gif:
-                            axs[gener[i][0]][gener[i][1]].set_title("Population " + str(i))
-                            sns.boxplot(data=df_of_launch[num_of_launch][pop_size * i:pop_size * i + pop_size],
-                                        palette="Blues",
-                                        ax=axs[gener[i][0]][gener[i][1]], linewidth=2)
+                # else:
+                # for j in range(EvoAnalytics.num_of_best_inds_for_print):
+                # plt.savefig("boxplots/" + str(data_for_analyze) + "/" + str(EvoAnalytics.run_id) + "/" + str(i + 1) + "_" + str(j + 1) + ".png")
 
-                        else:
-                            plt.close("all")
-                            fig = plt.figure()
-                            ax = plt.subplot()
-                            ax.set_title("Population " + str(i + 1))
-                            plt.ylim(EvoAnalytics.df_min_len, EvoAnalytics.df_max_len)
-                            sns.boxplot(data=df_of_launch[num_of_launch][pop_size * i:pop_size * i + pop_size],
-                                        palette="Blues")
-                            for j in range(EvoAnalytics.num_of_best_inds_for_print):
-                                plt.savefig(
-                                    "boxplots/" + str(data_for_analyze) + "/" + str(EvoAnalytics.run_id) + "/" + str(
-                                        i + 1) + "_" + str(j + 1) + ".png")
-
-                    if not chart_for_gif:
-                        plt.savefig(data_for_analyze + '_for_' + str(num_of_launch) + '_launch.png')
-
-                    # else:
-                    # for j in range(EvoAnalytics.num_of_best_inds_for_print):
-                    # plt.savefig("boxplots/" + str(data_for_analyze) + "/" + str(EvoAnalytics.run_id) + "/" + str(i + 1) + "_" + str(j + 1) + ".png")
-
-                    # plt.close('all')
+                # plt.close('all')
 

@@ -8,6 +8,8 @@ class StaticStorage:
     exp_domain = None
     is_custom_conditions = False
     multi_objective_optimization=False
+    mean_hhs=[]
+    costs=[]
 
     def init(self):
         #todo implement

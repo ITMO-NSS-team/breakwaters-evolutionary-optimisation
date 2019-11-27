@@ -13,6 +13,8 @@ from Optimisation.Objective import CostObjective, NavigationObjective, WaveHeigh
 from Optimisation.OptimisationTask import OptimisationTask
 from Visualisation.Visualiser import Visualiser
 import datetime
+import itertools
+import matplotlib.pyplot as plt
 
 if __name__ == '__main__':
     seed = 91429  # random.randint(1,10001)
@@ -67,7 +69,26 @@ if __name__ == '__main__':
 
     visualiser = Visualiser(store_all_individuals=False, store_best_individuals=True,
                             num_of_best_individuals_from_population_for_print=5, create_gif_image=True,
-                            create_boxplots=True, model=wave_model, task=task)
+                            create_boxplots=True, model=wave_model, task=task,print_pareto_front=True,data_for_pareto_set_chart=[["hs average decrease","cost"]])
     opt_result = optimiser.optimise(wave_model, task, visualiser)
+
+    '''
+    min_x = min(list(itertools.chain(*StaticStorage.mean_hhs)))
+    max_x = max(list(itertools.chain(*StaticStorage.mean_hhs)))
+    min_y = min(list(itertools.chain(*StaticStorage.costs)))
+    max_y = max(list(itertools.chain(*StaticStorage.costs)))
+    for i in range(len(StaticStorage.mean_hhs)):
+        fig, ax = plt.subplots()
+        #ax.set_title("Популяция " + str(i + 1))
+        ax.set_xlabel("Среднее снижение hs по всем точкам", fontsize=15)
+        ax.set_ylabel("Цена", fontsize=15)
+        ax.scatter(StaticStorage.mean_hhs[i], StaticStorage.costs[i], linewidths=7, color='g')
+        plt.tick_params(axis='both', labelsize=15)
+        plt.ylim(min_y-1, max_y+1)
+        plt.xlim(min_x-1, max_x+1)
+        fig.set_figwidth(7)
+        fig.set_figheight(7)
+        plt.savefig(f'pareto_front/img/{str(EvoAnalytics.run_id)}/{i}.png', bbox_inches='tight')
+    '''
 
     hs0 = opt_result.simulation_result.get_5percent_output_for_target_points(exp_domain.target_points[0])

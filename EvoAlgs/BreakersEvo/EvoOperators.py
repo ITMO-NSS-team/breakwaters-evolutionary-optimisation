@@ -69,7 +69,7 @@ def build_decision(model, task,genotype):
 
     return simulation_result,all_breakers
 
-def calculate_objectives(model, task, visualiser, pop, multi_objective_optimization, check_intersections=False,population_number=None, maxiters=None, toadd=False):
+def calculate_objectives(model, task, visualiser, pop, multi_objective_optimization, check_intersections=False,population_number=None, maxiters=None, subfolder_to_saving=None):
     if check_intersections:
 
         genotype = [int(round(g, 0)) for g in pop[0]]
@@ -85,11 +85,11 @@ def calculate_objectives(model, task, visualiser, pop, multi_objective_optimizat
         return obj_in_point
 
     if model.computational_manager is not None and model.computational_manager.is_lazy_parallel:
+
+
         # cycle for the mass simulation run
         pre_simulated_results = []
         pre_simulated_results_idx = []
-
-
 
         for p_ind, p in enumerate(pop):
 
@@ -97,7 +97,6 @@ def calculate_objectives(model, task, visualiser, pop, multi_objective_optimizat
                 genotype = [int(round(g, 0)) for g in p]
             else:
                 genotype = [int(round(g, 0)) for g in p.genotype.genotype_array]
-
 
             proposed_breakers = BreakersEvoUtils.build_breakers_from_genotype(genotype, task, model.domain.model_grid)
 
@@ -227,6 +226,7 @@ def calculate_objectives(model, task, visualiser, pop, multi_objective_optimizat
         if not StaticStorage.multi_objective_optimization:
 
             all_fitnesses.append(0.8 * objectives[0] + 0.9 * objectives[1] + 0.5 * objectives[2] + sum(objectives[3:]))
+            #all_fitnesses.append(objectives)
         else:
 
             #p.objectives = list(itertools.chain(*objectives))
@@ -241,16 +241,15 @@ def calculate_objectives(model, task, visualiser, pop, multi_objective_optimizat
             all_breakers_store.append(copy.deepcopy(all_breakers))
             genotypes.append(genotype)
 
-    [EvoAnalytics.save_cantidate(population_number, all_objectives[i], ind) for i, ind in enumerate(genotypes)]
+    [EvoAnalytics.save_cantidate(population_number, all_objectives[i], ind,subfolder_name=subfolder_to_saving) for i, ind in enumerate(genotypes)]
 
     if not StaticStorage.multi_objective_optimization:
         visualiser.print_individuals(all_objectives, population_number, simulation_results_store, all_breakers_store,all_fitnesses,maxiters)
         return all_fitnesses, all_objectives
     else:
-        if not toadd:
+        if subfolder_to_saving:
             visualiser.print_individuals(all_objectives, population_number, simulation_results_store, all_breakers_store,fitnesses=None, maxiters=maxiters)
         return all_objectives,labels_to_reference
-
 
 def _calculate_reference_objectives(model, task):
     objectives = []

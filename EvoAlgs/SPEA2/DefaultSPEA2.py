@@ -27,6 +27,8 @@ class DefaultSPEA2(SPEA2):
 
             self._archive = self.environmental_selection(self._pop, self._archive)
 
+            self.calculate_objectives(self._archive, population_number=gen, subfolder_to_saving="pareto_set",maxiters=self.params.max_gens)
+
             with open('out.txt', 'a') as out:
                 out.write('{}\n'.format(self._archive))
                 out.write('{}\n'.format(len(self._archive)))
@@ -50,8 +52,12 @@ class DefaultSPEA2(SPEA2):
             self._pop = self.reproduce(selected, self.params.pop_size)
 
             to_add = copy.deepcopy(self._archive + self._pop)
-            self.calculate_objectives(to_add,toadd=True)
+            self.calculate_objectives(to_add,population_number=gen,maxiters=self.params.max_gens)
+
+
             archive_history.append(to_add)
+
+            print("Archive history!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",archive_history)
 
             #EvoAnalytics.create_chart(gen)
 
