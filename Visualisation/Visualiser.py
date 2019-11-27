@@ -243,7 +243,7 @@ class Visualiser:
 
         if gif_type=="pareto2D":
             for data_types in self.data_for_pareto_set_chart:
-                path=str(os.path.abspath(os.curdir)) + "\\pareto_front\\"+"img\\" +data_types[0]+"_to_"+data_types[1]+ directory + "\\"
+                path=str(os.path.abspath(os.curdir)) + "\\pareto_front\\"+"img\\" +data_types[0]+"_to_"+data_types[1]+"\\"+ directory + "\\"
                 save_path = str(os.path.abspath(os.curdir)) + "\\gif_img\\" + directory + "\\"
                 print("path",path)
                 print("save path",save_path)
