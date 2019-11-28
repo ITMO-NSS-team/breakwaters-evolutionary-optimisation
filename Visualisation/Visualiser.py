@@ -95,51 +95,6 @@ class Visualiser:
                     #df = df.drop(df[df['pop_num'] != num_of_generations].index)  # Удаление строк не содержащих последнее поколение
 
 
-    def print_pareto_set_2D(self,objectives,num_of_population):
-        mean_hs=[]
-        cost_values=[]
-        for objective in objectives:
-            mean_hs.append(np.mean(objective[3:])*(-1))
-            cost_values.append(objective[1])
-
-        StaticStorage.mean_hhs.append(mean_hs)
-        StaticStorage.costs.append(cost_values)
-
-        '''
-        fig, ax = plt.subplots()
-        ax.set_title("Популяция " + str(num_of_population+1))
-        ax.set_xlabel("Среднее снижение hs по всем точкам", fontsize=15)
-        ax.set_ylabel("Цена", fontsize=15)
-        ax.scatter(mean_hs, cost_values, linewidths=7,color='g')
-        plt.tick_params(axis='both', labelsize=15)
-        fig.set_figwidth(7)
-        fig.set_figheight(7)
-        '''
-        '''
-        ax = plt.subplot()
-        plt.figure(figsize=(10, 10))
-        ax.set_title("Population " + str(1))
-
-        ax.set_xlabel("Среднее hs по всем точкам", fontsize=15)
-        ax.set_ylabel("Цена", fontsize=15)
-
-        plt.scatter(mean_hs, cost_values, linewidths=7)
-        '''
-        directory = EvoAnalytics.run_id
-
-        if not os.path.isdir("pareto_front"):
-            os.mkdir("pareto_front")
-        if not os.path.isdir(f'pareto_front/img'):
-            os.mkdir(f'pareto_front/img')
-        if not os.path.isdir(f'pareto_front/gif'):
-            os.mkdir(f'pareto_front/gif')
-        if not os.path.isdir(f'pareto_front/img/{directory}'):
-            os.mkdir(f'pareto_front/img/{directory}')
-        if not os.path.isdir(f'pareto_front/gif/{directory}'):
-            os.mkdir(f'pareto_front/gif/{directory}')
-
-        #plt.savefig(f'pareto_front/img/{directory}/{num_of_population}.png', bbox_inches='tight')
-
     def print_configuration(self, simulation_result,all_breakers,objective,dir,image_for_gif,num_of_population,ind_num):
 
         print("population_number", num_of_population)
@@ -251,7 +206,7 @@ class Visualiser:
                 for i in range (self.maxiters):
                     images.append(Image.open(path + str(i)+".png"))
 
-                images[0].save("{}.gif".format(save_path+data_types[0]+"_to_"+data_types[1]), save_all=True, append_images=images[1:], duration=100,
+                images[0].save("{}.gif".format(save_path+data_types[0]+"_to_"+data_types[1]), save_all=True, append_images=images[1:], duration=300,
                                loop=0)
 
             return
