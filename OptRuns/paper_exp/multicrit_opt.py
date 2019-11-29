@@ -8,7 +8,7 @@ from CommonUtils.StaticStorage import StaticStorage
 from Computation.СomputationalEnvironment import SwanWinRemoteComputationalManager
 from Configuration.Domains import SochiHarbor
 from EvoAlgs.EvoAnalytics import EvoAnalytics
-from Optimisation.Objective import RelativeCostObjective, RelativeNavigationObjective, RelativeWaveHeightObjective, StructuralObjective
+from Optimisation.Objective import RelativeCostObjective, RelativeNavigationObjective, RelativeWaveHeightObjective, StructuralObjective, ConstraintComparisonType
 from Optimisation.OptimisationTask import OptimisationTask
 from Optimisation.Optimiser import ParetoEvolutionaryOptimiser
 from Simulation.WaveModel import SwanWaveModel
@@ -37,7 +37,7 @@ if __name__ == '__main__':
 
     optimiser = ParetoEvolutionaryOptimiser()
 
-    base_modifications_for_tuning = [
+    selected_modifications_for_tuning = [
         Breaker('mod1', list(map(xy_to_points, [[-1, -1], [33, 22], [42, 17]])), 0, 'Ia'),
         Breaker('mod2_top', list(map(xy_to_points, [[-1, -1], [50, 32], [50, 39]])), 0, 'II')
     ]
@@ -47,9 +47,6 @@ if __name__ == '__main__':
         'mod2_top': [0]
     }
 
-    selected_modifications_for_tuning = base_modifications_for_tuning
-    selected_mod_points_to_optimise = [mod_points_to_optimise[mod.breaker_id] for mod in base_modifications_for_tuning
-                                       if mod.breaker_id in mod_points_to_optimise]
 
     objectives = [
         RelativeCostObjective(),
@@ -57,10 +54,9 @@ if __name__ == '__main__':
         RelativeWaveHeightObjective()]
 
     task = OptimisationTask(objectives, selected_modifications_for_tuning, mod_points_to_optimise, goal="minimise")
-    task.constraints = [(StructuralObjective, "e", 0)]
+    task.constraints = [(StructuralObjective(), ConstraintComparisonType.equal, 0)]
 
     StaticStorage.task = task
-    #StaticStorage.genotype_length = sum([len(_) * 2 for _ in selected_mod_points_to_optimise])
 
     StaticStorage.genotype_encoder = AngularGenotypeEncoder()
 

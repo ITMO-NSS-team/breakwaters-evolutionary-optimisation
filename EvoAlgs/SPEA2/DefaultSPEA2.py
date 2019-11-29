@@ -16,8 +16,8 @@ class DefaultSPEA2(SPEA2):
 
         gen = 0
 
-        with open('out.txt', 'w') as out:
-            out.write('{}\n'.format("archive"))
+        #with open('out.txt', 'w') as out:
+        #    out.write('{}\n'.format("archive"))
 
         while gen < self.params.max_gens:
 
@@ -51,13 +51,9 @@ class DefaultSPEA2(SPEA2):
             self._pop = self.reproduce(selected, self.params.pop_size)
 
             to_add = copy.deepcopy(self._archive + self._pop)
-            self.calculate_objectives(to_add, population_number=gen, maxiters=self.params.max_gens)
+            self.calculate_objectives(to_add)
 
             archive_history.append(to_add)
-
-            print(
-                "Archive history!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
-                archive_history)
 
             # EvoAnalytics.create_chart(gen)
 

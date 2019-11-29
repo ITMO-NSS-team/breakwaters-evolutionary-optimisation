@@ -85,10 +85,10 @@ class StructuralObjective(Objective):
                     return True
         return False
 
-    def get_obj_value(self, domain, breakers):
-
+    def get_obj_value(self, obj_data):
         num_self_intersection = sum(
-            [sum([int(self._selfintersection(breaker1, breaker2)) for breaker2 in breakers]) for breaker1 in breakers])
+            [sum([int(self._selfintersection(breaker1, breaker2)) for breaker2 in obj_data.breakers]) for breaker1 in
+             obj_data.breakers])
 
         return round(num_self_intersection * 100, -1)
 
@@ -171,8 +171,8 @@ class WaveHeightObjective(Objective):
 class RelativeWaveHeightObjective(WaveHeightObjective):
 
     def get_obj_value(self, obj_data):
-        wh_obj_new = WaveHeightObjective().get_obj_value(obj_data.domain, obj_data)
-        wh_obj_base = WaveHeightObjective().get_obj_value(obj_data.domain, obj_data.data_for_base_construction())
+        wh_obj_new = WaveHeightObjective().get_obj_value(obj_data)
+        wh_obj_base = WaveHeightObjective().get_obj_value(obj_data.data_for_base_construction())
 
         wh_obj_rel = [(x1 - x2) / x2 * 100 for (x1, x2) in zip(wh_obj_new, wh_obj_base)]
 

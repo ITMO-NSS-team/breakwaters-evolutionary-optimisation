@@ -47,10 +47,13 @@ class WaveModel(object):
 
             if loaded_configuration_reference is None:
                 configuration_info = self.configurate(breakers, configuration_label)
-                results = self.run_simulation(configuration_info, computational_manager=self.computational_manager)
                 if not forced_label:
+                    results = self.run_simulation(configuration_info, computational_manager=self.computational_manager)
                     self._save_simulation_result_reference(breakers,
                                                            configuration_label)
+                else:
+                    results = self.run_simulation(configuration_info, computational_manager=None)
+
             else:
                 print("Historical SWAN found")
                 configuration_label = loaded_configuration_reference

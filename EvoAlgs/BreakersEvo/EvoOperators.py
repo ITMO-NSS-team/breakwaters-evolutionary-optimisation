@@ -27,14 +27,14 @@ dir_range = [-50, 50]
 def calculate_objectives(model, task, visualiser, population):
     pre_simulated_results = model.computational_manager.prepare_simulations_for_population(population, model)
 
-    # labels_to_reference_for_simulated_runs = []
+    all_labels = []
 
     all_objectives = []
 
     for individ_index, individual in enumerate(population):
-        # label_to_reference = None
+        label_to_reference = None
 
-        proposed_breakers = individual.genotype.get_as_breakers()
+        proposed_breakers = individual.genotype.get_genotype_as_breakers()
         objectives_values = []
 
         simulation_result = None
@@ -42,14 +42,14 @@ def calculate_objectives(model, task, visualiser, population):
 
         for obj_ind, obj in enumerate(task.objectives):
             if obj.is_simulation_required:
-                base_simulation_result = model.run_simulation_for_constructions(model.domain.base_breakers)
+                base_simulation_result = model.run_simulation_for_constructions(model.domain.base_breakers,"default")
 
                 if model.computational_manager is None or not model.computational_manager.is_lazy_parallel:
                     simulation_result = model.run_simulation_for_constructions(proposed_breakers)
                 else:
                     simulation_result = pre_simulated_results[individ_index]
 
-                # label_to_reference = simulation_result.configuration_label
+                label_to_reference = simulation_result.configuration_label
 
             objective_calculation_data = ObjectiveData(model.domain, proposed_breakers, model.domain.base_breakers,
                                                        simulation_result,
@@ -57,7 +57,7 @@ def calculate_objectives(model, task, visualiser, population):
 
             new_obj_value = obj.get_obj_value(objective_calculation_data)
 
-            objectives_values.append([new_obj_value])
+            objectives_values.append(new_obj_value)
 
             if obj.is_simulation_required:
                 if model.computational_manager is None or not model.computational_manager.is_lazy_parallel:
@@ -67,7 +67,7 @@ def calculate_objectives(model, task, visualiser, population):
                         simulation_result = pre_simulated_results[individ_index]
                     except:
                         print("Simulated result not found in pre-simulated results")
-                # label_to_reference = simulation_result.configuration_label
+                label_to_reference = simulation_result.configuration_label
 
             else:
                 if not any(obj.is_simulation_required for obj in task.objectives):
@@ -76,14 +76,20 @@ def calculate_objectives(model, task, visualiser, population):
                     simulation_result = WaveSimulationResult(
                         hs=np.zeros(shape=(model.domain.model_grid.grid_y, model.domain.model_grid.grid_x)),
                         configuration_label=label)
-                    # label_to_reference = None
+                    label_to_reference = None
+
+        def flatten(items, seqtypes=(list, tuple)):
+            for i, x in enumerate(items):
+                while i < len(items) and isinstance(items[i], seqtypes):
+                    items[i:i + 1] = items[i]
+            return items
 
         # un-list objectives
-        objectives_values = list(itertools.chain(*objectives_values))
+        objectives_values = flatten(objectives_values)
 
-    all_objectives.append(objectives_values)
+        all_objectives.append(objectives_values)
 
-    # labels_to_reference_for_simulated_runs.append(label_to_reference)
+        all_labels.append(label_to_reference)
 
     # simulation_result, all_breakers = build_decision(model, task, genotype)
 
@@ -101,7 +107,7 @@ def calculate_objectives(model, task, visualiser, population):
     #    if subfolder_to_saving:
     #        visualiser.print_individuals(all_objectives, population_number, simulation_results_store,
     #                                     all_breakers_store, fitnesses=None, maxiters=maxiters)
-    return all_objectives
+    return all_objectives, all_labels
 
 
 def crossover(p1, p2, rate, genotype_mask):
@@ -119,7 +125,7 @@ def crossover(p1, p2, rate, genotype_mask):
     while is_bad:
         print(f'CROSSOVER_{iteration}')
 
-        new_breakers = genotype_encoder.mutate(p1.genotype, p2.genotype)
+        new_breakers = genotype_encoder.crossover(p1.genotype, p2.genotype)
 
         constraints = StaticStorage.task.constraints
 
@@ -163,7 +169,14 @@ def initial_pop_random(size, **kwargs):
     for _ in range(0, size):
 
         while len(population_new) < size:
-            genotype = np.zeros(StaticStorage.genotype_length)
+
+            base_genotype = genotype_encoder.breakers_to_parameterized_genotype(
+                StaticStorage.task.possible_modifications,
+                StaticStorage.task,
+                StaticStorage.exp_domain.model_grid)
+
+            genotype = np.zeros(len(base_genotype))
+
             for j, g in enumerate(genotype):
                 if j % 2 == 0:
                     genotype[j] = random.randint(genotype_encoder.min_for_init[0],
@@ -189,10 +202,11 @@ def initial_pop_random(size, **kwargs):
 
 
 def _validate_constraints(proposed_breakers, constraints):
-    objective_calculation_data = ObjectiveData(StaticStorage.model.domain, proposed_breakers,
-                                               StaticStorage.model.domain.base_breakers,
+    objective_calculation_data = ObjectiveData(StaticStorage.exp_domain, proposed_breakers,
+                                               StaticStorage.exp_domain.base_breakers,
                                                None,
                                                None)
+    is_bad = False
     for constraint in constraints:
         objective = constraint[0]
         comparison_type = constraint[1]
