@@ -37,7 +37,8 @@ class SPEA2:
         self._archive = []
 
     class Params:
-        def __init__(self, max_gens, pop_size, archive_size, crossover_rate, mutation_rate, mutation_value_rate,min_or_max):
+        def __init__(self, max_gens, pop_size, archive_size, crossover_rate, mutation_rate, mutation_value_rate,
+                     min_or_max):
             self.max_gens = max_gens
             self.pop_size = pop_size
 
@@ -69,8 +70,8 @@ class SPEA2:
         def fitness(self):
             return self.raw_fitness + self.density
 
-        #def weighted_sum(self):
-            #return sum(list(self.objectives))
+        # def weighted_sum(self):
+        # return sum(list(self.objectives))
 
     class ErrorHistory:
         class Point:
@@ -94,14 +95,13 @@ class SPEA2:
     def solution(self, verbose=True, **kwargs):
         pass
 
-    def fitness(self,gen):
+    def fitness(self, gen):
 
-
-        all_objectives,labels_to_reference=self.calculate_objectives(pop=self._pop,population_number=gen,multi_objective_optimization=True,maxiters=self.params.max_gens)
+        all_objectives, labels_to_reference = self.calculate_objectives(population=self._pop)
 
         for i, p in enumerate(self._pop):
-            p.objectives=all_objectives[i]
-            p.referenced_dataset=labels_to_reference[i]
+            p.objectives = all_objectives[i]
+            p.referenced_dataset = labels_to_reference[i]
 
         union = self._archive + self._pop
 

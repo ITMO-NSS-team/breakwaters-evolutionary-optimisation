@@ -1,5 +1,6 @@
 import numpy as np
 import warnings
+
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 
@@ -18,11 +19,5 @@ class BreakersUtils:
         for base_breaker in base_breakers:
             if all_modified_base_breakers != [] and base_breaker.breaker_id not in all_modified_base_breakers:
                 final_breakers.append(base_breaker)
-
-
-
-        #for i in range(len(final_breakers)):
-            #for j in range(len(final_breakers[i].points)):
-                #l_breakers[i].points[j].x,final_breakers[i].points[j].y)
 
         return final_breakers

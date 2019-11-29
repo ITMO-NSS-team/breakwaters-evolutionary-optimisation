@@ -1,4 +1,3 @@
-from Optimisation.OptimisationStrategies.DiffirentialEvoStrategy import DifferentialOptimisationStrategy
 from Optimisation.OptimisationStrategies.ManualStrategy import ManualOptimisationStrategy
 from Optimisation.OptimisationStrategies.EmptyStrategy import EmptyOptimisationStrategy
 from Optimisation.OptimisationStrategies.SPEA2Strategy import SPEA2OptimisationStrategy

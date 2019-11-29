@@ -38,7 +38,7 @@ class BreakerPoint(GridPoint):
 
         return BreakerPoint(x, y)
 
-    def point_to_relative_polar(self, anchor_point):
+    def get_relative_polar_coordinates(self, anchor_point):
 
         rad_grad = 180 / np.pi
 

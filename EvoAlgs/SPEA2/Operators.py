@@ -1,7 +1,5 @@
 from EvoAlgs.BreakersEvo.EvoOperators import (
-    initial_pop_lhs,
     initial_pop_random,
-    initial_pop_stat,
     crossover,
     mutation
 )

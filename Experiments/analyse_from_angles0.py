@@ -110,7 +110,7 @@ for _, mod_id in enumerate(['default',
     if mod_id == "default":
         brks = exp_domain.base_breakers
     else:
-        brks = BreakersEvoUtils.build_breakers_from_coords(newg, task)
+        brks = BreakersEvoUtils.build_breakers_from_manual_coords(newg, task)
 
     lens = [breaker.get_length() for breaker in brks]
 

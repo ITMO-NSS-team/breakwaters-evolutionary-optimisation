@@ -31,7 +31,7 @@ class WaveModel(object):
     def configurate(self, modifications, configuration_label: str):
         return self._configuration_strategy.configurate(self.domain, modifications, configuration_label)
 
-    def run_simulation_for_constructions(self, modifications, forced_label=None) -> SimulationResult:
+    def run_simulation_for_constructions(self, breakers, forced_label=None) -> SimulationResult:
 
         if forced_label is None:
             configuration_label = uuid.uuid4().hex
@@ -39,33 +39,35 @@ class WaveModel(object):
             configuration_label = forced_label
 
         if self.expensive:
-            serialised_breakers = BreakersEvoUtils.generate_genotype_from_breakers(modifications)
 
             if forced_label is None:
-                loaded_configuration_reference = self._load_simulation_result_reference(serialised_breakers)
+                loaded_configuration_reference = self._load_simulation_result_reference(breakers)
             else:
                 loaded_configuration_reference = None
 
             if loaded_configuration_reference is None:
-                configuration_info = self.configurate(modifications, configuration_label)
+                configuration_info = self.configurate(breakers, configuration_label)
                 results = self.run_simulation(configuration_info, computational_manager=self.computational_manager)
                 if not forced_label:
-                    self._save_simulation_result_reference(serialised_breakers,
+                    self._save_simulation_result_reference(breakers,
                                                            configuration_label)
             else:
                 print("Historical SWAN found")
                 configuration_label = loaded_configuration_reference
-                all_breakers = BreakersUtils.merge_breakers_with_modifications(self.domain.base_breakers, modifications)
+                all_breakers = BreakersUtils.merge_breakers_with_modifications(self.domain.base_breakers, breakers)
                 results = self.run_simulation(
                     ConfigurationInfo(all_breakers, self.domain, configuration_label, file_name=None),
                     computational_manager=self.computational_manager)
         else:
-            configuration_info = self.configurate(modifications, configuration_label)
+            configuration_info = self.configurate(breakers, configuration_label)
             results = self.run_simulation(configuration_info, computational_manager=None)
 
         return results
 
-    def _save_simulation_result_reference(self, serialised_breakers, configuration_label: str):
+    def _save_simulation_result_reference(self, breakers, configuration_label: str):
+
+        serialised_breakers = BreakersEvoUtils.serialise_breakers(breakers)
+
         lock = Lock()
         lock.acquire()
         try:
@@ -75,7 +77,10 @@ class WaveModel(object):
         finally:
             lock.release()
 
-    def _load_simulation_result_reference(self, serialised_breakers):
+    def _load_simulation_result_reference(self, breakers):
+
+        serialised_breakers = BreakersEvoUtils.serialise_breakers(breakers)
+
         db = pickledb.load(self.model_results_file_name, False)
         responce = db.get(serialised_breakers)
 
@@ -84,9 +89,8 @@ class WaveModel(object):
         with open('response.txt', 'a') as out:
             out.write('{}\n'.format(responce))
 
-        if responce == False or not os.path.exists(f'D:\\SWAN_sochi\\r\\hs{responce}.d'):
-            print(f'D:\\SWAN_sochi\\r\\hs{responce}.d',os.path.exists(f'D:\\SWAN_sochi\\r\\hs{responce}.d'))
-        #if responce == False:
+        if responce is False or not os.path.exists(f'D:\\SWAN_sochi\\r\\hs{responce}.d'):
+            print(f'D:\\SWAN_sochi\\r\\hs{responce}.d', os.path.exists(f'D:\\SWAN_sochi\\r\\hs{responce}.d'))
             return None
 
         configuration_label = responce
@@ -96,7 +100,7 @@ class WaveModel(object):
         db = pickledb.load(self.model_results_file_name, False)
         for key in db.db:
             if db.db[key] == id:
-                #print(key)
+                # print(key)
                 return key
         return None
 

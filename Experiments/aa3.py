@@ -228,7 +228,7 @@ for mod_id in ['n11_cover','n11_25c', 'n11_50', 'n11_75', 'n11_125', 'n11_250', 
 
     task = OptimisationTask(objectives, selected_modifications_for_tuning, mod_points_to_optimise, )
 
-    brks = BreakersEvoUtils.build_breakers_from_coords(newg, task)
+    brks = BreakersEvoUtils.build_breakers_from_manual_coords(newg, task)
 
     lens = [breaker.get_length() for breaker in brks]
 

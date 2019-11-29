@@ -1,0 +1,72 @@
+import datetime
+import random
+
+import numpy as np
+
+from Breakers.Breaker import xy_to_points, Breaker
+from CommonUtils.StaticStorage import StaticStorage
+from Computation.СomputationalEnvironment import SwanWinRemoteComputationalManager
+from Configuration.Domains import SochiHarbor
+from EvoAlgs.EvoAnalytics import EvoAnalytics
+from Optimisation.Objective import RelativeCostObjective, RelativeNavigationObjective, RelativeWaveHeightObjective, StructuralObjective
+from Optimisation.OptimisationTask import OptimisationTask
+from Optimisation.Optimiser import ParetoEvolutionaryOptimiser
+from Simulation.WaveModel import SwanWaveModel
+from Visualisation.Visualiser import Visualiser
+from EvoAlgs.BreakersEvo.GenotypeEncoders import AngularGenotypeEncoder,CartesianGenotypeEncoder
+
+if __name__ == '__main__':
+    seed = 42
+
+    np.random.seed(seed)
+    random.seed(seed)
+
+    exp_domain = SochiHarbor()
+    StaticStorage.exp_domain = exp_domain
+
+    StaticStorage.is_custom_conditions = True
+    StaticStorage.wind = "23.1 135"
+    StaticStorage.bdy = "5.3 9.1 200 30"
+
+    EvoAnalytics.clear()
+    EvoAnalytics.run_id = 'run_{date:%Y_%m_%d_%H_%M_%S}'.format(date=datetime.datetime.now())
+
+    parallel_computational_manager = SwanWinRemoteComputationalManager(resources_names=["125", "124", "123", "121"])
+    wave_model = SwanWaveModel(exp_domain, parallel_computational_manager)
+    wave_model.model_results_file_name = 'D:\SWAN_sochi\model_results_paper_martech.db'
+
+    optimiser = ParetoEvolutionaryOptimiser()
+
+    base_modifications_for_tuning = [
+        Breaker('mod1', list(map(xy_to_points, [[-1, -1], [33, 22], [42, 17]])), 0, 'Ia'),
+        Breaker('mod2_top', list(map(xy_to_points, [[-1, -1], [50, 32], [50, 39]])), 0, 'II')
+    ]
+
+    mod_points_to_optimise = {  # order is important
+        'mod1': [0],
+        'mod2_top': [0]
+    }
+
+    selected_modifications_for_tuning = base_modifications_for_tuning
+    selected_mod_points_to_optimise = [mod_points_to_optimise[mod.breaker_id] for mod in base_modifications_for_tuning
+                                       if mod.breaker_id in mod_points_to_optimise]
+
+    objectives = [
+        RelativeCostObjective(),
+        RelativeNavigationObjective(),
+        RelativeWaveHeightObjective()]
+
+    task = OptimisationTask(objectives, selected_modifications_for_tuning, mod_points_to_optimise, goal="minimise")
+    task.constraints = [(StructuralObjective, "e", 0)]
+
+    StaticStorage.task = task
+    #StaticStorage.genotype_length = sum([len(_) * 2 for _ in selected_mod_points_to_optimise])
+
+    StaticStorage.genotype_encoder = AngularGenotypeEncoder()
+
+    visualiser = Visualiser(store_all_individuals=False, store_best_individuals=True,
+                            num_of_best_individuals_from_population_for_print=5, create_gif_image=True,
+                            create_boxplots=True, model=wave_model, task=task, print_pareto_front=True,
+                            data_for_pareto_set_chart=[["hs average decrease", "cost"]])
+
+    opt_result = optimiser.optimise(wave_model, task, visualiser=visualiser)

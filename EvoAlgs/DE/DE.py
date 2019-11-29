@@ -9,17 +9,12 @@ class DEIterator:
     def __init__(self, de):
         self.de = de
         self.population = de.init()
-        #self.fitness, self.objectives = de.evaluate(self.population, 0)
+
         self.fitness, self.objectives = de.evaluate(self.population, 0)
         self.best_fitness = min(self.fitness)
         self.index_of_ind = 0
 
-        # if de.save_gif_images:
-        # de.print_individuals_with_best_fitness(self.population, self.fitness, 0)
-
         EvoAnalytics.num_of_best_inds_for_print = 5
-
-        # print("indexes",self.indexes_of_best_individuals)
 
         self.best_idx = np.argmin(self.fitness)
         # F and CR control parameters
@@ -70,10 +65,10 @@ class DEIterator:
     def replace(self, mutants):
         # mutant_fitness,obj = self.de.evaluate(np.asarray([mutant]), i)
         # return self.replacement(i, mutant, mutant_fitness, obj)
-        if self.iteration!=0:
+        if self.iteration != 0:
             mutant_fitness, obj = self.de.evaluate(np.asarray(mutants))
         else:
-            mutant_fitness,obj=self.fitness, self.objectives
+            mutant_fitness, obj = self.fitness, self.objectives
 
         return self.replacement(mutants, mutant_fitness, obj)
         # return self.replacement(i, mutant, mutant_fitness)
@@ -274,8 +269,6 @@ class DE:
         # Analytics
         EvoAnalytics.num_of_generations = self.maxiters
 
-
-
         for step_idx, step in enumerate(iterator):
 
             self.step_num += 1
@@ -292,6 +285,5 @@ class DE:
                     iterator.refresh()
                     iterator.close()
                 break
-
 
         return self.denormalize([P[idx].reshape(-1, 1)]), fitness[idx]

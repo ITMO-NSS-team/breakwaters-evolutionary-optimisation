@@ -15,7 +15,7 @@ from Visualisation.Visualiser import Visualiser
 import datetime
 
 if __name__ == '__main__':
-    seed = 42
+    seed = 421
 
     np.random.seed(seed)
     random.seed(seed)
@@ -38,13 +38,12 @@ if __name__ == '__main__':
     optimiser = ParetoEvolutionaryOptimiser()
 
     base_modifications_for_tuning = [
-        Breaker('mod1', list(map(xy_to_points, [[-1, -1], [33, 22], [42, 17]])), 0, 'Ia'),
-        Breaker('mod2_top', list(map(xy_to_points, [[-1, -1], [50, 32], [50, 39]])), 0, 'II')
+        Breaker('mod1', list(map(xy_to_points, [[-1, -1], [-1, -1],[33, 22], [42, 17]])), 0, 'Ia'),
     ]
 
     mod_points_to_optimise = {  # order is important
-        'mod1': [0],
-        'mod2_top': [0]
+        'mod1': [1, 0],
+      #  'mod2_top': [1,0]
     }
 
     selected_modifications_for_tuning = base_modifications_for_tuning
@@ -55,7 +54,7 @@ if __name__ == '__main__':
     objectives = [RelativeQuailityObjective()]
 
     task = OptimisationTask(objectives, selected_modifications_for_tuning, mod_points_to_optimise, goal="minimization")
-    task.strict_objectives = []
+    task.constraints = []
 
     StaticStorage.task = task
     StaticStorage.genotype_length = sum([len(_) * 2 for _ in selected_mod_points_to_optimise])

@@ -58,7 +58,7 @@ for i in range(0,100):
             WaveHeightObjective(importance=2)]
 
         task = OptimisationTask(objectives, selected_modifications_for_tuning, mod_points_to_optimise)
-        task.strict_objectives = []
+        task.constraints = []
 
         StaticStorage.task = task
         StaticStorage.genotype_length = sum([len(_) * 2 for _ in selected_mod_points_to_optimise])

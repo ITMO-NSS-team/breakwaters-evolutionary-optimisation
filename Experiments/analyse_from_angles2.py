@@ -25,11 +25,11 @@ wave_model = SwanWaveModel(exp_domain, None)
 
 optimiser = ParetoEvolutionaryOptimiser()
 
-indices = ['11', '12', '10', '5', '9', '6', '8', '7.2', '7.1']
+indices = ['13','11', '12', '10', '5', '9', '6', '8', '7.2', '7.1']
 
 max2 = 3
 
-for _, mod_id in enumerate(['MKG9_Т8_75', 'MKG10_Т6_75', 'newvar',
+for _, mod_id in enumerate(['final', 'MKG9_Т8_75', 'MKG10_Т6_75', 'newvar',
                             '904dff5a-6946-434d-8d1d-aaa4e553e6cc',
                             '5-8',
                             '53b30020-35a1-49aa-a4fd-b4d68e240c23',
@@ -185,6 +185,25 @@ for _, mod_id in enumerate(['MKG9_Т8_75', 'MKG10_Т6_75', 'newvar',
 
         newg = [32, 26, 48, 29]
 
+    elif mod_id == 'final':
+        base_modifications_for_tuning = [
+            Breaker('mod1', list(map(xy_to_points, [[-1, -1], [33, 22], [42, 17]])), 0, 'Ia'),
+            Breaker('mod2_top', list(map(xy_to_points, [[-1, -1], [50, 32], [50, 39]])), 0, 'II'),
+            Breaker('mod2_bottom', list(map(xy_to_points, [[-1, -1], [50, 39]])), 0, '--'),
+            Breaker('mod3long', list(map(xy_to_points, [[-1, -1], [56, 32], [67, 35]])), 0.9, 'IIIa')
+        ]
+
+        mod_points_to_optimise = {  # order is important
+            'mod1': [0],
+            'mod2_top': [0],
+            'mod2_bottom': [0],
+            'mod3long': [0],
+        }
+
+        lensb_real = [lensb[0], lensb[2]]
+
+        newg = [32, 27, 50, 30, 56, 40, 56, 33]
+
     selected_modifications_for_tuning = base_modifications_for_tuning
     selected_mod_points_to_optimise = [mod_points_to_optimise[mod.breaker_id] for mod in base_modifications_for_tuning]
 
@@ -195,7 +214,7 @@ for _, mod_id in enumerate(['MKG9_Т8_75', 'MKG10_Т6_75', 'newvar',
 
     task = OptimisationTask(objectives, selected_modifications_for_tuning, mod_points_to_optimise, )
 
-    brks = BreakersEvoUtils.build_breakers_from_coords(newg, task)
+    brks = BreakersEvoUtils.build_breakers_from_manual_coords(newg, task)
 
     lens = [breaker.get_length() for breaker in brks]
 
@@ -218,7 +237,7 @@ for _, mod_id in enumerate(['MKG9_Т8_75', 'MKG10_Т6_75', 'newvar',
             if lind % 2 == 1:
                 new1 = ',\n '
             lind += 1
-            if mod_id in ['MKG9_Т8_75','MKG10_Т6_75'] and i == 1:
+            if mod_id in ['MKG9_Т8_75', 'MKG10_Т6_75'] and i == 1:
                 len_info += f'{all_labels[i]}: 75 м{new1}'
             else:
                 len_info += f'{all_labels[i]}: {_len} м{new1}'
@@ -372,7 +391,8 @@ for _, mod_id in enumerate(['MKG9_Т8_75', 'MKG10_Т6_75', 'newvar',
                                                       StaticStorage.exp_domain.fairways,
                                                       StaticStorage.exp_domain.target_points,
                                                       "mean",
-                                                      [2, 2, 2, 2, 2, 2, 2, max2, max2, max2, max2, max2, max2, max2][i],
+                                                      [2, 2, 2, 2, 2, 2, 2, max2, max2, max2, max2, max2, max2, max2][
+                                                          i],
                                                       # f'{ord})',
                                                       'б)',
                                                       wi == 1, [1, 1, 1, 1, 1, 1, 1, 50, 50, 50, 50, 50, 50, 50][i],

@@ -33,11 +33,10 @@ if __name__ == '__main__':
     EvoAnalytics.clear()
     EvoAnalytics.run_id = 'run_{date:%Y_%m_%d_%H_%M_%S}'.format(date=datetime.datetime.now())
 
+    # wave_model = SwanWaveModel(exp_domain, None)
 
-    #wave_model = SwanWaveModel(exp_domain, None)
-
-    parallel_computational_manager = SwanWinRemoteComputationalManager(resources_names=["125", "124", "123"],
-                                                                      is_lazy_parallel=True)
+    parallel_computational_manager = SwanWinRemoteComputationalManager(resources_names=["125", "124", "123", '121'],
+                                                                       is_lazy_parallel=True)
     wave_model = SwanWaveModel(exp_domain, parallel_computational_manager)
 
     optimiser = ParetoEvolutionaryOptimiser()
@@ -62,14 +61,15 @@ if __name__ == '__main__':
                   NavigationObjective(importance=1),
                   WaveHeightObjective(importance=2)]
 
-    task = OptimisationTask(objectives, selected_modifications_for_tuning, mod_points_to_optimise,goal="minimization" )
+    task = OptimisationTask(objectives, selected_modifications_for_tuning, mod_points_to_optimise, goal="minimization")
 
     StaticStorage.task = task
     StaticStorage.genotype_length = sum([len(_) * 2 for _ in selected_mod_points_to_optimise])
 
     visualiser = Visualiser(store_all_individuals=False, store_best_individuals=True,
                             num_of_best_individuals_from_population_for_print=5, create_gif_image=True,
-                            create_boxplots=True, model=wave_model, task=task,print_pareto_front=True,data_for_pareto_set_chart=[["hs average decrease","cost"]])
+                            create_boxplots=True, model=wave_model, task=task, print_pareto_front=True,
+                            data_for_pareto_set_chart=[["hs average decrease", "cost"]])
     opt_result = optimiser.optimise(wave_model, task, visualiser)
 
     '''

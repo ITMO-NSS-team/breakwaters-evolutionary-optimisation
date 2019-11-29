@@ -1,12 +1,12 @@
 import json
-from abc import abstractmethod
-
-import winrm  # install as pip install pywinrm==0.2.2
-import shutil
 import os
-from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
-import numpy as np
+import shutil
+from abc import abstractmethod
+from concurrent.futures import ThreadPoolExecutor
 from multiprocessing import Lock
+
+import numpy as np
+import winrm  # install as pip install pywinrm==0.2.2
 
 '''
 reg add HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System /v LocalAccountTokenFilterPolicy /t REG_DWORD /d 1 /f
@@ -60,11 +60,11 @@ class SwanComputationalManager(ComputationalManager):
 
 
 # TODO implement as strategy pattern
-class SwanWinRemoteComputationalManager(SwanComputationalManager):
-    def __init__(self, resources_names, is_lazy_parallel=False):
+class SwanWinComputationalManager(SwanComputationalManager):
+    def __init__(self, resources_names, is_lazy_parallel):
         self.input_data = []
 
-        super(SwanWinRemoteComputationalManager, self).__init__(resources_names, is_lazy_parallel)
+        super(SwanWinComputationalManager, self).__init__(resources_names, is_lazy_parallel)
 
         self.runned = False
 
@@ -150,3 +150,47 @@ class SwanWinRemoteComputationalManager(SwanComputationalManager):
                         lock.release()
             self.input_data = []
         return results_list
+
+    def prepare_simulations_for_population(self, population, model):
+        if model.computational_manager is not None and model.computational_manager.is_lazy_parallel:
+            # cycle for the mass simulation run
+            pre_simulated_results = []
+            pre_simulated_results_idx = []
+
+            for individual_ind, individual in enumerate(population):
+                proposed_breakers = individual.genotype.get_as_breakers()
+
+                simulation_result = model.run_simulation_for_constructions(proposed_breakers)
+
+                pre_simulated_results.append(simulation_result)
+                pre_simulated_results_idx.append(simulation_result.configuration_label)
+
+            finalised_values = model.computational_manager.finalise_execution()
+
+            if len(finalised_values) > 0:
+                for i, val in enumerate(finalised_values):
+                    label = val[0]
+                    hs = val[1]
+                    indices = [i for i, x in enumerate(pre_simulated_results_idx) if x == label]
+                    if len(indices) > 2:
+                        print("STRANGE")
+                    for idx in indices:
+                        pre_simulated_results[idx]._hs = hs
+
+            for ps in pre_simulated_results:
+                if ps._hs is None:
+                    print("NONE FOUND")
+        else:
+            pre_simulated_results = None
+
+        return pre_simulated_results
+
+
+class SwanWinLocalComputationalManager(SwanWinComputationalManager):
+    def __init__(self, resources_names):
+        super(SwanWinLocalComputationalManager, self).__init__(resources_names, False)
+
+
+class SwanWinRemoteComputationalManager(SwanWinComputationalManager):
+    def __init__(self, resources_names):
+        super(SwanWinRemoteComputationalManager, self).__init__(resources_names, True)

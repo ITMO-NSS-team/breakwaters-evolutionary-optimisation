@@ -13,276 +13,95 @@ from scipy.stats.distributions import norm
 from Breakers.BreakersUtils import BreakersUtils
 from CommonUtils.StaticStorage import StaticStorage
 from EvoAlgs.BreakersEvo.BreakersEvoUtils import BreakersEvoUtils
-from EvoAlgs.BreakersEvo.BreakersParams import BreakersParams
+from EvoAlgs.BreakersEvo.BreakerIndividual import Individual
 from EvoAlgs.EvoAnalytics import EvoAnalytics
-from Optimisation.Objective import CostObjective, NavigationObjective, WaveHeightObjective, StructuralObjective, RelativeQuailityObjective
-from Simulation.Results import WaveSimulationResult
+from Optimisation.Objective import ObjectiveData, NavigationObjective, StructuralObjective, ConstraintComparisonType
 from Visualisation.ModelVisualization import ModelsVisualization
-from Visualisation.Visualiser import Visualiser
+from Simulation.Results import WaveSimulationResult
 
 # TODO refactor
 len_range = [0, 3]
 dir_range = [-50, 50]
 
 
-def obtain_numerical_chromosome(task):
-    chromosome = []
-    for modification in task.possible_modifications:
-        points_to_opt = task.mod_points_to_optimise[modification.breaker_id]
-        points_to_encode = []
-        prev_anchor = None
-        for i in points_to_opt:
-            anchor = modification.points[i + 1]
-            prev_anchor = modification.points[i + 2]
+def calculate_objectives(model, task, visualiser, population):
+    pre_simulated_results = model.computational_manager.prepare_simulations_for_population(population, model)
 
-            polar_coords = modification.points[i].point_to_relative_polar(anchor)
-
-            # fill '-1' point to obtain next anchor
-            modification.points[i].x = anchor.x + modification.points[i].x
-            modification.points[i].y = anchor.y + modification.points[i].y
-
-            real_angle = polar_coords["angle"]
-            anchor_angle = anchor.point_to_relative_polar(prev_anchor)["angle"]
-            relative_angle = ((real_angle - anchor_angle) + 360) % 360
-            points_to_encode.append([polar_coords["length"], relative_angle])
-
-        chromosome.append(list(chain.from_iterable(points_to_encode)))
-    return list(chain.from_iterable(chromosome))
-
-def build_decision(model, task,genotype):
-
-    proposed_breakers = BreakersEvoUtils.build_breakers_from_genotype(genotype, task, model.domain.model_grid)
-
-    #if sum([isinstance(obj, WaveHeightObjective) for obj in task.objectives]):
-    if any(isinstance(o, (WaveHeightObjective, RelativeQuailityObjective)) for o in task.objectives):
-
-        simulation_result = model.run_simulation_for_constructions(proposed_breakers)
-
-    else:
-
-        simulation_result = WaveSimulationResult(
-            hs=np.zeros(shape=(model.domain.model_grid.grid_y, model.domain.model_grid.grid_x)),
-            configuration_label=EvoAnalytics.run_id)
-
-    all_breakers = BreakersUtils.merge_breakers_with_modifications(model.domain.base_breakers,
-                                                                   proposed_breakers)
-
-    return simulation_result,all_breakers
-
-def calculate_objectives(model, task, visualiser, pop, multi_objective_optimization, check_intersections=False,population_number=None, maxiters=None, subfolder_to_saving=None):
-    if check_intersections:
-
-        genotype = [int(round(g, 0)) for g in pop[0]]
-        proposed_breakers = BreakersEvoUtils.build_breakers_from_genotype(genotype, task, model.domain.model_grid)
-
-        combined_breakers_for_cost_estimation = BreakersUtils.merge_breakers_with_modifications(
-            model.domain.base_breakers, proposed_breakers)
-
-        obj = StructuralObjective(importance=1)
-
-        obj_in_point = obj.get_obj_value(model.domain, combined_breakers_for_cost_estimation)
-
-        return obj_in_point
-
-    if model.computational_manager is not None and model.computational_manager.is_lazy_parallel:
-
-
-        # cycle for the mass simulation run
-        pre_simulated_results = []
-        pre_simulated_results_idx = []
-
-        for p_ind, p in enumerate(pop):
-
-            if not StaticStorage.multi_objective_optimization:
-                genotype = [int(round(g, 0)) for g in p]
-            else:
-                genotype = [int(round(g, 0)) for g in p.genotype.genotype_array]
-
-            proposed_breakers = BreakersEvoUtils.build_breakers_from_genotype(genotype, task, model.domain.model_grid)
-
-            simulation_result = model.run_simulation_for_constructions(proposed_breakers)
-            print("simulation result", simulation_result._hs)
-            pre_simulated_results.append(simulation_result)
-            pre_simulated_results_idx.append(simulation_result.configuration_label)
-
-        finalised_values = model.computational_manager.finalise_execution()
-        # process ids
-        if len(finalised_values) > 0:
-            for i, val in enumerate(finalised_values):
-                label = val[0]
-                hs = val[1]
-                indices = [i for i, x in enumerate(pre_simulated_results_idx) if x == label]
-                if len(indices)>2:
-                    print("STRANGE")
-                for idx in indices:
-                    pre_simulated_results[idx]._hs = hs
-
-        for ps in pre_simulated_results:
-            if ps._hs is None:
-                print("NONE FOUND")
-    else:
-        pre_simulated_results = None
+    # labels_to_reference_for_simulated_runs = []
 
     all_objectives = []
-    if not StaticStorage.multi_objective_optimization:
-        all_fitnesses = []
-    else:
-        labels_to_reference=[]
 
-    genotypes=[]#genotypes store
-    simulation_results_store = []
-    all_breakers_store = []
-    for individ_index, p in enumerate(pop):
-        label_to_reference = None
+    for individ_index, individual in enumerate(population):
+        # label_to_reference = None
 
-        if not StaticStorage.multi_objective_optimization:
-            genotype = [int(round(g, 0)) for g in p]
-        else:
-            genotype = [int(round(g, 0)) for g in p.genotype.genotype_array]
+        proposed_breakers = individual.genotype.get_as_breakers()
+        objectives_values = []
 
-        proposed_breakers = BreakersEvoUtils.build_breakers_from_genotype(genotype, task, model.domain.model_grid)
-        objectives = []
-
-        base_objectives = _calculate_reference_objectives(model, task)
-
-        combined_breakers_for_cost_estimation = BreakersUtils.merge_breakers_with_modifications(
-            model.domain.base_breakers, proposed_breakers)
+        simulation_result = None
+        base_simulation_result = None
 
         for obj_ind, obj in enumerate(task.objectives):
-            if isinstance(obj, RelativeQuailityObjective):
-                if model.computational_manager is not None and model.computational_manager.is_lazy_parallel:
-                    base_simulation_result = model.run_simulation_for_constructions(model.domain.base_breakers)
-                    base_fin_values = model.computational_manager.finalise_execution()
-                    # process ids
-                    if len(base_fin_values) > 0:
-                        for i, val in enumerate(base_fin_values):
-                            label = val[0]
-                            hs = val[1]
-                            base_simulation_result._hs = hs
-                else:
-                    base_simulation_result = model.run_simulation_for_constructions(model.domain.base_breakers)
+            if obj.is_simulation_required:
+                base_simulation_result = model.run_simulation_for_constructions(model.domain.base_breakers)
 
                 if model.computational_manager is None or not model.computational_manager.is_lazy_parallel:
                     simulation_result = model.run_simulation_for_constructions(proposed_breakers)
                 else:
                     simulation_result = pre_simulated_results[individ_index]
 
-                label_to_reference = simulation_result.configuration_label
+                # label_to_reference = simulation_result.configuration_label
 
-                new_obj = obj.get_obj_value(model.domain, proposed_breakers, model.domain.base_breakers,
-                                            simulation_result,
-                                            base_simulation_result)
+            objective_calculation_data = ObjectiveData(model.domain, proposed_breakers, model.domain.base_breakers,
+                                                       simulation_result,
+                                                       base_simulation_result)
 
-                objectives.append([new_obj])
+            new_obj_value = obj.get_obj_value(objective_calculation_data)
 
-            if isinstance(obj, (CostObjective, NavigationObjective, StructuralObjective)):
-                # TODO expensive check can be missed? investigate
-                if not isinstance(obj, StructuralObjective):
-                    new_obj = obj.get_obj_value(model.domain, combined_breakers_for_cost_estimation)
-                else:
-                    new_obj = obj.get_obj_value(model.domain, proposed_breakers)
+            objectives_values.append([new_obj_value])
 
-                if isinstance(obj, CostObjective):
-                    new_obj = (new_obj - base_objectives[obj_ind]) / base_objectives[obj_ind] * 100
-                if isinstance(obj, NavigationObjective):
-                    new_obj = -(new_obj - base_objectives[obj_ind]) / base_objectives[obj_ind] * 100
-                if isinstance(obj, StructuralObjective):
-                    new_obj = new_obj - base_objectives[obj_ind]
-
-                objectives.append([new_obj])
-
-            if isinstance(obj, WaveHeightObjective):
+            if obj.is_simulation_required:
                 if model.computational_manager is None or not model.computational_manager.is_lazy_parallel:
                     simulation_result = model.run_simulation_for_constructions(proposed_breakers)
                 else:
-
-                    # print(individ_index)
                     try:
                         simulation_result = pre_simulated_results[individ_index]
                     except:
-                        print("!")
-                label_to_reference = simulation_result.configuration_label
+                        print("Simulated result not found in pre-simulated results")
+                # label_to_reference = simulation_result.configuration_label
 
-                    # print("simulation result",simulation_result._hs)
-
-                new_obj = (obj.get_obj_value(model.domain, proposed_breakers, simulation_result))
-
-                    # for 3 points it is list
-                new_obj = [(x1 - x2) / x2 * 100 for (x1, x2) in zip(new_obj, base_objectives[obj_ind])]
-
-                objectives.append(new_obj)
             else:
-                if not any(isinstance(o, (WaveHeightObjective, RelativeQuailityObjective)) for o in task.objectives):
+                if not any(obj.is_simulation_required for obj in task.objectives):
+                    # stub for simulation results if no simulations needed
                     label = uuid.uuid4().hex
                     simulation_result = WaveSimulationResult(
                         hs=np.zeros(shape=(model.domain.model_grid.grid_y, model.domain.model_grid.grid_x)),
                         configuration_label=label)
-                    label_to_reference = label
-        #objectives = [j for i in objectives for j in i]
-        objectives=list(itertools.chain(*objectives))
+                    # label_to_reference = None
 
-        all_objectives.append(objectives)
+        # un-list objectives
+        objectives_values = list(itertools.chain(*objectives_values))
 
-        if not StaticStorage.multi_objective_optimization:
+    all_objectives.append(objectives_values)
 
-            all_fitnesses.append(0.8 * objectives[0] + 0.9 * objectives[1] + 0.5 * objectives[2] + sum(objectives[3:]))
-            #all_fitnesses.append(objectives)
-        else:
+    # labels_to_reference_for_simulated_runs.append(label_to_reference)
 
-            #p.objectives = list(itertools.chain(*objectives))
+    # simulation_result, all_breakers = build_decision(model, task, genotype)
 
-            #p.referenced_dataset = label_to_reference
+    # simulation_results_store.append(copy.deepcopy(simulation_result))
+    # all_breakers_store.append(copy.deepcopy(all_breakers))
 
-            labels_to_reference.append(label_to_reference)
+    # [EvoAnalytics.save_cantidate(population_number, all_objectives[i], ind) for
+    # i, ind in [g in individ.genotype for population]]
 
-        if True:
-            simulation_result, all_breakers = build_decision(model, task, genotype)
-            simulation_results_store.append(copy.deepcopy(simulation_result))
-            all_breakers_store.append(copy.deepcopy(all_breakers))
-            genotypes.append(genotype)
-
-    [EvoAnalytics.save_cantidate(population_number, all_objectives[i], ind,subfolder_name=subfolder_to_saving) for i, ind in enumerate(genotypes)]
-
-    if not StaticStorage.multi_objective_optimization:
-        visualiser.print_individuals(all_objectives, population_number, simulation_results_store, all_breakers_store,all_fitnesses,maxiters)
-        return all_fitnesses, all_objectives
-    else:
-        if subfolder_to_saving:
-            visualiser.print_individuals(all_objectives, population_number, simulation_results_store, all_breakers_store,fitnesses=None, maxiters=maxiters)
-        return all_objectives,labels_to_reference
-
-def _calculate_reference_objectives(model, task):
-    objectives = []
-    simulation_result = None
-    for obj_ind, obj in enumerate(task.objectives):
-        if isinstance(obj, (CostObjective, NavigationObjective, StructuralObjective)):
-            # TODO expensive check can be missed? investigate
-            new_obj = obj.get_obj_value(model.domain, model.domain.base_breakers)
-            objectives.append(new_obj)
-
-        if isinstance(obj, WaveHeightObjective):
-
-            if model.computational_manager is not None and model.computational_manager.is_lazy_parallel:
-                simulation_result = model.run_simulation_for_constructions(model.domain.base_breakers)
-                values = model.computational_manager.finalise_execution()
-                # process ids
-                if len(values) > 0:
-                    for i, val in enumerate(values):
-                        label = val[0]
-                        hs = val[1]
-                        simulation_result._hs = hs
-            else:
-                simulation_result = model.run_simulation_for_constructions(model.domain.base_breakers)
-
-            new_obj = (obj.get_obj_value(model.domain, model.domain.base_breakers, simulation_result))
-            objectives.append(new_obj)
-
-    if not os.path.isdir(f'img/{EvoAnalytics.run_id}/swan_default.png') and simulation_result is not None:
-        visualiser = ModelsVisualization(f'swan_default', EvoAnalytics.run_id)
-        visualiser.simple_visualise(simulation_result.get_5percent_output_for_field(), model.domain.base_breakers, model.domain.base_breakers,
-                                    StaticStorage.exp_domain.fairways, StaticStorage.exp_domain.target_points,
-                                    objectives)
-    return objectives
+    # if not StaticStorage.multi_objective_optimization:
+    #    visualiser.print_individuals(all_objectives, population_number, simulation_results_store, all_breakers_store,
+    #                                 all_fitnesses, maxiters)
+    #   return all_fitnesses, all_objectives
+    # else:
+    #    if subfolder_to_saving:
+    #        visualiser.print_individuals(all_objectives, population_number, simulation_results_store,
+    #                                     all_breakers_store, fitnesses=None, maxiters=maxiters)
+    return all_objectives
 
 
 def crossover(p1, p2, rate, genotype_mask):
@@ -290,200 +109,104 @@ def crossover(p1, p2, rate, genotype_mask):
     if random_val >= rate:
         return p1
 
-    strict_objectives = StaticStorage.task.strict_objectives
-    new_individ = BreakersParams(copy.deepcopy(p1.genotype_array))
-    # for gen_ind in range(0, len(p1.genotype_array), 2):
-    gen_ind = [0, 2][random.randint(0, 1)]
+    new_individ = Individual(copy.deepcopy(p1.genotype))
+
     is_bad = True
-    iter = 0
+    iteration = 0
 
-    while is_bad and iter < 50:
-        print(f'CROSSOVER {iter}')
+    genotype_encoder = StaticStorage.genotype_encoder
 
-        angle_parent_id = random.randint(0, 1)
+    while is_bad:
+        print(f'CROSSOVER_{iteration}')
 
-        part1_rate = abs(random.random())
-        part2_rate = 1 - part1_rate
+        new_breakers = genotype_encoder.mutate(p1.genotype, p2.genotype)
 
-        genotype_array = copy.copy(new_individ.genotype_array)
+        constraints = StaticStorage.task.constraints
 
-        if genotype_mask is None or gen_ind not in genotype_mask:
-            len_ind = gen_ind
-            dir_ind = gen_ind + 1
-            genotype_array[len_ind] = round(p1.genotype_array[len_ind] * part1_rate + p2.genotype_array[
-                len_ind] * part2_rate)
-        else:
-            next()
-
-        if angle_parent_id == 0:
-            genotype_array[dir_ind] = round((p1.genotype_array[dir_ind] + 360) % 360)
-        if angle_parent_id == 1:
-            genotype_array[dir_ind] = round((p2.genotype_array[dir_ind] + 360) % 360)
-        is_bad = False
-        for objective in strict_objectives:
-            obj_val = objective.get_obj_value(StaticStorage.exp_domain,
-                                              BreakersEvoUtils.build_breakers_from_genotype(
-                                                  genotype_array,
-                                                  StaticStorage.task, StaticStorage.exp_domain.model_grid))
-            if obj_val >= 0 and isinstance(objective, NavigationObjective):
-                is_bad = True
-                print("Unsuccesful crossover N")
-
-                continue
-            if obj_val > 0 and isinstance(objective, StructuralObjective):
-                is_bad = True
-                print("Unsuccesful crossover S")
-        if not is_bad: new_individ.genotype_array = copy.copy(genotype_array)
-        iter += 1
+        is_bad = _validate_constraints(new_breakers, constraints)
+        if not is_bad:
+            new_individ.genotype = copy.copy(new_breakers)
+        iteration += 1
 
     return new_individ
 
 
 def mutation(individ, rate, mutation_value_rate, genotype_mask):
-    new_individ = BreakersParams(copy.deepcopy(individ.genotype_array))
+    new_individ = Individual(copy.deepcopy(individ.genotype))
 
     random_val = random.random()
 
     if random_val >= rate:
-
-        strict_objectives = StaticStorage.task.strict_objectives
+        genotype_encoder = StaticStorage.genotype_encoder
+        iteration = 0
         is_bad = True
 
-        for _ in range(0,
-                       random.randint(1, int(round(len(individ.genotype_array) / 2)))):  # number of mutations
-            is_bad = True
-            iter = 0
+        while is_bad:
+            print(f'MUTATION_{iteration}')
 
-            while is_bad and iter < 50:
-                print(f'MUTATION{iter}')
+            new_breakers = genotype_encoder.mutate(new_individ.genotype)
+            constraints = StaticStorage.task.constraints
 
-                param_ind_to_mutate = random.randint(0, int(round(len(individ.genotype_array) / 2 - 1)))
+            is_bad = _validate_constraints(new_breakers, constraints)
 
-                mutation_ratio = abs(np.random.RandomState().normal(2, 1.5, 1)[0])
-                mutation_ratio_dir = abs(np.random.RandomState().normal(15, 5, 1)[0])
-
-                if not (genotype_mask is None or param_ind_to_mutate not in genotype_mask):
-                    next()
-
-                sign = 1 if random.random() < 0.5 else -1
-
-                genotype_array = copy.copy(new_individ.genotype_array)
-
-                len_ind = param_ind_to_mutate * 2
-                dir_ind = param_ind_to_mutate * 2 + 1
-                genotype_array[len_ind] += sign * mutation_ratio
-                genotype_array[len_ind] = abs(genotype_array[len_ind])
-                genotype_array[dir_ind] += sign * mutation_ratio_dir
-                genotype_array[dir_ind] = max(genotype_array[dir_ind], dir_range[0])
-                genotype_array[dir_ind] = min(genotype_array[dir_ind], dir_range[1])
-
-                is_bad = False
-                for objective in strict_objectives:
-                    obj_val = objective.get_obj_value(StaticStorage.exp_domain,
-                                                      BreakersEvoUtils.build_breakers_from_genotype(
-                                                          genotype_array, StaticStorage.task,
-                                                          StaticStorage.exp_domain.model_grid))
-
-                    if obj_val >= 0 and isinstance(objective, NavigationObjective):
-                        is_bad = True
-                        print("Unsuccesful mutation N")
-
-                        continue
-                    if obj_val > 0 and isinstance(objective, StructuralObjective):
-                        is_bad = True
-                        print("Unsuccesful mutation S")
-
-                        continue
-                if not is_bad: new_individ.genotype_array = copy.copy(genotype_array)
-                iter += 1
+            if not is_bad:
+                new_individ.genotype = copy.copy(new_breakers)
+            iteration += 1
     return new_individ
-
-
-def initial_pop_lhs(size, **kwargs):
-    samples_grid = lhs(StaticStorage.genotype_length, size * 3, 'center')
-
-    for i in range(0, StaticStorage.genotype_length):
-        if i % 2 == 0:
-            par_range = len_range
-            par_scale = 1
-        else:
-            par_range = dir_range
-            par_scale = 50
-
-        # TODO better sampling
-        samples_grid[:, i] = (norm(loc=np.mean(par_range), scale=par_scale).ppf(samples_grid[:, i]))
-
-    population = [BreakersParams(genotype) for genotype in samples_grid]
-    population_new = []
-
-    strict_objectives = StaticStorage.task.strict_objectives
-    for ind in population:
-        bad = False
-        for objective in strict_objectives:
-            obj_val = objective.get_obj_value(StaticStorage.exp_domain,
-                                              BreakersEvoUtils.build_breakers_from_genotype(ind.genotype_array,
-                                                                                            StaticStorage.task))
-            if obj_val is None:
-                bad = True
-                break
-        if not bad:
-            population_new.append(ind)
-        if len(population_new) == size: break
-
-    return population_new
 
 
 def initial_pop_random(size, **kwargs):
     print("INITIAL")
     population_new = []
+
+    genotype_encoder = StaticStorage.genotype_encoder
     for _ in range(0, size):
 
-        strict_objectives = StaticStorage.task.strict_objectives
         while len(population_new) < size:
             genotype = np.zeros(StaticStorage.genotype_length)
             for j, g in enumerate(genotype):
                 if j % 2 == 0:
-                    genotype[j] = random.randint(0, 3)
+                    genotype[j] = random.randint(genotype_encoder.min_for_init[0],
+                                                 genotype_encoder.max_for_init[0])
                 else:
-                    genotype[j] = random.randint(-3, 3) * 15
+                    genotype[j] = random.randint(genotype_encoder.min_for_init[1],
+                                                 genotype_encoder.max_for_init[1])
 
-            is_bad = False
-            for objective in strict_objectives:
-                obj_val = objective.get_obj_value(StaticStorage.exp_domain,
-                                                  BreakersEvoUtils.build_breakers_from_genotype(genotype,
-                                                                                                StaticStorage.task,
-                                                                                                StaticStorage.exp_domain.model_grid))
-                if obj_val >= 0 and isinstance(objective, NavigationObjective):
-                    is_bad = True
-                    # print("Unsuccesful init N")
-                    continue
-                if obj_val > 0 and isinstance(objective, StructuralObjective):
-                    is_bad = True
-                    # print("Unsuccesful init S")
-                    continue
+            breakers_from_genotype = genotype_encoder.parameterized_genotype_to_breakers(
+                genotype,
+                StaticStorage.task,
+                StaticStorage.exp_domain.model_grid)
+
+            constraints = StaticStorage.task.constraints
+
+            is_bad = _validate_constraints(breakers_from_genotype, constraints)
 
             if not is_bad:
-                population_new.append(BreakersParams(copy.deepcopy(genotype)))
+                population_new.append(
+                    Individual(breakers_from_genotype))
 
     return population_new
 
 
-def initial_pop_stat(size, **kwargs):
-    print("INITIAL STAT")
-    population_new = []
-    genotypes = [[4, -90, 0, 0],
-                 [4, -60, 0, 0],
-                 [4, -45, 0, 0],
-                 [4, -30, 0, 0],
-                 [4, -15, 0, 0],
-                 [4, 0, 0, 0],
-                 [4, 15, 0, 0],
-                 [4, 30, 0, 0],
-                 [4, 45, 0, 0],
-                 [4, 60, 0, 0],
-                 [4, 90, 0, 0]]
-    # for _ in range(0, size):
-    for genotype in genotypes:
-        population_new.append(BreakersParams(copy.deepcopy(genotype)))
+def _validate_constraints(proposed_breakers, constraints):
+    objective_calculation_data = ObjectiveData(StaticStorage.model.domain, proposed_breakers,
+                                               StaticStorage.model.domain.base_breakers,
+                                               None,
+                                               None)
+    for constraint in constraints:
+        objective = constraint[0]
+        comparison_type = constraint[1]
+        constr_value = constraint[2]
 
-    return population_new
+        if objective.is_simulation_required:
+            raise NotImplementedError
+
+        obj_val = objective.get_obj_value(objective_calculation_data)
+
+        if comparison_type == ConstraintComparisonType.equal and not (obj_val == constr_value):
+            is_bad = True
+            break
+        if comparison_type == ConstraintComparisonType.not_equal and not (obj_val != constr_value):
+            is_bad = True
+            break
+    return is_bad

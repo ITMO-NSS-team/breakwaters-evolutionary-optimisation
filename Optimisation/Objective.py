@@ -1,22 +1,42 @@
-from abc import abstractmethod
-from typing import List
+from enum import Enum
 
 import numpy as np
 from shapely.geometry import LineString
 
 from Breakers.Breaker import Breaker
-from Configuration.Domains import Domain, Fairway
+from Configuration.Domains import Fairway
 from Simulation.Results import WaveSimulationResult
 
 
-class Objective(object):
-    @abstractmethod
-    def get_obj_value(self, domain: Domain, breakers: List[Breaker]):
+class ConstraintComparisonType(Enum):
+    not_equal = 0
+    equal = 1
+    less_or_equal = 2
+    less = 3
+    more_or_equal = 4
+    more = 5
+
+
+class ObjectiveData:
+    def __init__(self, domain, breakers, base_breakers, simulation_result: WaveSimulationResult,
+                 simulation_result_base: WaveSimulationResult):
+        self.domain = domain
+        self.breakers = breakers
+        self.base_breakers = base_breakers
+        self.simulation_result = simulation_result
+        self.simulation_result_base = simulation_result_base
         return
 
-    def __init__(self, importance=1):
-        self.importance = importance
+    def data_for_base_construction(self):
+        return ObjectiveData(self.domain, self.base_breakers, self.base_breakers, self.simulation_result_base,
+                             self.simulation_result_base)
 
+
+class Objective(object):
+    is_simulation_required = False
+
+    def get_obj_value(self, obj_data: ObjectiveData):
+        return
 
 
 class StructuralObjective(Objective):
@@ -67,7 +87,6 @@ class StructuralObjective(Objective):
 
     def get_obj_value(self, domain, breakers):
 
-
         num_self_intersection = sum(
             [sum([int(self._selfintersection(breaker1, breaker2)) for breaker2 in breakers]) for breaker1 in breakers])
 
@@ -76,9 +95,17 @@ class StructuralObjective(Objective):
 
 class CostObjective(Objective):
 
-    def get_obj_value(self, domain, breakers):
-        cost = sum([breaker.get_length() for breaker in breakers]) * 10
+    def get_obj_value(self, obj_data):
+        cost = sum([breaker.get_length() for breaker in obj_data.breakers]) * 10
         return round(cost, 0)
+
+
+class RelativeCostObjective(CostObjective):
+    def get_obj_value(self, obj_data):
+        cost_obj_new = CostObjective().get_obj_value(obj_data)
+        cost_obj_base = CostObjective().get_obj_value(obj_data.data_for_base_construction())
+        cost_obj_rel = (cost_obj_new - cost_obj_base) / cost_obj_base * 100
+        return cost_obj_rel
 
 
 class NavigationObjective(Objective):
@@ -108,43 +135,70 @@ class NavigationObjective(Objective):
 
         return dist
 
-    def get_obj_value(self, domain, breakers):
+    def get_obj_value(self, obj_data):
 
         min_dist_to_fairway = min(
-            [min([(self._dist_from_fairway_to_breaker(fairway, breaker)) for breaker in breakers])
+            [min([(self._dist_from_fairway_to_breaker(fairway, breaker)) for breaker in obj_data.breakers])
              for
              fairway in
-             domain.fairways])
+             obj_data.domain.fairways])
 
         return -round(min_dist_to_fairway * 100, -1)
 
 
+class RelativeNavigationObjective(NavigationObjective):
+    is_simulation_required = True
+
+    def get_obj_value(self, obj_data):
+        nav_obj_new = NavigationObjective().get_obj_value(obj_data)
+        nav_obj_base = NavigationObjective().get_obj_value(obj_data)
+        nav_obj_rel = (nav_obj_new - nav_obj_base) / nav_obj_base * 100
+        return nav_obj_rel
+
+
 class WaveHeightObjective(Objective):
+    is_simulation_required = True
 
-    def get_obj_value(self, domain, breakers, simulation_result: WaveSimulationResult):
-        hs_vals = simulation_result.get_5percent_output_for_target_points(domain.target_points)
-
+    def get_obj_value(self, obj_data):
+        hs_vals = obj_data.simulation_result.get_5percent_output_for_target_points(obj_data.domain.target_points)
         hs_vals = [hs if hs > 0.05 else 9 for hs in hs_vals]
 
-        hs_weigtened = [hs * pt.weight for hs, pt in zip(hs_vals, domain.target_points)]
+        hs_weigtened = [hs * pt.weight for hs, pt in zip(hs_vals, obj_data.domain.target_points)]
 
         return [round(hs * 100, -1) for hs in hs_weigtened]  # to avoid zero
 
 
+class RelativeWaveHeightObjective(WaveHeightObjective):
+
+    def get_obj_value(self, obj_data):
+        wh_obj_new = WaveHeightObjective().get_obj_value(obj_data.domain, obj_data)
+        wh_obj_base = WaveHeightObjective().get_obj_value(obj_data.domain, obj_data.data_for_base_construction())
+
+        wh_obj_rel = [(x1 - x2) / x2 * 100 for (x1, x2) in zip(wh_obj_new, wh_obj_base)]
+
+        return wh_obj_rel
+
+
 class RelativeQuailityObjective(Objective):
-    def get_obj_value(self, domain, breakers, base_breakers, simulation_result: WaveSimulationResult,
-                      simulation_result_base: WaveSimulationResult):
-        cost_obj_new = CostObjective().get_obj_value(domain, breakers)
-        cost_obj_base = CostObjective().get_obj_value(domain, base_breakers)
+    is_simulation_required = True
 
-        rel_cost_obj = ((cost_obj_new - cost_obj_base) / cost_obj_base) * 100
+    def get_obj_value(self, obj_data):
+        cost_obj_rel = RelativeCostObjective().get_obj_value(obj_data)
+        wh_obj_real = RelativeWaveHeightObjective().get_obj_value(obj_data)
 
-        wh_obj_new = WaveHeightObjective().get_obj_value(domain, breakers, simulation_result)
-        wh_obj_old = WaveHeightObjective().get_obj_value(domain, base_breakers, simulation_result_base)
+        relative_quality_obj_value = (100 + np.mean(wh_obj_real)) / (100 - cost_obj_rel)
 
-        rel_wh_obj = [(x1 - x2) / x2 * 100 for (x1, x2) in zip(wh_obj_new, wh_obj_old)]
-
-        relative_quality_obj_value = (100 + np.mean(rel_wh_obj)) / (100 + rel_cost_obj)
-        print(
-            f'{relative_quality_obj_value},{rel_wh_obj},{rel_cost_obj},{cost_obj_new},{cost_obj_base},{wh_obj_new},{cost_obj_base}')
         return relative_quality_obj_value * 100
+
+
+class CompositeObjective(Objective):
+    is_simulation_required = True
+
+    def get_obj_value(self, obj_data):
+        cost_obj_rel = RelativeCostObjective().get_obj_value(obj_data)
+        nav_obj_rel = RelativeNavigationObjective().get_obj_value(obj_data)
+        wh_obj_rel = RelativeWaveHeightObjective().get_obj_value(obj_data)
+
+        composite_objective = wh_obj_rel * 2 + cost_obj_rel * 1 + nav_obj_rel * 0.5
+
+        return composite_objective
