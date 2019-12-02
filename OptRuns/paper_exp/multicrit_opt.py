@@ -8,12 +8,13 @@ from CommonUtils.StaticStorage import StaticStorage
 from Computation.СomputationalEnvironment import SwanWinRemoteComputationalManager
 from Configuration.Domains import SochiHarbor
 from EvoAlgs.EvoAnalytics import EvoAnalytics
-from Optimisation.Objective import RelativeCostObjective, RelativeNavigationObjective, RelativeWaveHeightObjective, StructuralObjective, ConstraintComparisonType
+from Optimisation.Objective import RelativeCostObjective, RelativeNavigationObjective, RelativeWaveHeightObjective, \
+    StructuralObjective, ConstraintComparisonType
 from Optimisation.OptimisationTask import OptimisationTask
 from Optimisation.Optimiser import ParetoEvolutionaryOptimiser
 from Simulation.WaveModel import SwanWaveModel
 from Visualisation.Visualiser import Visualiser
-from EvoAlgs.BreakersEvo.GenotypeEncoders import AngularGenotypeEncoder,CartesianGenotypeEncoder
+from EvoAlgs.BreakersEvo.GenotypeEncoders import AngularGenotypeEncoder, CartesianGenotypeEncoder
 
 if __name__ == '__main__':
     seed = 42
@@ -46,7 +47,6 @@ if __name__ == '__main__':
         'mod1': [0],
         'mod2_top': [0]
     }
-
 
     objectives = [
         RelativeCostObjective(),

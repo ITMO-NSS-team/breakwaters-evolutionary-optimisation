@@ -13,12 +13,12 @@ import math
 
 class ModelsVisualization:
 
-    def __init__(self, configuration_label,exp_name=None):
+    def __init__(self, configuration_label, exp_name=None):
         self.configuration_label = configuration_label
         if not exp_name:
             self.exp_name = EvoAnalytics.run_id
         else:
-            self.exp_name=exp_name
+            self.exp_name = exp_name
         # to clear to plot
 
         plt.rcParams.update({'figure.max_open_warning': 0})
@@ -219,7 +219,7 @@ class ModelsVisualization:
         base_y = 9
         k = 5
         for ang_ind, ang in enumerate([0, 45, 90, 135, 180, 225, 270, 315]):
-            ang2 = (ang+120) % 360
+            ang2 = (ang + 120) % 360
             new_x = np.sin(ang2 / 180 * math.pi) * k
             new_y = -np.cos(ang2 / 180 * math.pi) * k
 
@@ -230,7 +230,7 @@ class ModelsVisualization:
 
             plt.annotate(wind_names[ang_ind], (base_x + new_x, base_y + new_y), color='black')
 
-        real_ang = (real_ang + 120 + 180 ) % 360
+        real_ang = (real_ang + 120 + 180) % 360
 
         new_x = np.sin(real_ang / 180 * math.pi) * (k + 2)
         new_y = -np.cos(real_ang / 180 * math.pi) * (k + 2)
@@ -245,9 +245,9 @@ class ModelsVisualization:
         # plt.show()
         plt.clf()
 
-    #def visualise_individuals_to_storage(self):
+    # def visualise_individuals_to_storage(self):
 
-    #def visualise_best_individuals(self):
+    # def visualise_best_individuals(self):
 
     def make_directory_for_gif_images(self):
         if not os.path.isdir(f'wave_gif_imgs/{self.exp_name}'):

@@ -241,13 +241,6 @@ class DE:
                                     num_of_pop_ind=[self.step_num + 1, index_of_ind], maxiters=self.maxiters)
             return [fit_and_obj[0]], fit_and_obj[1]
 
-        '''
-        if len(PD) > 1:
-            return [self.fobj([ind], fromDE=True, num_of_pop_ind=[self.step_num, i]) for i, ind in enumerate(PD)]
-        else:
-            print("PPPPPPPPPDDDDDDDDDD",PD)
-            return [self.fobj([ind], fromDE=True, num_of_pop_ind=[self.step_num + 1, index_of_ind]) for ind in PD]
-        '''
 
     def iterator(self):
         return iter(DEIterator(self))

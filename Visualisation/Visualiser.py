@@ -12,6 +12,10 @@ import pandas as pd
 import re
 
 
+class VisualiserState:
+    def __init__(self, generation_number):
+        self.generation_number = generation_number
+
 class Visualiser:
 
     def __init__(self, store_all_individuals, store_best_individuals, num_of_best_individuals_from_population_for_print,
@@ -30,6 +34,8 @@ class Visualiser:
         self.create_boxplots = create_boxplots
         self.print_pareto_front = print_pareto_front
         self.data_for_pareto_set_chart = data_for_pareto_set_chart
+
+        self.state = VisualiserState(0)
 
     def pareto_set_2D(self, x_axis=None, y_axis=None, file=None, directory=None):
 
@@ -115,7 +121,7 @@ class Visualiser:
 
         del visualiser
 
-    def print_individuals(self, objectives, num_of_population, simulation_result_store, all_breakers_store,
+    def print_individuals(self, objectives, simulation_result_store, all_breakers_store,
                           fitnesses=None, maxiters=None):
 
         '''
@@ -124,6 +130,8 @@ class Visualiser:
                 for i in range(len(self.data_pareto)):
                     self.data_pareto[i].append()
         '''
+
+        num_of_population = self.state.generation_number
 
         if num_of_population == 0:
             self.maxiters = maxiters

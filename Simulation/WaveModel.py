@@ -39,7 +39,6 @@ class WaveModel(object):
             configuration_label = forced_label
 
         if self.expensive:
-
             if forced_label is None:
                 loaded_configuration_reference = self._load_simulation_result_reference(breakers)
             else:
@@ -87,13 +86,7 @@ class WaveModel(object):
         db = pickledb.load(self.model_results_file_name, False)
         responce = db.get(serialised_breakers)
 
-        with open('db.txt', 'a') as out:
-            out.write('{}\n'.format(db.db))
-        with open('response.txt', 'a') as out:
-            out.write('{}\n'.format(responce))
-
         if responce is False or not os.path.exists(f'D:\\SWAN_sochi\\r\\hs{responce}.d'):
-            print(f'D:\\SWAN_sochi\\r\\hs{responce}.d', os.path.exists(f'D:\\SWAN_sochi\\r\\hs{responce}.d'))
             return None
 
         configuration_label = responce

@@ -7,6 +7,7 @@ import math
 from EvoAlgs.SPEA2.SPEA2 import SPEA2
 from EvoAlgs.EvoAnalytics import EvoAnalytics
 from CommonUtils.StaticStorage import StaticStorage
+from Visualisation.Visualiser import VisualiserState
 
 
 class DefaultSPEA2(SPEA2):
@@ -14,24 +15,25 @@ class DefaultSPEA2(SPEA2):
         archive_history = []
         history = SPEA2.ErrorHistory()
 
-        gen = 0
+        generation_number = 0
 
-        #with open('out.txt', 'w') as out:
-        #    out.write('{}\n'.format("archive"))
+        while generation_number < self.params.max_gens:
 
-        while gen < self.params.max_gens:
+            self.visualiser.state = VisualiserState(generation_number)
 
-            self.fitness(gen)
+            self.fitness()
 
-            # [EvoAnalytics.save_cantidate(gen, ind.objectives, ind.genotype.genotype_array, ind.referenced_dataset) for ind in self._pop]
+            #[EvoAnalytics.save_cantidate(generation_number, ind.objectives, ind.genotype.genotype_array,
+            #                             ind.referenced_dataset) for ind in self._pop]
+
+            self.visualiser.print_individuals([obj.objectives for obj in self._pop],
+                                              [obj.simulation_result for obj in self._pop],
+                                              [obj.genotype.get_genotype_as_breakers() for obj in self._pop],
+                                              fitnesses=None, maxiters=self.params.max_gens)
 
             self._archive = self.environmental_selection(self._pop, self._archive)
 
-            self.calculate_objectives(self._archive)
-
-            with open('out.txt', 'a') as out:
-                out.write('{}\n'.format(self._archive))
-                out.write('{}\n'.format(len(self._archive)))
+            self.calculate_objectives(self._archive, self.visualiser)
 
             best = sorted(self._archive, key=lambda p: mean_obj(p))[0]
 
@@ -41,23 +43,23 @@ class DefaultSPEA2(SPEA2):
 
                 if verbose:
                     if 'print_fun' in kwargs:
-                        kwargs['print_fun'](best, gen)
+                        kwargs['print_fun'](best, generation_number)
                     else:
-                        print_new_best_individ(best, gen)
+                        print_new_best_individ(best, generation_number)
 
-                history.add_new(best_gens, gen, mean_obj(best), 0)
+                history.add_new(best_gens, generation_number, mean_obj(best), 0)
 
             selected = self.selected(self.params.pop_size, self._archive)
             self._pop = self.reproduce(selected, self.params.pop_size)
 
             to_add = copy.deepcopy(self._archive + self._pop)
-            self.calculate_objectives(to_add)
+            self.calculate_objectives(to_add, self.visualiser)
 
             archive_history.append(to_add)
 
             # EvoAnalytics.create_chart(gen)
 
-            gen += 1
+            generation_number += 1
 
         return history, archive_history
 

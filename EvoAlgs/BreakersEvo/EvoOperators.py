@@ -13,7 +13,7 @@ from scipy.stats.distributions import norm
 from Breakers.BreakersUtils import BreakersUtils
 from CommonUtils.StaticStorage import StaticStorage
 from EvoAlgs.BreakersEvo.BreakersEvoUtils import BreakersEvoUtils
-from EvoAlgs.BreakersEvo.BreakerIndividual import Individual
+from EvoAlgs.BreakersEvo.BreakerStructureRepresentation import BreakerStructureRepresentation
 from EvoAlgs.EvoAnalytics import EvoAnalytics
 from Optimisation.Objective import ObjectiveData, NavigationObjective, StructuralObjective, ConstraintComparisonType
 from Visualisation.ModelVisualization import ModelsVisualization
@@ -24,7 +24,14 @@ len_range = [0, 3]
 dir_range = [-50, 50]
 
 
-def calculate_objectives(model, task, visualiser, population):
+def _flatten(items, seqtypes=(list, tuple)):
+    for i, x in enumerate(items):
+        while i < len(items) and isinstance(items[i], seqtypes):
+            items[i:i + 1] = items[i]
+    return items
+
+
+def calculate_objectives(model, task, population, visualiser=None):
     pre_simulated_results = model.computational_manager.prepare_simulations_for_population(population, model)
 
     all_labels = []
@@ -49,7 +56,7 @@ def calculate_objectives(model, task, visualiser, population):
                 else:
                     simulation_result = pre_simulated_results[individ_index]
 
-                label_to_reference = simulation_result.configuration_label
+                #label_to_reference = simulation_result.configuration_label
 
             objective_calculation_data = ObjectiveData(model.domain, proposed_breakers, model.domain.base_breakers,
                                                        simulation_result,
@@ -67,7 +74,7 @@ def calculate_objectives(model, task, visualiser, population):
                         simulation_result = pre_simulated_results[individ_index]
                     except:
                         print("Simulated result not found in pre-simulated results")
-                label_to_reference = simulation_result.configuration_label
+                #label_to_reference = simulation_result.configuration_label
 
             else:
                 if not any(obj.is_simulation_required for obj in task.objectives):
@@ -76,38 +83,16 @@ def calculate_objectives(model, task, visualiser, population):
                     simulation_result = WaveSimulationResult(
                         hs=np.zeros(shape=(model.domain.model_grid.grid_y, model.domain.model_grid.grid_x)),
                         configuration_label=label)
-                    label_to_reference = None
-
-        def flatten(items, seqtypes=(list, tuple)):
-            for i, x in enumerate(items):
-                while i < len(items) and isinstance(items[i], seqtypes):
-                    items[i:i + 1] = items[i]
-            return items
-
+                    #label_to_reference = None
         # un-list objectives
-        objectives_values = flatten(objectives_values)
+        objectives_values = _flatten(objectives_values)
 
-        all_objectives.append(objectives_values)
+        individual.objectives = objectives_values
+        individual.simulation_result = simulation_result
 
-        all_labels.append(label_to_reference)
-
-    # simulation_result, all_breakers = build_decision(model, task, genotype)
-
-    # simulation_results_store.append(copy.deepcopy(simulation_result))
-    # all_breakers_store.append(copy.deepcopy(all_breakers))
-
-    # [EvoAnalytics.save_cantidate(population_number, all_objectives[i], ind) for
-    # i, ind in [g in individ.genotype for population]]
-
-    # if not StaticStorage.multi_objective_optimization:
-    #    visualiser.print_individuals(all_objectives, population_number, simulation_results_store, all_breakers_store,
-    #                                 all_fitnesses, maxiters)
-    #   return all_fitnesses, all_objectives
-    # else:
-    #    if subfolder_to_saving:
-    #        visualiser.print_individuals(all_objectives, population_number, simulation_results_store,
-    #                                     all_breakers_store, fitnesses=None, maxiters=maxiters)
-    return all_objectives, all_labels
+        #if visualiser is not None:
+        #    visualiser.print_individuals([individual.objectives], [individual.simulation_result],
+        #                                     [proposed_breakers], fitnesses=None, maxiters=1)
 
 
 def crossover(p1, p2, rate, genotype_mask):
@@ -115,7 +100,7 @@ def crossover(p1, p2, rate, genotype_mask):
     if random_val >= rate:
         return p1
 
-    new_individ = Individual(copy.deepcopy(p1.genotype))
+    new_individ = BreakerStructureRepresentation(copy.deepcopy(p1.genotype))
 
     is_bad = True
     iteration = 0
@@ -131,6 +116,7 @@ def crossover(p1, p2, rate, genotype_mask):
 
         is_bad = _validate_constraints(new_breakers, constraints)
         if not is_bad:
+            print("Accepted")
             new_individ.genotype = copy.copy(new_breakers)
         iteration += 1
 
@@ -138,7 +124,7 @@ def crossover(p1, p2, rate, genotype_mask):
 
 
 def mutation(individ, rate, mutation_value_rate, genotype_mask):
-    new_individ = Individual(copy.deepcopy(individ.genotype))
+    new_individ = BreakerStructureRepresentation(copy.deepcopy(individ.genotype))
 
     random_val = random.random()
 
@@ -156,7 +142,9 @@ def mutation(individ, rate, mutation_value_rate, genotype_mask):
             is_bad = _validate_constraints(new_breakers, constraints)
 
             if not is_bad:
+                print("Accepted")
                 new_individ.genotype = copy.copy(new_breakers)
+
             iteration += 1
     return new_individ
 
@@ -170,33 +158,16 @@ def initial_pop_random(size, **kwargs):
 
         while len(population_new) < size:
 
-            base_genotype = genotype_encoder.breakers_to_parameterized_genotype(
-                StaticStorage.task.possible_modifications,
-                StaticStorage.task,
-                StaticStorage.exp_domain.model_grid)
-
-            genotype = np.zeros(len(base_genotype))
-
-            for j, g in enumerate(genotype):
-                if j % 2 == 0:
-                    genotype[j] = random.randint(genotype_encoder.min_for_init[0],
-                                                 genotype_encoder.max_for_init[0])
-                else:
-                    genotype[j] = random.randint(genotype_encoder.min_for_init[1],
-                                                 genotype_encoder.max_for_init[1])
-
-            breakers_from_genotype = genotype_encoder.parameterized_genotype_to_breakers(
-                genotype,
-                StaticStorage.task,
-                StaticStorage.exp_domain.model_grid)
+            new_breakers = genotype_encoder.space_fill(StaticStorage.task.possible_modifications)
 
             constraints = StaticStorage.task.constraints
 
-            is_bad = _validate_constraints(breakers_from_genotype, constraints)
+            is_bad = _validate_constraints(new_breakers, constraints)
 
             if not is_bad:
+                print("Accepted")
                 population_new.append(
-                    Individual(breakers_from_genotype))
+                    BreakerStructureRepresentation(new_breakers))
 
     return population_new
 

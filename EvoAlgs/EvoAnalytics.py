@@ -34,8 +34,8 @@ class EvoAnalytics:
         gc.collect()
         plt.close("all")
 
-        #plt.rcParams['figure.figsize'] = [40, 4 * EvoAnalytics.num_of_rows]
-        #plt.rcParams['figure.figsize'] = [40, 40]
+        # plt.rcParams['figure.figsize'] = [40, 4 * EvoAnalytics.num_of_rows]
+        # plt.rcParams['figure.figsize'] = [40, 40]
         plt.rcParams['xtick.labelsize'] = 30
         plt.rcParams['ytick.labelsize'] = 30
         plt.rcParams['axes.titlesize'] = 20
@@ -63,7 +63,7 @@ class EvoAnalytics:
             os.remove(hist_file_name)
 
     @staticmethod
-    def save_cantidate(pop_num, objectives, genotype, referenced_dataset="None",subfolder_name=None):
+    def save_cantidate(pop_num, objectives, genotype, referenced_dataset="None", subfolder_name=None):
 
         if not os.path.isdir(f'HistoryFiles'):
             os.mkdir(f'HistoryFiles')
@@ -107,16 +107,17 @@ class EvoAnalytics:
     def change_symbol_in_file(file=None, symbol=',', symbol_for_change=';'):
         if not file:
             file = f'HistoryFiles/history_{EvoAnalytics.run_id}.csv'
-        with open(file, 'r+') as f:
-            txt = f.read().replace(symbol_for_change, symbol)
-            f.seek(0)
-            f.truncate()
-            f.write(txt)
+        if os._exists(file):
+            with open(file, 'r+') as f:
+                txt = f.read().replace(symbol_for_change, symbol)
+                f.seek(0)
+                f.truncate()
+                f.write(txt)
 
     @staticmethod
-    def print_pareto_set_2D(data,save_directory,population_num,types_of_data,min_max_x_y):
+    def print_pareto_set_2D(data, save_directory, population_num, types_of_data, min_max_x_y):
 
-        print("data",data)
+        print("data", data)
         print("population_num", population_num)
         print("types_of_data", types_of_data)
         print("min_max_x_y", min_max_x_y)
@@ -126,13 +127,13 @@ class EvoAnalytics:
         ax.set_title("Популяция " + str(population_num + 1))
         for i in range(len(types_of_data)):
 
-            if types_of_data[i]=="cost":
-                if i==0:
+            if types_of_data[i] == "cost":
+                if i == 0:
                     ax.invert_xaxis()
                     plt.xlim(min_max_x_y[0][1] - 1, min_max_x_y[0][0] + 1)
                     plt.ylim(min_max_x_y[1][0] - 1, min_max_x_y[1][1] + 1)
                     ax.set_xlabel("Цена", fontsize=15)
-                elif i==1:
+                elif i == 1:
                     ax.invert_yaxis()
                     plt.ylim(min_max_x_y[1][1] - 1, min_max_x_y[1][0] + 1)
                     plt.xlim(min_max_x_y[0][0] - 1, min_max_x_y[0][1] + 1)
@@ -141,23 +142,23 @@ class EvoAnalytics:
                 plt.ylim(min_max_x_y[1][0] - 1, min_max_x_y[1][1] + 1)
                 plt.xlim(min_max_x_y[0][0] - 1, min_max_x_y[0][1] + 1)
 
-                if types_of_data[i]=="hs average decrease":
-                    if i==0:
+                if types_of_data[i] == "hs average decrease":
+                    if i == 0:
                         ax.set_xlabel("Среднее снижение hs по всем точкам", fontsize=15)
-                    elif i==1:
+                    elif i == 1:
                         ax.set_ylabel("Среднее снижение hs по всем точкам", fontsize=15)
-
 
         ax.scatter(data[0], data[1], linewidths=7, color='g')
         plt.tick_params(axis='both', labelsize=15)
-        #plt.ylim(min_max_x_y[1][0] - 1, min_max_x_y[1][1] + 1)
-        #plt.xlim(min_max_x_y[0][0] - 1, min_max_x_y[0][1] + 1)
+        # plt.ylim(min_max_x_y[1][0] - 1, min_max_x_y[1][1] + 1)
+        # plt.xlim(min_max_x_y[0][0] - 1, min_max_x_y[0][1] + 1)
         fig.set_figwidth(7)
         fig.set_figheight(7)
         plt.savefig(save_directory, bbox_inches='tight')
 
     @staticmethod
-    def create_chart(num_of_generation=None, f=None, data_for_analyze='obj', analyze_only_last_generation=True, chart_for_gif=False, first_generation=False, num_of_launches=1):
+    def create_chart(num_of_generation=None, f=None, data_for_analyze='obj', analyze_only_last_generation=True,
+                     chart_for_gif=False, first_generation=False, num_of_launches=1):
 
         if not os.path.isdir("boxplots"):
             os.mkdir("boxplots")
@@ -169,8 +170,8 @@ class EvoAnalytics:
         if not f:
             f = f'HistoryFiles/history_{EvoAnalytics.run_id}.csv'
         else:
-            f=f
-            #f = f'HistoryFiles/history_{f}.csv'
+            f = f
+            # f = f'HistoryFiles/history_{f}.csv'
 
         EvoAnalytics.change_symbol_in_file(f)
         df = pd.read_csv(f, header=0)
@@ -249,12 +250,13 @@ class EvoAnalytics:
                 if not os.path.isdir("boxplots/" + str(data_for_analyze) + "/" + str(EvoAnalytics.run_id)):
                     os.mkdir("boxplots/" + str(data_for_analyze) + "/" + str(EvoAnalytics.run_id))
 
-
-                EvoAnalytics.axs[EvoAnalytics.gener[num_of_generation][0]][EvoAnalytics.gener[num_of_generation][1]].set_title("Population " + str(num_of_generation))
-                sns.boxplot(data=df, palette="Blues", ax=EvoAnalytics.axs[EvoAnalytics.gener[num_of_generation][0]][EvoAnalytics.gener[num_of_generation][1]], linewidth=2)
+                EvoAnalytics.axs[EvoAnalytics.gener[num_of_generation][0]][
+                    EvoAnalytics.gener[num_of_generation][1]].set_title("Population " + str(num_of_generation))
+                sns.boxplot(data=df, palette="Blues", ax=EvoAnalytics.axs[EvoAnalytics.gener[num_of_generation][0]][
+                    EvoAnalytics.gener[num_of_generation][1]], linewidth=2)
                 plt.close('all')
 
-                    # EvoAnalytics.fig.savefig(data_for_analyze + "_boxplots.png",bbox_inches='tight')
+                # EvoAnalytics.fig.savefig(data_for_analyze + "_boxplots.png",bbox_inches='tight')
 
                 saving_process_is_completed = 0
                 while saving_process_is_completed < 1:
@@ -293,7 +295,7 @@ class EvoAnalytics:
             else:
 
                 pop_size = len(df_of_launch[0].loc[df_of_launch[0]['pop_num'] == 0])
-                #pop_size=df_of_launch[df_of_launch['pop_num']==0].index #Количество индивидов в популяции
+                # pop_size=df_of_launch[df_of_launch['pop_num']==0].index #Количество индивидов в популяции
 
             # Начать индексирование в dataframe с 0-ля
             for i in range(len(df_of_launch)):
@@ -319,7 +321,7 @@ class EvoAnalytics:
                 num_of_rows = math.ceil(num_of_generations / num_of_cols)
 
                 plt.rcParams['figure.figsize'] = [40, 4 * num_of_rows]
-                #plt.rcParams['figure.figsize'] = [40, 40]
+                # plt.rcParams['figure.figsize'] = [40, 40]
                 plt.rcParams['xtick.labelsize'] = 15
                 plt.rcParams['ytick.labelsize'] = 15
 
@@ -342,7 +344,7 @@ class EvoAnalytics:
                     EvoAnalytics.df_min_len = min([df_of_launch[0][i].min() for i in df_of_launch[0].columns])
                     EvoAnalytics.df_max_len = max([df_of_launch[0][i].max() for i in df_of_launch[0].columns])
 
-                    #print("min and max", EvoAnalytics.df_min_len, "and", EvoAnalytics.df_max_len)
+                    # print("min and max", EvoAnalytics.df_min_len, "and", EvoAnalytics.df_max_len)
                     plt.ylim(EvoAnalytics.df_min_len, EvoAnalytics.df_max_len)
 
                     ax = plt.subplot()
@@ -353,7 +355,8 @@ class EvoAnalytics:
 
                     for j in range(EvoAnalytics.num_of_best_inds_for_print):
                         plt.savefig(
-                            "boxplots/" + str(data_for_analyze) + "/" + str(EvoAnalytics.run_id) + "/" + "1_" + str(j + 1) + ".png")
+                            "boxplots/" + str(data_for_analyze) + "/" + str(EvoAnalytics.run_id) + "/" + "1_" + str(
+                                j + 1) + ".png")
 
                     # for i in range(EvoAnalytics.num_of_best_inds_for_print):
                     # plt.savefig(
@@ -388,4 +391,3 @@ class EvoAnalytics:
                 # plt.savefig("boxplots/" + str(data_for_analyze) + "/" + str(EvoAnalytics.run_id) + "/" + str(i + 1) + "_" + str(j + 1) + ".png")
 
                 # plt.close('all')
-

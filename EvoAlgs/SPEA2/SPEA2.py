@@ -7,7 +7,7 @@ from EvoAlgs.SPEA2.RawFitness import raw_fitness
 
 
 class SPEA2:
-    def __init__(self, params, calculate_objectives, evolutionary_operators):
+    def __init__(self, params, calculate_objectives, evolutionary_operators, visualiser):
         '''
          Strength Pareto Evolutionary Algorithm
         :param params: Meta-parameters of the SPEA2
@@ -24,6 +24,8 @@ class SPEA2:
         self.__init_populations()
 
         self.genotype_mask = None
+
+        self.visualiser = visualiser
 
     def __init_operators(self):
         self.init_population = self.operators.init_population
@@ -65,13 +67,10 @@ class SPEA2:
             self.dominators = []
             self.raw_fitness = 0
             self.density = 0
-            self.referenced_dataset = None
 
         def fitness(self):
             return self.raw_fitness + self.density
 
-        # def weighted_sum(self):
-        # return sum(list(self.objectives))
 
     class ErrorHistory:
         class Point:
@@ -95,13 +94,8 @@ class SPEA2:
     def solution(self, verbose=True, **kwargs):
         pass
 
-    def fitness(self, gen):
-
-        all_objectives, labels_to_reference = self.calculate_objectives(population=self._pop)
-
-        for i, p in enumerate(self._pop):
-            p.objectives = all_objectives[i]
-            p.referenced_dataset = labels_to_reference[i]
+    def fitness(self):
+        self.calculate_objectives(population=self._pop, visualiser=self.visualiser)
 
         union = self._archive + self._pop
 

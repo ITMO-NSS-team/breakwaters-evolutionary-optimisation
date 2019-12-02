@@ -35,47 +35,17 @@ class CartesianGenotypeEncoder:
         self.pairwise = True
 
     def parameterized_genotype_to_breakers(self, genotype, task, grid):
-        gen_id = 0
-        new_modifications = []
-
-        for modification in task.possible_modifications:
-
-            if modification.breaker_id in task.mod_points_to_optimise:
-                point_ids_to_optimise_in_modification = task.mod_points_to_optimise[modification.breaker_id]
-
-                anchor_point = modification.points[max(point_ids_to_optimise_in_modification) + 1]
-                prev_anchor = modification.points[max(point_ids_to_optimise_in_modification) + 2]
-
-                for point_ind in point_ids_to_optimise_in_modification:
-                    anchor_angle = anchor_point.get_relative_polar_coordinates(prev_anchor)["angle"]
-
-                    length = genotype[gen_id]
-                    direction = (genotype[gen_id + 1] + anchor_angle + 360) % 360
-
-                    modification.points[point_ind] = modification.points[point_ind].from_polar(length,
-                                                                                               direction,
-                                                                                               anchor_point, grid)
-                    gen_id += 2
-                    prev_anchor = anchor_point
-                    anchor_point = modification.points[point_ind]
-                new_modifications.append(modification)
-        return new_modifications
+        return
 
     def breakers_to_parameterized_genotype(breakers):
-        txt = []
-        for pb in breakers:
-            for pbp in pb.points:
-                txt.append(str(int(pbp.x)))
-                txt.append(str(int(pbp.y)))
-        txt_genotype = ",".join(txt)
-        return txt_genotype
+        return
 
 
 class AngularGenotypeEncoder:
 
     def __init__(self):
-        self.min_for_init = [0, -50]
-        self.max_for_init = [5, 50]
+        self.min_for_init = [0, -75]
+        self.max_for_init = [5, 75]
         self.pairwise = True
 
     def parameterized_genotype_to_breakers(self, genotype, task, grid):
@@ -106,12 +76,14 @@ class AngularGenotypeEncoder:
         return new_modifications
 
     def breakers_to_parameterized_genotype(self, breakers, task, grid):
-        gen_id = 0
         chromosome = []
 
         for modification in task.possible_modifications:
 
             if modification.breaker_id in task.mod_points_to_optimise:
+
+                breaker = [b for b in breakers if b.breaker_id == modification.breaker_id][0]
+
                 point_ids_to_optimise_in_modification = task.mod_points_to_optimise[modification.breaker_id]
 
                 anchor_point = modification.points[max(point_ids_to_optimise_in_modification) + 1]
@@ -119,24 +91,26 @@ class AngularGenotypeEncoder:
 
                 for point_ind in point_ids_to_optimise_in_modification:
                     anchor_angle = anchor_point.get_relative_polar_coordinates(prev_anchor)["angle"]
+                    if modification.points[max(point_ids_to_optimise_in_modification)].x == -1:
+                        length = 0
+                        direction = anchor_angle
+                        prev_anchor = anchor_point
+                        anchor_point = modification.points[point_ind]
+                    else:
+                        last_point = breaker.points[max(point_ids_to_optimise_in_modification)]
+                        length = last_point.get_relative_polar_coordinates(anchor_point)["length"]
+                        direction = last_point.get_relative_polar_coordinates(anchor_point)["angle"]
 
-                    length = 2
-                    direction = anchor_angle
-                    # direction = (genotype[gen_id + 1] + anchor_angle + 360) % 360
-
-                    # modification.points[point_ind] = modification.points[point_ind].from_polar(length,
-                    #                                                                           direction,
-                    #                                                                           anchor_point, grid)
-                    prev_anchor = anchor_point
-                    anchor_point = modification.points[point_ind]
-                chromosome.append(length)
-                chromosome.append(direction)
+                        prev_anchor = anchor_point
+                        anchor_point = last_point
+                    chromosome.append(length)
+                    chromosome.append(direction)
         return chromosome
 
     @abstractmethod
     def mutate(self, ancestor_genotype):
-        ancestor_genotype_encoded = self.breakers_to_parameterized_genotype(ancestor_genotype,StaticStorage.task,
-                                                        StaticStorage.exp_domain.model_grid)
+        ancestor_genotype_encoded = self.breakers_to_parameterized_genotype(ancestor_genotype, StaticStorage.task,
+                                                                            StaticStorage.exp_domain.model_grid)
 
         new_encoded_genotype = copy.deepcopy(ancestor_genotype_encoded)
 
@@ -147,10 +121,7 @@ class AngularGenotypeEncoder:
             range(0, round(len(ancestor_genotype_encoded) / block_size)), num_of_blocks_to_crossover)
 
         mutation_ratio = abs(np.random.RandomState().normal(2, 1.5, 1)[0])
-        mutation_ratio_dir = abs(np.random.RandomState().normal(15, 5, 1)[0])
-
-        part1_rate = abs(random.random())
-        part2_rate = 1 - part1_rate
+        mutation_ratio_dir = abs(np.random.RandomState().normal(35, 5, 1)[0])
 
         genotype_mask = None
 
@@ -164,12 +135,16 @@ class AngularGenotypeEncoder:
                 new_encoded_genotype[len_ind] = abs(new_encoded_genotype[len_ind])
                 new_encoded_genotype[dir_ind] += sign * mutation_ratio_dir
                 new_encoded_genotype[dir_ind] = max(new_encoded_genotype[dir_ind], self.min_for_init[1])
-                new_encoded_genotype[dir_ind] = min(new_encoded_genotype[dir_ind], self.min_for_init[1])
+                new_encoded_genotype[dir_ind] = min(new_encoded_genotype[dir_ind], self.max_for_init[1])
             else:
                 next()
 
+        old_chromosome_txt = ','.join([str(int(round(_))) for _ in ancestor_genotype_encoded])
+        new_chromosome_txt = ','.join([str(int(round(_))) for _ in new_encoded_genotype])
+
+        print(f'Mutated with angular encoding:\n[{old_chromosome_txt}]\nto\n[{new_chromosome_txt}]')
         return self.parameterized_genotype_to_breakers(new_encoded_genotype, StaticStorage.task,
-                                                        StaticStorage.exp_domain.model_grid)
+                                                       StaticStorage.exp_domain.model_grid)
 
     @abstractmethod
     def crossover(self, ancestor_genotype1, ancestor_genotype2):
@@ -208,9 +183,33 @@ class AngularGenotypeEncoder:
         if angle_parent_id == 1:
             new_encoded_genotype[dir_ind] = round((ancestor_genotype2_encoded[dir_ind] + 360) % 360)
 
+        old_chromosome1_txt = ','.join([str(int(round(_))) for _ in ancestor_genotype1_encoded])
+        old_chromosome2_txt = ','.join([str(int(round(_))) for _ in ancestor_genotype2_encoded])
+        new_chromosome_txt = ','.join([str(int(round(_))) for _ in new_encoded_genotype])
+
+        print(
+            f'Crossovered with angular encoding:\n[{old_chromosome1_txt}],\n[{old_chromosome2_txt}]\nto\n[{new_chromosome_txt}]')
         return self.parameterized_genotype_to_breakers(new_encoded_genotype, StaticStorage.task,
-                                                        StaticStorage.exp_domain.model_grid)
+                                                       StaticStorage.exp_domain.model_grid)
 
     @abstractmethod
-    def space_fill(self):
+    def space_fill(self, reference_genotype):
+        base_genotype_encoded = self.breakers_to_parameterized_genotype(reference_genotype, StaticStorage.task,
+                                                                        StaticStorage.exp_domain.model_grid)
+
+        new_encoded_genotype = copy.deepcopy(base_genotype_encoded)
+
+        for j, g in enumerate(new_encoded_genotype):
+            if j % 2 == 0:
+                new_encoded_genotype[j] = random.randint(self.min_for_init[0],
+                                                         self.max_for_init[0])
+            else:
+                new_encoded_genotype[j] = random.randint(self.min_for_init[1],
+                                                         self.max_for_init[1])
+
+        new_chromosome_txt = ','.join([str(int(round(_))) for _ in new_encoded_genotype])
+
+        print(f'Initiated with angular encoding: [{new_chromosome_txt}]')
+        return self.parameterized_genotype_to_breakers(new_encoded_genotype, StaticStorage.task,
+                                                       StaticStorage.exp_domain.model_grid)
         return

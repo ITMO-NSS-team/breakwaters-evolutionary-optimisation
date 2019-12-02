@@ -78,4 +78,5 @@ class BreakerPoint(GridPoint):
         if angle < 0:
             angle = angle + 360
 
+        angle = angle % 360
         return {"length": length, "angle": angle}

@@ -1,5 +1,4 @@
-from Optimisation.OptimisationStrategies.ManualStrategy import ManualOptimisationStrategy
-from Optimisation.OptimisationStrategies.EmptyStrategy import EmptyOptimisationStrategy
+
 from Optimisation.OptimisationStrategies.SPEA2Strategy import SPEA2OptimisationStrategy
 
 from Optimisation.OptimisationStrategies.DEStrategy import DEStrategy
@@ -16,27 +15,10 @@ class Optimiser(object):
         return self._optimisation_strategy.optimise(model, task,visualiser)
 
 
-class StubOptimiser(Optimiser):
-    def __init__(self):
-        emp_strategy = EmptyOptimisationStrategy()
-        super(StubOptimiser, self).__init__(emp_strategy)
-
-
-class ManualOptimiser(Optimiser):
-    def __init__(self):
-        man_strategy = ManualOptimisationStrategy()
-        super(ManualOptimiser, self).__init__(man_strategy)
-
 class DEOptimiser(Optimiser):
     def __init__(self):
         strategy = DEStrategy()
         super(DEOptimiser, self).__init__(strategy)
-
-
-class DifferentialEvolutionaryOptimiser(Optimiser):
-    def __init__(self):
-        deoptim_strategy = DifferentialOptimisationStrategy()
-        super(DifferentialEvolutionaryOptimiser, self).__init__(deoptim_strategy)
 
 
 class ParetoEvolutionaryOptimiser(Optimiser):
