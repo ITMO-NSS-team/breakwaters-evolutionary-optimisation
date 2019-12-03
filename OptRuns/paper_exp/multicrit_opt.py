@@ -9,11 +9,11 @@ from Computation.СomputationalEnvironment import SwanWinRemoteComputationalMana
 from Configuration.Domains import SochiHarbor
 from EvoAlgs.EvoAnalytics import EvoAnalytics
 from Optimisation.Objective import RelativeCostObjective, RelativeNavigationObjective, RelativeWaveHeightObjective, \
-    StructuralObjective, ConstraintComparisonType
+    StructuralObjective, ConstraintComparisonType, RelativeQuailityObjective
 from Optimisation.OptimisationTask import OptimisationTask
 from Optimisation.Optimiser import ParetoEvolutionaryOptimiser
 from Simulation.WaveModel import SwanWaveModel
-from Visualisation.Visualiser import Visualiser
+from Visualisation.Visualiser import Visualiser, VisualisationSettings, VisualisationData
 from EvoAlgs.BreakersEvo.GenotypeEncoders import AngularGenotypeEncoder, CartesianGenotypeEncoder
 
 if __name__ == '__main__':
@@ -48,21 +48,29 @@ if __name__ == '__main__':
         'mod2_top': [0]
     }
 
-    objectives = [
+    optimisation_objectives = [
         RelativeCostObjective(),
         RelativeNavigationObjective(),
         RelativeWaveHeightObjective()]
 
-    task = OptimisationTask(objectives, selected_modifications_for_tuning, mod_points_to_optimise, goal="minimise")
+    analytics_objectives = [
+        RelativeQuailityObjective()]
+
+    task = OptimisationTask(optimisation_objectives, selected_modifications_for_tuning, mod_points_to_optimise,
+                            goal="minimise")
     task.constraints = [(StructuralObjective(), ConstraintComparisonType.equal, 0)]
 
     StaticStorage.task = task
 
     StaticStorage.genotype_encoder = AngularGenotypeEncoder()
 
-    visualiser = Visualiser(store_all_individuals=False, store_best_individuals=True,
-                            num_of_best_individuals_from_population_for_print=5, create_gif_image=True,
-                            create_boxplots=True, model=wave_model, task=task, print_pareto_front=True,
-                            data_for_pareto_set_chart=[["hs average decrease", "cost"]])
+    vis_settings = VisualisationSettings(store_all_individuals=False, store_best_individuals=True,
+                                         num_of_best_individuals_from_population_for_print=5,
+                                         create_gif_image=True,
+                                         create_boxplots=True,
+                                         print_pareto_front=True)
+    vis_data = VisualisationData(optimisation_objectives, base_breakers=exp_domain.base_breakers, task=task)
+
+    visualiser = Visualiser(vis_settings, vis_data)
 
     opt_result = optimiser.optimise(wave_model, task, visualiser=visualiser)
