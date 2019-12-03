@@ -33,6 +33,7 @@ class ComputationalManager(object):
     def __init__(self, resources_names, is_lazy_parallel=False):
         self.resources_names = resources_names
         self.resources_description = ComputationalResourceDescription("remotes_config.json")
+        self.print_info = False
         assert self.resources_description.config_dict is not None
 
         if self.resources_description.config_dict is not None:
@@ -86,16 +87,18 @@ class SwanWinComputationalManager(SwanComputationalManager):
             finally:
                 lock.release()
 
-            print("task sent to the {server_name}".format(server_name=resource_description["name"]))
+            if self.print_info:
+                print("task sent to the {server_name}".format(server_name=resource_description["name"]))
+
             # from local SWAN to share
             shutil.copy(f'D:\\SWAN_sochi\\{config_file_name}.swn', resource_description["transfer_folder_localname"])
 
             transfer_folder = resource_description[
-                'transfer_folder']  # '\\\\192.168.13.1\\share\share_with_blades\\125'
+                'transfer_folder']
 
             config_name = config_file_name  # "CONFIG_v1"
 
-            swan_remote_path = resource_description['remote_model_folder']  # 'C:\\Users\\nano_user'
+            swan_remote_path = resource_description['remote_model_folder']
 
             ps_script_1 = r"""Copy-Item %s\%s.swn %s
                         """ % (transfer_folder, config_name, swan_remote_path)
@@ -114,9 +117,6 @@ class SwanWinComputationalManager(SwanComputationalManager):
 
             r1 = s.run_ps(script)
 
-            out = r1.std_out
-            # print(out)
-
             shutil.copy(resource_description['transfer_folder_localname'] + f"//{out_file_name}", "D:\\SWAN_sochi\\r")
 
             self.resources_description[cur_res_index]["is_free"] = True
@@ -134,7 +134,6 @@ class SwanWinComputationalManager(SwanComputationalManager):
         return
 
     def finalise_execution(self):
-        # print('finalise_execution')
         results_list = []
         # TODO check order
         if len(self.input_data) > 0:

@@ -21,18 +21,21 @@ from Optimisation.OptimisationStrategies.AbstractOptimisationStrategy import Opt
 
 class SPEA2OptimisationStrategy(OptimisationStrategyAbstract):
 
+    def __init__(self, is_greedy=False):
+        self.is_greedy = is_greedy
+
     def optimise(self, model: WaveModel, task: OptimisationTask, visualiser: Visualiser):
         StaticStorage.multi_objective_optimization = True
 
         operators = default_operators()
 
         _, archive_history = DefaultSPEA2(
-            params=DefaultSPEA2.Params(max_gens=10, pop_size=10, archive_size=5,
+            params=DefaultSPEA2.Params(max_gens=20, pop_size=20, archive_size=5,
                                        crossover_rate=0.3, mutation_rate=0.5,  # 0.9 0.9
                                        mutation_value_rate=[], min_or_max=task.goal),
             calculate_objectives=partial(calculate_objectives, model, task),
             evolutionary_operators=operators,
-            visualiser=visualiser).solution(verbose=False)
+            visualiser=visualiser, is_greedy=self.is_greedy).solution(verbose=False)
 
         best = archive_history[-1][1]
 

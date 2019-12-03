@@ -11,11 +11,18 @@ from Visualisation.Visualiser import VisualiserState
 
 
 class DefaultSPEA2(SPEA2):
+
     def solution(self, verbose=True, **kwargs):
         archive_history = []
         history = SPEA2.ErrorHistory()
 
         generation_number = 0
+        mask_index = 0
+
+        if self.is_greedy:
+            StaticStorage.genotype_encoder.genotype_mask[1:len(StaticStorage.genotype_encoder.genotype_mask)] = 1
+            StaticStorage.genotype_encoder.genotype_mask[mask_index] = 0
+            StaticStorage.genotype_encoder.genotype_mask[mask_index + 1] = 0
 
         while generation_number < self.params.max_gens:
 
@@ -23,13 +30,13 @@ class DefaultSPEA2(SPEA2):
 
             self.fitness()
 
-            #[EvoAnalytics.save_cantidate(generation_number, ind.objectives, ind.genotype.genotype_array,
+            # [EvoAnalytics.save_cantidate(generation_number, ind.objectives, ind.genotype.genotype_array,
             #                             ind.referenced_dataset) for ind in self._pop]
 
-            self.visualiser.print_individuals([obj.objectives for obj in self._pop],
-                                              [obj.simulation_result for obj in self._pop],
-                                              [obj.genotype.get_genotype_as_breakers() for obj in self._pop],
-                                              fitnesses=None, maxiters=self.params.max_gens)
+            # self.visualiser.print_individuals([obj.objectives for obj in self._pop],
+            #                                  [obj.simulation_result for obj in self._pop],
+            #                                  [obj.genotype.get_genotype_as_breakers() for obj in self._pop],
+            #                                  fitnesses=None, maxiters=self.params.max_gens)
 
             self._archive = self.environmental_selection(self._pop, self._archive)
 
@@ -51,6 +58,19 @@ class DefaultSPEA2(SPEA2):
 
             selected = self.selected(self.params.pop_size, self._archive)
             self._pop = self.reproduce(selected, self.params.pop_size)
+
+            if self.is_greedy & generation_number != 0 and generation_number % 3 == 0:
+                StaticStorage.genotype_encoder.genotype_mask[mask_index - 2] = 1
+                StaticStorage.genotype_encoder.genotype_mask[mask_index - 1] = 1
+                StaticStorage.genotype_encoder.genotype_mask[mask_index] = 0
+                StaticStorage.genotype_encoder.genotype_mask[mask_index + 1] = 0
+                mask_index += 2
+                genotype_mask_txt = ",".join([str(int(g)) for g in StaticStorage.genotype_encoder.genotype_mask])
+                print(f'Current mask is [{genotype_mask_txt}]')
+
+                if mask_index == len(StaticStorage.genotype_encoder.genotype_mask):
+                    print("All greedy steps are done, genotype is fixed")
+                    break
 
             to_add = copy.deepcopy(self._archive + self._pop)
             self.calculate_objectives(to_add, self.visualiser)

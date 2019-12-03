@@ -25,3 +25,9 @@ class ParetoEvolutionaryOptimiser(Optimiser):
     def __init__(self):
         spea2_strategy = SPEA2OptimisationStrategy()
         super(ParetoEvolutionaryOptimiser, self).__init__(spea2_strategy)
+
+
+class GreedyParetoEvolutionaryOptimiser(Optimiser):
+    def __init__(self):
+        spea2_strategy = SPEA2OptimisationStrategy(is_greedy=True)
+        super(GreedyParetoEvolutionaryOptimiser, self).__init__(spea2_strategy)

@@ -11,7 +11,7 @@ from EvoAlgs.EvoAnalytics import EvoAnalytics
 from Optimisation.Objective import RelativeCostObjective, RelativeNavigationObjective, RelativeWaveHeightObjective, \
     StructuralObjective, ConstraintComparisonType, RelativeQuailityObjective
 from Optimisation.OptimisationTask import OptimisationTask
-from Optimisation.Optimiser import ParetoEvolutionaryOptimiser
+from Optimisation.Optimiser import ParetoEvolutionaryOptimiser, GreedyParetoEvolutionaryOptimiser
 from Simulation.WaveModel import SwanWaveModel
 from Visualisation.Visualiser import Visualiser, VisualisationSettings, VisualisationData
 from EvoAlgs.BreakersEvo.GenotypeEncoders import AngularGenotypeEncoder, CartesianGenotypeEncoder
@@ -38,15 +38,23 @@ if __name__ == '__main__':
 
     optimiser = ParetoEvolutionaryOptimiser()
 
-    selected_modifications_for_tuning = [
+    selected_modifications_for_tuning1 = [
         Breaker('mod1', list(map(xy_to_points, [[-1, -1], [33, 22], [42, 17]])), 0, 'Ia'),
-        Breaker('mod2_top', list(map(xy_to_points, [[-1, -1], [50, 32], [50, 39]])), 0, 'II')
+        Breaker('mod2_top', list(map(xy_to_points, [[-1, -1], [50, 32], [50, 39]])), 0, 'II'),
+        Breaker('mod2_bottom', list(map(xy_to_points, [[-1, -1], [50, 39], [50, 38]])), 0, 'II')
     ]
 
-    mod_points_to_optimise = {  # order is important
-        'mod1': [0],
-        'mod2_top': [0]
-    }
+    selected_modifications_for_tuning2 = [
+        Breaker('mod1', list(map(xy_to_points, [[-1, -1], [-1, -1], [33, 22], [42, 17]])), 0, 'Ia'),
+        Breaker('mod2_top', list(map(xy_to_points, [[-1, -1], [-1, -1], [50, 32], [50, 39]])), 0, 'II'),
+        Breaker('mod2_bottom', list(map(xy_to_points, [[-1, -1], [-1, -1], [50, 39], [50, 38]])), 0, 'II')
+    ]
+
+    selected_modifications_for_tuning3 = [
+        Breaker('mod1', list(map(xy_to_points, [[-1, -1], [-1, -1], [-1, -1], [33, 22], [42, 17]])), 0, 'Ia')
+    ]
+
+    selected_modifications_for_tuning = selected_modifications_for_tuning2
 
     optimisation_objectives = [
         RelativeCostObjective(),
@@ -56,7 +64,7 @@ if __name__ == '__main__':
     analytics_objectives = [
         RelativeQuailityObjective()]
 
-    task = OptimisationTask(optimisation_objectives, selected_modifications_for_tuning, mod_points_to_optimise,
+    task = OptimisationTask(optimisation_objectives, selected_modifications_for_tuning,
                             goal="minimise")
     task.constraints = [(StructuralObjective(), ConstraintComparisonType.equal, 0)]
 

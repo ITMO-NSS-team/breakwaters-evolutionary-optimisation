@@ -7,7 +7,7 @@ from EvoAlgs.SPEA2.RawFitness import raw_fitness
 
 
 class SPEA2:
-    def __init__(self, params, calculate_objectives, evolutionary_operators, visualiser):
+    def __init__(self, params, calculate_objectives, evolutionary_operators, visualiser, is_greedy):
         '''
          Strength Pareto Evolutionary Algorithm
         :param params: Meta-parameters of the SPEA2
@@ -23,9 +23,8 @@ class SPEA2:
         self.__init_operators()
         self.__init_populations()
 
-        self.genotype_mask = None
-
         self.visualiser = visualiser
+        self.is_greedy = is_greedy
 
     def __init_operators(self):
         self.init_population = self.operators.init_population
@@ -191,9 +190,8 @@ class SPEA2:
             if idx == len(selected) - 1:
                 p2 = selected[0]
 
-            child_gen = self.crossover(p1.genotype, p2.genotype, self.params.crossover_rate, self.genotype_mask)
-            child_gen = self.mutation(child_gen, self.params.mutation_rate, self.params.mutation_value_rate,
-                                      self.genotype_mask)
+            child_gen = self.crossover(p1.genotype, p2.genotype, self.params.crossover_rate)
+            child_gen = self.mutation(child_gen, self.params.mutation_rate, self.params.mutation_value_rate)
             child = SPEA2.Individ(genotype=child_gen)
             children.append(child)
 

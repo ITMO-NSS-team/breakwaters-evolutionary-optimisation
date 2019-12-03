@@ -95,7 +95,7 @@ def calculate_objectives(model, task, population, visualiser=None):
         #                                     [proposed_breakers], fitnesses=None, maxiters=1)
 
 
-def crossover(p1, p2, rate, genotype_mask):
+def crossover(p1, p2, rate):
     random_val = random.random()
     if random_val >= rate:
         return p1
@@ -123,7 +123,7 @@ def crossover(p1, p2, rate, genotype_mask):
     return new_individ
 
 
-def mutation(individ, rate, mutation_value_rate, genotype_mask):
+def mutation(individ, rate, mutation_value_rate):
     new_individ = BreakerStructureRepresentation(copy.deepcopy(individ.genotype))
 
     random_val = random.random()

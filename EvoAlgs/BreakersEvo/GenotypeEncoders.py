@@ -11,7 +11,7 @@ class GenotypeEncoder:
         return
 
     @abstractmethod
-    def breakers_to_parameterized_genotype(self, breakers):
+    def breakers_to_parameterized_genotype(self, breakers, task, grid):
         return
 
     @abstractmethod
@@ -33,12 +33,7 @@ class CartesianGenotypeEncoder:
         self.min_for_init = [-3, -3]
         self.max_for_init = [3, 3]
         self.pairwise = True
-
-    def parameterized_genotype_to_breakers(self, genotype, task, grid):
-        return
-
-    def breakers_to_parameterized_genotype(breakers):
-        return
+        self.genotype_mask = None
 
 
 class AngularGenotypeEncoder:
@@ -47,6 +42,11 @@ class AngularGenotypeEncoder:
         self.min_for_init = [0, -75]
         self.max_for_init = [5, 75]
         self.pairwise = True
+        self.genotype_mask = None
+
+    def _obtain_random_pair_indeces(self, chromosome_length, block_size, num_of_blocks):
+        return random.sample(
+            range(0, round(chromosome_length / block_size)), num_of_blocks)
 
     def parameterized_genotype_to_breakers(self, genotype, task, grid):
         gen_id = 0
@@ -107,7 +107,6 @@ class AngularGenotypeEncoder:
                     chromosome.append(direction)
         return chromosome
 
-    @abstractmethod
     def mutate(self, ancestor_genotype):
         ancestor_genotype_encoded = self.breakers_to_parameterized_genotype(ancestor_genotype, StaticStorage.task,
                                                                             StaticStorage.exp_domain.model_grid)
@@ -115,18 +114,23 @@ class AngularGenotypeEncoder:
         new_encoded_genotype = copy.deepcopy(ancestor_genotype_encoded)
 
         block_size = 2
-        num_of_blocks_to_crossover = 1
+        num_of_blocks_to_mutate = 1
 
-        indexs_of_pairs_to_change = random.sample(
-            range(0, round(len(ancestor_genotype_encoded) / block_size)), num_of_blocks_to_crossover)
+        indexs_of_pairs_to_change = self._obtain_random_pair_indeces(len(ancestor_genotype_encoded), block_size,
+                                                                     num_of_blocks_to_mutate)
+
+        for block_id_index, block_id in enumerate(indexs_of_pairs_to_change):
+            if self.genotype_mask[block_id * block_size] == 1:
+                while self.genotype_mask[indexs_of_pairs_to_change[block_id_index] * block_size] == 1:
+                    indexs_of_pairs_to_change[block_id_index] = self._obtain_random_pair_indeces(
+                        len(ancestor_genotype_encoded),
+                        block_size, 1)[0]
 
         mutation_ratio = abs(np.random.RandomState().normal(2, 1.5, 1)[0])
         mutation_ratio_dir = abs(np.random.RandomState().normal(35, 5, 1)[0])
 
-        genotype_mask = None
-
         for gen_ind in indexs_of_pairs_to_change:
-            if genotype_mask is None or gen_ind not in genotype_mask:
+            if self.genotype_mask[gen_ind] != 1:
                 sign = 1 if random.random() < 0.5 else -1
 
                 len_ind = gen_ind * block_size
@@ -136,8 +140,6 @@ class AngularGenotypeEncoder:
                 new_encoded_genotype[dir_ind] += sign * mutation_ratio_dir
                 new_encoded_genotype[dir_ind] = max(new_encoded_genotype[dir_ind], self.min_for_init[1])
                 new_encoded_genotype[dir_ind] = min(new_encoded_genotype[dir_ind], self.max_for_init[1])
-            else:
-                next()
 
         old_chromosome_txt = ','.join([str(int(round(_))) for _ in ancestor_genotype_encoded])
         new_chromosome_txt = ','.join([str(int(round(_))) for _ in new_encoded_genotype])
@@ -146,7 +148,6 @@ class AngularGenotypeEncoder:
         return self.parameterized_genotype_to_breakers(new_encoded_genotype, StaticStorage.task,
                                                        StaticStorage.exp_domain.model_grid)
 
-    @abstractmethod
     def crossover(self, ancestor_genotype1, ancestor_genotype2):
 
         ancestor_genotype1_encoded = self.breakers_to_parameterized_genotype(ancestor_genotype1, StaticStorage.task,
@@ -159,29 +160,32 @@ class AngularGenotypeEncoder:
         block_size = 2
         num_of_blocks_to_crossover = 1
 
-        indexs_of_pairs_to_change = random.sample(
-            range(0, round(len(ancestor_genotype1_encoded) / block_size)), num_of_blocks_to_crossover)
+        indexs_of_pairs_to_change = self._obtain_random_pair_indeces(len(ancestor_genotype1_encoded), block_size,
+                                                                     num_of_blocks_to_crossover)
+
+        for block_id_index, block_id in enumerate(indexs_of_pairs_to_change):
+            if self.genotype_mask[block_id * block_size] == 1:
+                while self.genotype_mask[indexs_of_pairs_to_change[block_id_index] * block_size] == 1:
+                    indexs_of_pairs_to_change[block_id_index] = self._obtain_random_pair_indeces(
+                        len(ancestor_genotype1_encoded),
+                        block_size, 1)[0]
 
         angle_parent_id = random.randint(0, 1)
 
         part1_rate = abs(random.random())
         part2_rate = 1 - part1_rate
 
-        genotype_mask = None
-
         for gen_ind in indexs_of_pairs_to_change:
-            if genotype_mask is None or gen_ind not in genotype_mask:
+            if self.genotype_mask[gen_ind * block_size] != 1 and self.genotype_mask[gen_ind * block_size + 1] != 1:
                 len_ind = gen_ind * block_size
                 dir_ind = gen_ind * block_size + 1
                 new_encoded_genotype[len_ind] = round(ancestor_genotype1_encoded[len_ind] * part1_rate +
                                                       ancestor_genotype2_encoded[len_ind] * part2_rate)
-            else:
-                next()
 
-        if angle_parent_id == 0:
-            new_encoded_genotype[dir_ind] = round((ancestor_genotype1_encoded[dir_ind] + 360) % 360)
-        if angle_parent_id == 1:
-            new_encoded_genotype[dir_ind] = round((ancestor_genotype2_encoded[dir_ind] + 360) % 360)
+                if angle_parent_id == 0:
+                    new_encoded_genotype[dir_ind] = round((ancestor_genotype1_encoded[dir_ind] + 360) % 360)
+                if angle_parent_id == 1:
+                    new_encoded_genotype[dir_ind] = round((ancestor_genotype2_encoded[dir_ind] + 360) % 360)
 
         old_chromosome1_txt = ','.join([str(int(round(_))) for _ in ancestor_genotype1_encoded])
         old_chromosome2_txt = ','.join([str(int(round(_))) for _ in ancestor_genotype2_encoded])
@@ -192,12 +196,13 @@ class AngularGenotypeEncoder:
         return self.parameterized_genotype_to_breakers(new_encoded_genotype, StaticStorage.task,
                                                        StaticStorage.exp_domain.model_grid)
 
-    @abstractmethod
     def space_fill(self, reference_genotype):
         base_genotype_encoded = self.breakers_to_parameterized_genotype(reference_genotype, StaticStorage.task,
                                                                         StaticStorage.exp_domain.model_grid)
 
         new_encoded_genotype = copy.deepcopy(base_genotype_encoded)
+
+        self.genotype_mask = np.zeros(len(new_encoded_genotype))
 
         for j, g in enumerate(new_encoded_genotype):
             if j % 2 == 0:
@@ -212,4 +217,3 @@ class AngularGenotypeEncoder:
         print(f'Initiated with angular encoding: [{new_chromosome_txt}]')
         return self.parameterized_genotype_to_breakers(new_encoded_genotype, StaticStorage.task,
                                                        StaticStorage.exp_domain.model_grid)
-        return

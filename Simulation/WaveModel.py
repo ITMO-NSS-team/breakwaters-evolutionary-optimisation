@@ -16,11 +16,13 @@ from Simulation.Results import SimulationResult
 class WaveModel(object):
 
     def __init__(self, domain, simulation_strategy, configuration_strategy,
-                 computational_manager: ComputationalManager):
+                 computational_manager: ComputationalManager, print_info=False):
         self.domain = domain
         self._simulation_strategy = simulation_strategy
         self._configuration_strategy = configuration_strategy
         self.computational_manager = computational_manager
+        self.print_info = print_info
+        computational_manager.print_info = print_info
 
         self.expensive = False
         self.model_results_file_name = 'D:\SWAN_sochi\model_results.db'
@@ -54,7 +56,8 @@ class WaveModel(object):
                     results = self.run_simulation(configuration_info, computational_manager=None)
 
             else:
-                print("Historical SWAN found")
+                if self.print_info:
+                    print("Historical SWAN found")
                 configuration_label = loaded_configuration_reference
                 all_breakers = BreakersUtils.merge_breakers_with_modifications(self.domain.base_breakers, breakers)
                 results = self.run_simulation(

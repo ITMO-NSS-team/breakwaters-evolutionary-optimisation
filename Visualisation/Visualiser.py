@@ -122,8 +122,8 @@ class Visualiser:
     def print_configuration(self, simulation_result, all_breakers, objective, dir, image_for_gif, num_of_population,
                             ind_num):
 
-        print("population_number", num_of_population)
-        print("ind num", ind_num)
+        #print("population_number", num_of_population)
+        #print("ind num", ind_num)
 
         visualiser = ModelsVisualization(str(num_of_population + 1) + "_" + str(ind_num + 1))
 
@@ -180,11 +180,11 @@ class Visualiser:
                                          objectives[ind_num], dir="wave_gif_imgs", image_for_gif=True,
                                          num_of_population=num_of_population, ind_num=i)
 
-        print("num of population", num_of_population + 1)
+        #print("num of population", num_of_population + 1)
         if num_of_population + 1 == maxiters:
 
             if self.visualisation_settings.print_pareto_front:
-                for i in self.visualisation_settings.data_for_pareto_set_chart:
+                for i in self.visualisation_data.data_for_pareto_set_chart:
                     self.pareto_set_2D(x_axis=i[0], y_axis=i[1],
                                        file=f'HistoryFiles/pareto_set/history_{EvoAnalytics.run_id}.csv')
 
