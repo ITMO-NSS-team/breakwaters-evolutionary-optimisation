@@ -1,27 +1,15 @@
-import copy
-import itertools
-import os
 import random
 import uuid
-from itertools import chain
 import copy
 
 import numpy as np
-from pyDOE import lhs
-from scipy.stats.distributions import norm
 
-from Breakers.BreakersUtils import BreakersUtils
 from CommonUtils.StaticStorage import StaticStorage
-from EvoAlgs.BreakersEvo.BreakersEvoUtils import BreakersEvoUtils
 from EvoAlgs.BreakersEvo.BreakerStructureRepresentation import BreakerStructureRepresentation
 from EvoAlgs.EvoAnalytics import EvoAnalytics
-from Optimisation.Objective import ObjectiveData, NavigationObjective, StructuralObjective, ConstraintComparisonType
+from Optimisation.Objective import ObjectiveData, ConstraintComparisonType
 from Visualisation.ModelVisualization import ModelsVisualization
 from Simulation.Results import WaveSimulationResult
-
-# TODO refactor
-len_range = [0, 3]
-dir_range = [-50, 50]
 
 
 def _flatten(items, seqtypes=(list, tuple)):
@@ -32,7 +20,10 @@ def _flatten(items, seqtypes=(list, tuple)):
 
 
 def calculate_objectives(model, task, population, visualiser=None):
-    pre_simulated_results = model.computational_manager.prepare_simulations_for_population(population, model)
+    if any(obj.is_simulation_required for obj in task.objectives):
+        pre_simulated_results = model.computational_manager.prepare_simulations_for_population(population, model)
+    else:
+        pre_simulated_results = None
 
     for individ_index, individual in enumerate(population):
         proposed_breakers = individual.genotype.get_genotype_as_breakers()

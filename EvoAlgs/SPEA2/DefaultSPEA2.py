@@ -40,21 +40,21 @@ class DefaultSPEA2(SPEA2):
 
             self._archive = self.environmental_selection(self._pop, self._archive)
 
-            self.calculate_objectives(self._archive, self.visualiser)
+            # self.calculate_objectives(self._archive, self.visualiser)
 
-            #best = sorted(self._archive, key=lambda p: mean_obj(p))[0]
+            # best = sorted(self._archive, key=lambda p: mean_obj(p))[0]
 
-            #last_fit = history.last().fitness_value
-            #if last_fit > mean_obj(best):
+            # last_fit = history.last().fitness_value
+            # if last_fit > mean_obj(best):
             #    best_gens = best.genotype
 
-             #   if verbose:
-             #       if 'print_fun' in kwargs:
-             #           kwargs['print_fun'](best, generation_number)
-             #       else:
-             #           print_new_best_individ(best, generation_number)
-             #
-             #   history.add_new(best_gens, generation_number, mean_obj(best), 0)
+            #   if verbose:
+            #       if 'print_fun' in kwargs:
+            #           kwargs['print_fun'](best, generation_number)
+            #       else:
+            #           print_new_best_individ(best, generation_number)
+            #
+            #   history.add_new(best_gens, generation_number, mean_obj(best), 0)
 
             selected = self.selected(self.params.pop_size, self._archive)
             self._pop = self.reproduce(selected, self.params.pop_size)

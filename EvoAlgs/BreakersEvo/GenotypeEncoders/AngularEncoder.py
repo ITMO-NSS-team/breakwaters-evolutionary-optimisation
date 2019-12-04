@@ -1,52 +1,18 @@
-from abc import abstractmethod
 import copy
 import random
-from CommonUtils.StaticStorage import StaticStorage
+
 import numpy as np
 
-
-class GenotypeEncoder:
-    @abstractmethod
-    def parameterized_genotype_to_breakers(self, genotype, task, grid):
-        return
-
-    @abstractmethod
-    def breakers_to_parameterized_genotype(self, breakers, task, grid):
-        return
-
-    @abstractmethod
-    def mutate(self, ancestor_genotype):
-        return
-
-    @abstractmethod
-    def crossover(self, ancestor_genotype1, ancestor_genotype2):
-        return
-
-    @abstractmethod
-    def space_fill(self):
-        return
+from CommonUtils.StaticStorage import StaticStorage
+from EvoAlgs.BreakersEvo.GenotypeEncoders.GenotypeEncoder import DirectGenotypeEncoder
 
 
-class CartesianGenotypeEncoder:
-
-    def __init__(self):
-        self.min_for_init = [-3, -3]
-        self.max_for_init = [3, 3]
-        self.pairwise = True
-        self.genotype_mask = None
-
-
-class AngularGenotypeEncoder:
+class AngularGenotypeEncoder(DirectGenotypeEncoder):
 
     def __init__(self):
         self.min_for_init = [0, -75]
         self.max_for_init = [5, 75]
-        self.pairwise = True
         self.genotype_mask = None
-
-    def _obtain_random_pair_indeces(self, chromosome_length, block_size, num_of_blocks):
-        return random.sample(
-            range(0, round(chromosome_length / block_size)), num_of_blocks)
 
     def parameterized_genotype_to_breakers(self, genotype, task, grid):
         gen_id = 0
