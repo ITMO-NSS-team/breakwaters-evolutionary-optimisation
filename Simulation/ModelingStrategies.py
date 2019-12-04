@@ -21,7 +21,7 @@ class SimulationStrategyAbstract(metaclass=ABCMeta):
 
 class SimpleGeomSimulationStrategy(SimulationStrategyAbstract):
 
-    def simulate(self, configuration_info: ConfigurationInfo, computational_manager=None):
+    def simulate(self, configuration_info: ConfigurationInfo, computational_manager):
 
         visualiser = ModelsVisualization(configuration_info.configuration_label)
 
