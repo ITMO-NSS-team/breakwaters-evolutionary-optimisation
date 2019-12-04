@@ -38,6 +38,9 @@ class ExpAlgs(Enum):
 
 
 class ExperimentalEnvironment:
+    def __init__(self, seed):
+        self.seed = seed
+
     selected_modifications_for_tuning1 = [
         Breaker('mod1', list(map(xy_to_points, [[-1, -1], [33, 22], [42, 17]])), 0, 'Ia'),
         Breaker('mod2_top', list(map(xy_to_points, [[-1, -1], [50, 32], [50, 39]])), 0, 'II'),
@@ -95,10 +98,9 @@ class ExperimentalEnvironment:
 
     def run_optimisation_experiment(self, task_id, enc_id, algopt_id):
         if __name__ == 'OptRuns.paper_exp.ExperimentalEnvironment':
-            seed = 42
 
-            np.random.seed(seed)
-            random.seed(seed)
+            np.random.seed(self.seed)
+            random.seed(self.seed)
 
             exp_domain = SochiHarbor()
 
