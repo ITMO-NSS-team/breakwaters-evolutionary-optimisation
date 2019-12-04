@@ -42,9 +42,9 @@ selected_modifications_for_tuning = base_modifications_for_tuning
 selected_mod_points_to_optimise = [mod_points_to_optimise[mod.breaker_id] for mod in base_modifications_for_tuning]
 
 objectives = [  # StructuralObjective(importance=1),
-    CostObjective(importance=3),
+    CostObjective(),
     # NavigationObjective(importance=1),
-    WaveHeightObjective(importance=2)]
+    WaveHeightObjective()]
 
 task = OptimisationTask(objectives, selected_modifications_for_tuning, mod_points_to_optimise, )
 

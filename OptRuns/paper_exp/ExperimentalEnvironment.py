@@ -90,7 +90,7 @@ class ExperimentalEnvironment:
     def _get_optimiser_for_experiment(enc_id):
         if enc_id == ExpAlgs.multi:
             return ParetoEvolutionaryOptimiser()
-        if enc_id == ExpAlgs.greedy_multi:
+        if enc_id == ExpEncoders.greedy_multi:
             return GreedyParetoEvolutionaryOptimiser()
         if enc_id == ExpAlgs.single:
             return DEOptimiser()
@@ -98,6 +98,7 @@ class ExperimentalEnvironment:
 
     def run_optimisation_experiment(self, task_id, enc_id, algopt_id):
         if __name__ == 'OptRuns.paper_exp.ExperimentalEnvironment':
+
             np.random.seed(self.seed)
             random.seed(self.seed)
 
@@ -109,9 +110,8 @@ class ExperimentalEnvironment:
             EvoAnalytics.clear()
             EvoAnalytics.run_id = 'run_{exp_name}_{date:%Y_%m_%d_%H_%M_%S}'.format(exp_name=exp_name,
                                                                                    date=datetime.datetime.now())
-            computational_manager = SwanWinLocalComputationalManager()  # (
-            # resources_names=["125", "124", "123", "121"])
-            wave_model = SwanWaveModel(exp_domain, computational_manager)
+            parallel_computational_manager = SwanWinLocalComputationalManager()
+            wave_model = SwanWaveModel(exp_domain, parallel_computational_manager)
             wave_model.model_results_file_name = 'D:\SWAN_sochi\model_results_paper_martech.db'
 
             optimiser = ExperimentalEnvironment._get_optimiser_for_experiment(algopt_id)

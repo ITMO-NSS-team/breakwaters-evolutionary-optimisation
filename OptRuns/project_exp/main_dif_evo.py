@@ -65,9 +65,9 @@ selected_modifications_for_tuning = base_modifications_for_tuning
 selected_mod_points_to_optimise = [mod_points_to_optimise[mod.breaker_id] for mod in base_modifications_for_tuning]
 
 
-objectives = [StructuralObjective(importance=1),
-              CostObjective(importance=3),
-              NavigationObjective(importance=1)]
+objectives = [StructuralObjective(),
+              CostObjective(),
+              NavigationObjective()]
               #WaveHeightObjective(importance=1)]
 
 EvoAnalytics.clear()

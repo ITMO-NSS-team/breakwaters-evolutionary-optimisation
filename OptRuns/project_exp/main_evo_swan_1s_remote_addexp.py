@@ -53,9 +53,9 @@ for i in range(0,100):
                                            if mod.breaker_id in mod_points_to_optimise]
 
         objectives = [  # StructuralObjective(importance=1),
-            CostObjective(importance=3),
+            CostObjective(),
             # NavigationObjective(importance=1),
-            WaveHeightObjective(importance=2)]
+            WaveHeightObjective()]
 
         task = OptimisationTask(objectives, selected_modifications_for_tuning, mod_points_to_optimise)
         task.constraints = []

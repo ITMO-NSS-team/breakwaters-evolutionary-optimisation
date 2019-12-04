@@ -38,7 +38,6 @@ class Objective(object):
     def get_obj_value(self, obj_data: ObjectiveData):
         return
 
-
 class StructuralObjective(Objective):
 
     def _selfintersection(self, breaker1, breaker2):
