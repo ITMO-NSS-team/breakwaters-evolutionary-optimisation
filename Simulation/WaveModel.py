@@ -53,7 +53,7 @@ class WaveModel(object):
                     self._save_simulation_result_reference(breakers,
                                                            configuration_label)
                 else:
-                    results = self.run_simulation(configuration_info, computational_manager=None)
+                    results = self.run_simulation(configuration_info, computational_manager=self.computational_manager)
 
             else:
                 if self.print_info:
@@ -65,7 +65,7 @@ class WaveModel(object):
                     computational_manager=self.computational_manager)
         else:
             configuration_info = self.configurate(breakers, configuration_label)
-            results = self.run_simulation(configuration_info, computational_manager=None)
+            results = self.run_simulation(configuration_info, computational_manager=self.computational_manager)
 
         return results
 

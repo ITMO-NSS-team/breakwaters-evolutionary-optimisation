@@ -160,11 +160,11 @@ class WaveHeightObjective(Objective):
 
     def get_obj_value(self, obj_data):
         hs_vals = obj_data.simulation_result.get_5percent_output_for_target_points(obj_data.domain.target_points)
-        hs_vals = [hs if hs > 0.05 else 9 for hs in hs_vals]
 
-        hs_weigtened = [hs * pt.weight for hs, pt in zip(hs_vals, obj_data.domain.target_points)]
+        hs_vals = [hs if hs > 0.01 else 9 for hs in hs_vals]  # if model fails
+        hs_vals = [hs if hs > 0.5 else 0.5 for hs in hs_vals]  # lower theshold
 
-        return [round(hs * 100, -1) for hs in hs_weigtened]  # to avoid zero
+        return [round(hs * 100, -1) for hs in hs_vals]  # to avoid zero
 
 
 class RelativeWaveHeightObjective(WaveHeightObjective):
