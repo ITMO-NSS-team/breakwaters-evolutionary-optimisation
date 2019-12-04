@@ -49,14 +49,8 @@ def calculate_objectives(model, task, population, visualiser=None):
 
         for obj_ind, obj in enumerate(task.objectives):
             if obj.is_simulation_required:
-                base_simulation_result = model.run_simulation_for_constructions(model.domain.base_breakers,"default")
-
-                if model.computational_manager is None or not model.computational_manager.is_lazy_parallel:
-                    simulation_result = model.run_simulation_for_constructions(proposed_breakers)
-                else:
-                    simulation_result = pre_simulated_results[individ_index]
-
-                #label_to_reference = simulation_result.configuration_label
+                base_simulation_result = model.run_simulation_for_constructions(model.domain.base_breakers, "default")
+                simulation_result = pre_simulated_results[individ_index]
 
             objective_calculation_data = ObjectiveData(model.domain, proposed_breakers, model.domain.base_breakers,
                                                        simulation_result,
@@ -67,14 +61,10 @@ def calculate_objectives(model, task, population, visualiser=None):
             objectives_values.append(new_obj_value)
 
             if obj.is_simulation_required:
-                if model.computational_manager is None or not model.computational_manager.is_lazy_parallel:
-                    simulation_result = model.run_simulation_for_constructions(proposed_breakers)
-                else:
-                    try:
-                        simulation_result = pre_simulated_results[individ_index]
-                    except:
-                        print("Simulated result not found in pre-simulated results")
-                #label_to_reference = simulation_result.configuration_label
+                try:
+                    simulation_result = pre_simulated_results[individ_index]
+                except:
+                    print("Simulated result not found in pre-simulated results")
 
             else:
                 if not any(obj.is_simulation_required for obj in task.objectives):
@@ -83,14 +73,14 @@ def calculate_objectives(model, task, population, visualiser=None):
                     simulation_result = WaveSimulationResult(
                         hs=np.zeros(shape=(model.domain.model_grid.grid_y, model.domain.model_grid.grid_x)),
                         configuration_label=label)
-                    #label_to_reference = None
+
         # un-list objectives
         objectives_values = _flatten(objectives_values)
 
         individual.objectives = objectives_values
         individual.simulation_result = simulation_result
 
-        #if visualiser is not None:
+        # if visualiser is not None:
         #    visualiser.print_individuals([individual.objectives], [individual.simulation_result],
         #                                     [proposed_breakers], fitnesses=None, maxiters=1)
 

@@ -199,30 +199,12 @@ class SwanSimulationStrategy(SimulationStrategyAbstract):
 
     def simulate(self, configuration_info: ConfigurationInfo, computational_manager: SwanComputationalManager):
 
-        if computational_manager is None:
-            if not os.path.isfile(
-                    'D:\\SWAN_sochi\\r\\hs{}.d'.format(configuration_info.configuration_label)):
-                print("SWAN RUNNED")
-                saved_work_dir = os.getcwd()
-                os.chdir('D:\\SWAN_sochi\\')
+        out_file_name = f'hs{configuration_info.configuration_label}.d'
 
-                os.system(r'swanrun.bat {}'.format(configuration_info.file_name))
-
-                os.chdir(saved_work_dir)
-
-                print("SWAN FINISHED")
-
-            hs = np.genfromtxt('D:\\SWAN_sochi\\r\\hs{}.d'.format(configuration_info.configuration_label))
+        if os.path.isfile('D:\\SWAN_sochi\\r\\hs{}.d'.format(configuration_info.configuration_label)):
+            hs = np.genfromtxt(f'D:\\SWAN_sochi\\r\\{out_file_name}')
         else:
-            out_file_name = f'hs{configuration_info.configuration_label}.d'
-
-            if os.path.isfile('D:\\SWAN_sochi\\r\\hs{}.d'.format(configuration_info.configuration_label)):
-                hs = np.genfromtxt(f'D:\\SWAN_sochi\\r\\{out_file_name}')
-            else:
-                computational_manager.execute(configuration_info.file_name, out_file_name)
-                if computational_manager.is_lazy_parallel:
-                    hs = None
-                else:
-                    hs = np.genfromtxt(f'D:\\SWAN_sochi\\r\\{out_file_name}')
+            computational_manager.execute(configuration_info.file_name, out_file_name)
+            hs = None
 
         return WaveSimulationResult(hs, configuration_info.configuration_label)

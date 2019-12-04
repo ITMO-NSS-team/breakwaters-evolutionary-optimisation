@@ -30,10 +30,12 @@ class ComputationalResourceDescription(object):
 
 
 class ComputationalManager(object):
-    def __init__(self, resources_names, is_lazy_parallel=False):
+    def __init__(self, resources_names):
         self.resources_names = resources_names
         self.resources_description = ComputationalResourceDescription("remotes_config.json")
         self.print_info = False
+        self.input_data = []
+
         assert self.resources_description.config_dict is not None
 
         if self.resources_description.config_dict is not None:
@@ -42,8 +44,6 @@ class ComputationalManager(object):
 
             for rd in self.resources_description:
                 rd["is_free"] = True
-
-        self.is_lazy_parallel = is_lazy_parallel
 
     @abstractmethod
     def execute(self, config_file_name, out_file_name):
@@ -55,17 +55,46 @@ class ComputationalManager(object):
 
 
 class SwanComputationalManager(ComputationalManager):
-    @abstractmethod
     def execute(self, config_file_name, out_file_name):
+        if self.resources_description is None:
+            FileNotFoundError("Computational config not found")
+        self.input_data.append((config_file_name, out_file_name))
         return
+
+    def prepare_simulations_for_population(self, population, model):
+        pre_simulated_results = []
+        pre_simulated_results_idx = []
+
+        for individual_ind, individual in enumerate(population):
+            proposed_breakers = individual.genotype.get_genotype_as_breakers()
+
+            simulation_result = model.run_simulation_for_constructions(proposed_breakers)
+
+            pre_simulated_results.append(simulation_result)
+            pre_simulated_results_idx.append(simulation_result.configuration_label)
+
+        finalised_values = model.computational_manager.finalise_execution()
+
+        if len(finalised_values) > 0:
+            for i, val in enumerate(finalised_values):
+                label = val[0]
+                hs = val[1]
+                indices = [i for i, x in enumerate(pre_simulated_results_idx) if x == label]
+                if len(indices) > 2:
+                    print("STRANGE")
+                for idx in indices:
+                    pre_simulated_results[idx]._hs = hs
+
+        for ps in pre_simulated_results:
+            if ps._hs is None:
+                print("NONE FOUND")
+        return pre_simulated_results
 
 
 # TODO implement as strategy pattern
-class SwanWinComputationalManager(SwanComputationalManager):
-    def __init__(self, resources_names, is_lazy_parallel):
-        self.input_data = []
-
-        super(SwanWinComputationalManager, self).__init__(resources_names, is_lazy_parallel)
+class SwanWinRemoteComputationalManager(SwanComputationalManager):
+    def __init__(self, resources_names):
+        super(SwanWinRemoteComputationalManager, self).__init__(resources_names)
 
         self.runned = False
 
@@ -123,16 +152,6 @@ class SwanWinComputationalManager(SwanComputationalManager):
 
         return out_file_name[2:(len(out_file_name) - 2)]
 
-    def execute(self, config_file_name, out_file_name):
-        if self.resources_description is None:
-            FileNotFoundError("Remote configuration config not found")
-
-        if self.is_lazy_parallel:
-            self.input_data.append((config_file_name, out_file_name))
-        else:
-            self._execute_single((config_file_name, out_file_name))
-        return
-
     def finalise_execution(self):
         results_list = []
         # TODO check order
@@ -150,46 +169,37 @@ class SwanWinComputationalManager(SwanComputationalManager):
             self.input_data = []
         return results_list
 
-    def prepare_simulations_for_population(self, population, model):
-        if model.computational_manager is not None and model.computational_manager.is_lazy_parallel:
-            # cycle for the mass simulation run
-            pre_simulated_results = []
-            pre_simulated_results_idx = []
 
-            for individual_ind, individual in enumerate(population):
-                proposed_breakers = individual.genotype.get_genotype_as_breakers()
+class SwanWinLocalComputationalManager(SwanComputationalManager):
+    def __init__(self):
+        super(SwanWinLocalComputationalManager, self).__init__("local")
 
-                simulation_result = model.run_simulation_for_constructions(proposed_breakers)
+    def finalise_execution(self):
+        results_list = []
+        # TODO check order
+        if len(self.input_data) > 0:
+            for file in map(self._execute_single, self.input_data):
+                hs = np.genfromtxt(f'D:\\SWAN_sochi\\r\\hs{file}.d')
+                lock = Lock()
+                lock.acquire()
+                try:
+                    results_list.append((file, hs))
+                finally:
+                    lock.release()
+            self.input_data = []
+        return results_list
 
-                pre_simulated_results.append(simulation_result)
-                pre_simulated_results_idx.append(simulation_result.configuration_label)
+    def _execute_single(self, input_data):
+        config_file_name, out_file_name = input_data
 
-            finalised_values = model.computational_manager.finalise_execution()
+        if config_file_name is not None:  # if new calculacation reqired
+            model_folder = self.resources_description[0]["remote_model_folder"]
 
-            if len(finalised_values) > 0:
-                for i, val in enumerate(finalised_values):
-                    label = val[0]
-                    hs = val[1]
-                    indices = [i for i, x in enumerate(pre_simulated_results_idx) if x == label]
-                    if len(indices) > 2:
-                        print("STRANGE")
-                    for idx in indices:
-                        pre_simulated_results[idx]._hs = hs
-
-            for ps in pre_simulated_results:
-                if ps._hs is None:
-                    print("NONE FOUND")
-        else:
-            pre_simulated_results = None
-
-        return pre_simulated_results
-
-
-class SwanWinLocalComputationalManager(SwanWinComputationalManager):
-    def __init__(self, resources_names):
-        super(SwanWinLocalComputationalManager, self).__init__(resources_names, False)
-
-
-class SwanWinRemoteComputationalManager(SwanWinComputationalManager):
-    def __init__(self, resources_names):
-        super(SwanWinRemoteComputationalManager, self).__init__(resources_names, True)
+            if not os.path.isfile(f'{model_folder}\\r\\{out_file_name}'):
+                saved_work_dir = os.getcwd()
+                os.chdir(model_folder)
+                os.system(fr'swanrun.bat {config_file_name}')
+                os.chdir(saved_work_dir)
+            if self.print_info:
+                print("task sent to the {server_name}".format(server_name=self.resource_description["name"]))
+        return out_file_name[2:(len(out_file_name) - 2)]
