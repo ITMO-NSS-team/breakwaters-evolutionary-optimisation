@@ -98,6 +98,8 @@ class AngularGenotypeEncoder:
                         anchor_point = modification.points[point_ind]
                     else:
                         last_point = breaker.points[max(point_ids_to_optimise_in_modification)]
+                        if last_point.x == -1:
+                            hhh = 6
                         length = last_point.get_relative_polar_coordinates(anchor_point)["length"]
                         direction = last_point.get_relative_polar_coordinates(anchor_point)["angle"]
 

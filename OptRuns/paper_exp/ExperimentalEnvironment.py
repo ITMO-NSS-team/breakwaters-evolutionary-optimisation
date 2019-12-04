@@ -11,8 +11,7 @@ from Computation.СomputationalEnvironment import SwanWinRemoteComputationalMana
 from Configuration.Domains import SochiHarbor
 from EvoAlgs.BreakersEvo.GenotypeEncoders import AngularGenotypeEncoder, CartesianGenotypeEncoder
 from EvoAlgs.EvoAnalytics import EvoAnalytics
-from Optimisation.Objective import RelativeCostObjective, RelativeNavigationObjective, RelativeWaveHeightObjective, \
-    StructuralObjective, ConstraintComparisonType, RelativeQuailityObjective
+from Optimisation.Objective import *
 from Optimisation.OptimisationTask import OptimisationTask
 from Optimisation.Optimiser import ParetoEvolutionaryOptimiser, GreedyParetoEvolutionaryOptimiser, DEOptimiser
 from Simulation.WaveModel import SwanWaveModel
@@ -75,6 +74,9 @@ class ExperimentalEnvironment:
             StaticStorage.wind = "23.1 135"
             StaticStorage.bdy = "5.3 9.1 200 30"
             StaticStorage.exp_domain = domain
+
+
+
         else:
             raise NotImplementedError
 
@@ -96,7 +98,7 @@ class ExperimentalEnvironment:
             return DEOptimiser()
         raise NotImplementedError
 
-    def run_optimisation_experiment(self, task_id, enc_id, algopt_id):
+    def run_optimisation_experiment(self, task_id, enc_id, algopt_id, run_local):
         if __name__ == 'OptRuns.paper_exp.ExperimentalEnvironment':
             np.random.seed(self.seed)
             random.seed(self.seed)
@@ -109,8 +111,10 @@ class ExperimentalEnvironment:
             EvoAnalytics.clear()
             EvoAnalytics.run_id = 'run_{exp_name}_{date:%Y_%m_%d_%H_%M_%S}'.format(exp_name=exp_name,
                                                                                    date=datetime.datetime.now())
-            computational_manager = SwanWinLocalComputationalManager()  # (
-            # resources_names=["125", "124", "123", "121"])
+            if run_local:
+                computational_manager = SwanWinLocalComputationalManager()
+            else:
+                computational_manager = SwanWinRemoteComputationalManager(resources_names=["125", "124", "123", "121"])
             wave_model = SwanWaveModel(exp_domain, computational_manager)
             wave_model.model_results_file_name = 'D:\SWAN_sochi\model_results_paper_martech.db'
 
@@ -124,6 +128,9 @@ class ExperimentalEnvironment:
                 RelativeWaveHeightObjective()]
 
             analytics_objectives = [
+                CostObjective,
+                NavigationObjective,
+                WaveHeightObjective,
                 RelativeQuailityObjective()]
 
             task = OptimisationTask(optimisation_objectives, selected_modifications_for_tuning,

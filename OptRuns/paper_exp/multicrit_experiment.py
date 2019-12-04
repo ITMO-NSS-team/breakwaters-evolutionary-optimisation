@@ -8,4 +8,4 @@ opt_id = ExpAlgs.greedy_multi
 seed = 42
 
 env = ExperimentalEnvironment(seed)
-env.run_optimisation_experiment(task_id, enc_id, opt_id)
+env.run_optimisation_experiment(task_id, enc_id, opt_id, run_local=True)

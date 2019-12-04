@@ -34,13 +34,7 @@ def _flatten(items, seqtypes=(list, tuple)):
 def calculate_objectives(model, task, population, visualiser=None):
     pre_simulated_results = model.computational_manager.prepare_simulations_for_population(population, model)
 
-    all_labels = []
-
-    all_objectives = []
-
     for individ_index, individual in enumerate(population):
-        label_to_reference = None
-
         proposed_breakers = individual.genotype.get_genotype_as_breakers()
         objectives_values = []
 
@@ -49,7 +43,7 @@ def calculate_objectives(model, task, population, visualiser=None):
 
         for obj_ind, obj in enumerate(task.objectives):
             if obj.is_simulation_required:
-                base_simulation_result = model.run_simulation_for_constructions(model.domain.base_breakers, "default")
+                base_simulation_result = pre_simulated_results[len(pre_simulated_results) - 1]
                 simulation_result = pre_simulated_results[individ_index]
 
             objective_calculation_data = ObjectiveData(model.domain, proposed_breakers, model.domain.base_breakers,

@@ -66,12 +66,14 @@ class SwanComputationalManager(ComputationalManager):
         pre_simulated_results_idx = []
 
         for individual_ind, individual in enumerate(population):
-            proposed_breakers = individual.genotype.get_genotype_as_breakers()
-
-            simulation_result = model.run_simulation_for_constructions(proposed_breakers)
+            simulation_result = model.run_simulation_for_constructions(individual.genotype.get_genotype_as_breakers())
 
             pre_simulated_results.append(simulation_result)
             pre_simulated_results_idx.append(simulation_result.configuration_label)
+
+        base_simulation_result = model.run_simulation_for_constructions(model.domain.base_breakers)
+        pre_simulated_results.append(base_simulation_result)
+        pre_simulated_results_idx.append(base_simulation_result.configuration_label)
 
         finalised_values = model.computational_manager.finalise_execution()
 
