@@ -95,6 +95,7 @@ class StructuralObjective(Objective):
 
 class CostObjective(Objective):
     is_simulation_required = False
+
     def get_obj_value(self, obj_data):
         cost = sum([breaker.get_length() for breaker in obj_data.breakers]) * 10
         return round(cost, 0)
@@ -152,7 +153,7 @@ class RelativeNavigationObjective(NavigationObjective):
     def get_obj_value(self, obj_data):
         nav_obj_new = NavigationObjective().get_obj_value(obj_data)
         nav_obj_base = NavigationObjective().get_obj_value(obj_data)
-        nav_obj_rel = (nav_obj_new - nav_obj_base) / nav_obj_base * 100
+        nav_obj_rel = (nav_obj_new - nav_obj_base) / (nav_obj_base + 1) * 100
         return nav_obj_rel
 
 

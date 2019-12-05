@@ -4,6 +4,7 @@ from math import sqrt
 from operator import itemgetter
 
 from EvoAlgs.SPEA2.RawFitness import raw_fitness
+from CommonUtils.StaticStorage import StaticStorage
 
 
 class SPEA2:
@@ -49,27 +50,16 @@ class SPEA2:
             self.mutation_rate = mutation_rate
             self.mutation_value_rate = mutation_value_rate
 
-            # TODO: these params should not be here
-            self.initial_fid_time = 180
-            self.initial_fid_spatial = 56
-
-            self.fid_time_delta = 0
-            self.fid_spatial_delta = 0
-
-            self.refinement_radius = 0
-            self.refinement_radius_delta = 0
-
     class Individ:
         def __init__(self, genotype):
             self.objectives = ()
-            self.genotype = genotype
+            self.genotype = copy.deepcopy(genotype)
             self.dominators = []
             self.raw_fitness = 0
             self.density = 0
 
         def fitness(self):
             return self.raw_fitness + self.density
-
 
     class ErrorHistory:
         class Point:
@@ -130,10 +120,29 @@ class SPEA2:
 
         return sqrt(sum)
 
+    def remove_duplicates(self, individuals):
+        non_duplicates = []
+        for ind in individuals:
+            if len(non_duplicates) == 0:
+                non_duplicates.append(ind)
+            else:
+                unqiue = False
+                for nondup_ind in non_duplicates:
+                    if not unqiue:  # still
+                        for obj_ind, obj in enumerate(ind.objectives):
+                            if obj != nondup_ind.objectives[obj_ind]:
+                                unqiue = True
+                                break
+                if unqiue:
+                    non_duplicates.append(ind)
+        return non_duplicates
+
     def environmental_selection(self, pop, archive):
 
         union = archive + pop
         env = [p for p in union if p.fitness() < 1.0]
+
+        env = self.remove_duplicates(union)
 
         if len(env) < self.params.archive_size:
             # Fill the archive with the remaining candidate solutions
@@ -161,17 +170,19 @@ class SPEA2:
 
                 if len(env) <= self.params.archive_size:
                     break
+
+        env = self.remove_duplicates(env)
+
         return env
 
     def selected(self, size, pop):
         selected = []
+
         while len(selected) < size:
             selected.append(self.binary_tournament(pop))
-
         return selected
 
     def binary_tournament(self, pop):
-
         i, j = random.randint(0, len(pop) - 1), random.randint(0, len(pop) - 1)
 
         while j == i:

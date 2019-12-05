@@ -30,13 +30,13 @@ class SPEA2OptimisationStrategy(OptimisationStrategyAbstract):
         operators = default_operators()
 
         _, archive_history = DefaultSPEA2(
-            params=DefaultSPEA2.Params(max_gens=20, pop_size=20, archive_size=5,
-                                       crossover_rate=0.3, mutation_rate=0.5,  # 0.9 0.9
+            params=DefaultSPEA2.Params(max_gens=100, pop_size=30, archive_size=10,
+                                       crossover_rate=0.5, mutation_rate=0.5,  # 0.9 0.9
                                        mutation_value_rate=[], min_or_max=task.goal),
             calculate_objectives=partial(calculate_objectives, model, task),
             evolutionary_operators=operators,
             visualiser=visualiser, is_greedy=self.is_greedy).solution(verbose=False)
 
-        best = archive_history[-1][1]
+        best = None
 
         return OptimisationResults(None, best, archive_history)

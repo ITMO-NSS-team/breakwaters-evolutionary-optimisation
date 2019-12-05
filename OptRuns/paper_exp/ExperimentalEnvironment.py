@@ -6,7 +6,9 @@ from Breakers.Breaker import xy_to_points
 from CommonUtils.StaticStorage import StaticStorage
 from Computation.СomputationalEnvironment import SwanWinRemoteComputationalManager, SwanWinLocalComputationalManager
 from Configuration.Domains import SochiHarbor
-from EvoAlgs.BreakersEvo.GenotypeEncoders.GenotypeEncoder import AngularGenotypeEncoder, CartesianGenotypeEncoder
+from EvoAlgs.BreakersEvo.GenotypeEncoders.AngularEncoder import AngularGenotypeEncoder
+from EvoAlgs.BreakersEvo.GenotypeEncoders.CartesianEncoder import CartesianGenotypeEncoder
+
 from EvoAlgs.EvoAnalytics import EvoAnalytics
 from Optimisation.Objective import *
 from Optimisation.OptimisationTask import OptimisationTask
@@ -34,8 +36,6 @@ class ExpAlgs(Enum):
 
 
 class ExperimentalEnvironment:
-    def __init__(self, seed):
-        self.seed = seed
 
     selected_modifications_for_tuning1 = [
         Breaker('mod1', list(map(xy_to_points, [[-1, -1], [33, 22], [42, 17]])), 0, 'Ia'),
@@ -97,8 +97,8 @@ class ExperimentalEnvironment:
 
     def run_optimisation_experiment(self, task_id, enc_id, algopt_id, run_local):
         if __name__ == 'OptRuns.paper_exp.ExperimentalEnvironment':
-            np.random.seed(self.seed)
-            random.seed(self.seed)
+            #np.random.seed(self.seed)
+            #random.seed(self.seed)
 
             exp_domain = SochiHarbor()
 
@@ -149,11 +149,11 @@ class ExperimentalEnvironment:
 
             optimiser.optimise(wave_model, task, visualiser=visualiser)
 
+
 class TestEnvironment(ExperimentalEnvironment):
     def run_optimisation_experiment(self, task_id, enc_id, algopt_id, run_local):
         if __name__ == 'OptRuns.paper_exp.ExperimentalEnvironment':
-            np.random.seed(self.seed)
-            random.seed(self.seed)
+
 
             exp_domain = SochiHarbor()
 
@@ -175,7 +175,6 @@ class TestEnvironment(ExperimentalEnvironment):
             selected_modifications_for_tuning = ExperimentalEnvironment._get_modifications_for_experiment(task_id)
 
             optimisation_objectives = [
-                RelativeNavigationObjective(),
                 RelativeCostObjective()]
 
             analytics_objectives = [
@@ -202,5 +201,5 @@ class TestEnvironment(ExperimentalEnvironment):
             visualiser = Visualiser(vis_settings, vis_data)
 
             opt_res = optimiser.optimise(wave_model, task, visualiser=visualiser)
-            print("Final result")
-            print(opt_res.history[19][0].genotype.get_parameterized_chromosome_as_num_list())
+            #print("Final result")
+            #print(opt_res.history[19][0].genotype.get_parameterized_chromosome_as_num_list())

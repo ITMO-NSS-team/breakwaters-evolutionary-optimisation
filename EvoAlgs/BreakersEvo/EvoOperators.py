@@ -21,9 +21,8 @@ def _flatten(items, seqtypes=(list, tuple)):
 
 def calculate_objectives(model, task, population, visualiser=None):
     if any(obj.is_simulation_required for obj in task.objectives):
-        pre_simulated_results = model.computational_manager.prepare_simulations_for_population(population, model)
-    else:
-        pre_simulated_results = None
+        pre_simulated_results = model.computational_manager.prepare_simulations_for_population(population, model) \
+            if any(obj.is_simulation_required for obj in task.objectives) else None
 
     for individ_index, individual in enumerate(population):
         proposed_breakers = individual.genotype.get_genotype_as_breakers()
@@ -85,14 +84,14 @@ def crossover(p1, p2, rate):
     while is_bad:
         print(f'CROSSOVER_{iteration}')
 
-        new_breakers = genotype_encoder.crossover(p1.genotype, p2.genotype)
+        new_breakers = genotype_encoder.onepoint_crossover(p1.genotype, p2.genotype)
 
         constraints = StaticStorage.task.constraints
 
         is_bad = _validate_constraints(new_breakers, constraints)
         if not is_bad:
             print("Accepted")
-            new_individ.genotype = copy.copy(new_breakers)
+            new_individ.genotype = copy.deepcopy(new_breakers)
         iteration += 1
 
     return new_individ
@@ -103,7 +102,7 @@ def mutation(individ, rate, mutation_value_rate):
 
     random_val = random.random()
 
-    if random_val >= rate:
+    if random_val < rate:
         genotype_encoder = StaticStorage.genotype_encoder
         iteration = 0
         is_bad = True
@@ -118,7 +117,7 @@ def mutation(individ, rate, mutation_value_rate):
 
             if not is_bad:
                 print("Accepted")
-                new_individ.genotype = copy.copy(new_breakers)
+                new_individ.genotype = copy.deepcopy(new_breakers)
 
             iteration += 1
     return new_individ
