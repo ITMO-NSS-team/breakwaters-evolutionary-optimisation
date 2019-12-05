@@ -66,6 +66,7 @@ class SPEA2:
             self.dominators = []
             self.raw_fitness = 0
             self.density = 0
+            self.population_number=0
 
         def fitness(self):
             return self.raw_fitness + self.density
@@ -94,6 +95,7 @@ class SPEA2:
         pass
 
     def fitness(self):
+
         self.calculate_objectives(population=self._pop, visualiser=self.visualiser)
 
         union = self._archive + self._pop

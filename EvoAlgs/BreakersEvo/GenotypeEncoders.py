@@ -75,8 +75,10 @@ class AngularGenotypeEncoder:
                 new_modifications.append(modification)
         return new_modifications
 
-    def breakers_to_parameterized_genotype(self, breakers, task, grid):
+    def breakers_to_parameterized_genotype(self, breakers, task, grid=None):
         chromosome = []
+
+
 
         for modification in task.possible_modifications:
 

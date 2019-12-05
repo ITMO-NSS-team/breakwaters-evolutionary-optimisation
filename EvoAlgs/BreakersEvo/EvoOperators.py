@@ -7,6 +7,7 @@ from itertools import chain
 import copy
 
 import numpy as np
+import pandas as pd
 from pyDOE import lhs
 from scipy.stats.distributions import norm
 
@@ -65,7 +66,6 @@ def calculate_objectives(model, task, population, visualiser=None):
                     simulation_result = pre_simulated_results[individ_index]
                 except:
                     print("Simulated result not found in pre-simulated results")
-
             else:
                 if not any(obj.is_simulation_required for obj in task.objectives):
                     # stub for simulation results if no simulations needed
@@ -79,6 +79,8 @@ def calculate_objectives(model, task, population, visualiser=None):
 
         individual.objectives = objectives_values
         individual.simulation_result = simulation_result
+
+        EvoAnalytics.save_cantidate(individual.population_number, individual.objectives, individual.genotype.get_parameterized_chromosome_as_num_list(task))
 
         # if visualiser is not None:
         #    visualiser.print_individuals([individual.objectives], [individual.simulation_result],

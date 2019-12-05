@@ -12,7 +12,6 @@ from Simulation.ConfigurationStrategies import GeomConfigurationStrategy, Config
 from Simulation.ModelingStrategies import SimpleGeomSimulationStrategy, SwanSimulationStrategy
 from Simulation.Results import SimulationResult
 
-
 class WaveModel(object):
 
     def __init__(self, domain, simulation_strategy, configuration_strategy,

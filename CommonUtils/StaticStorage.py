@@ -8,3 +8,4 @@ class StaticStorage:
     multi_objective_optimization = False
     mean_hhs = []
     costs = []
+    genotype_encoder=None

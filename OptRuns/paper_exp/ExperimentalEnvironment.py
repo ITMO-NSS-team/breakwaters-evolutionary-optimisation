@@ -90,7 +90,7 @@ class ExperimentalEnvironment:
     def _get_optimiser_for_experiment(enc_id):
         if enc_id == ExpAlgs.multi:
             return ParetoEvolutionaryOptimiser()
-        if enc_id == ExpEncoders.greedy_multi:
+        if enc_id == ExpAlgs.greedy_multi:
             return GreedyParetoEvolutionaryOptimiser()
         if enc_id == ExpAlgs.single:
             return DEOptimiser()
@@ -128,6 +128,7 @@ class ExperimentalEnvironment:
 
             task = OptimisationTask(optimisation_objectives, selected_modifications_for_tuning,
                                     goal="minimise")
+
             task.constraints = [(StructuralObjective(), ConstraintComparisonType.equal, 0)]
 
             StaticStorage.task = task
@@ -139,6 +140,7 @@ class ExperimentalEnvironment:
                                                  create_gif_image=True,
                                                  create_boxplots=True,
                                                  print_pareto_front=True)
+
             vis_data = VisualisationData(optimisation_objectives, base_breakers=exp_domain.base_breakers, task=task)
 
             visualiser = Visualiser(vis_settings, vis_data)

@@ -28,6 +28,9 @@ class DefaultSPEA2(SPEA2):
 
             self.visualiser.state = VisualiserState(generation_number)
 
+            for individ in self._pop:
+                individ.population_number=generation_number
+
             self.fitness()
 
             # [EvoAnalytics.save_cantidate(generation_number, ind.objectives, ind.genotype.genotype_array,
@@ -40,7 +43,7 @@ class DefaultSPEA2(SPEA2):
 
             self._archive = self.environmental_selection(self._pop, self._archive)
 
-            self.calculate_objectives(self._archive, self.visualiser)
+            #self.calculate_objectives(self._archive, self.visualiser)
 
             #best = sorted(self._archive, key=lambda p: mean_obj(p))[0]
 
@@ -72,10 +75,11 @@ class DefaultSPEA2(SPEA2):
                     print("All greedy steps are done, genotype is fixed")
                     break
 
-            to_add = copy.deepcopy(self._archive + self._pop)
-            self.calculate_objectives(to_add, self.visualiser)
+            #to_add = copy.deepcopy(self._archive + self._pop)
 
-            archive_history.append(to_add)
+            #self.calculate_objectives(to_add, self.visualiser)
+
+            #archive_history.append(to_add)
 
             # EvoAnalytics.create_chart(gen)
 

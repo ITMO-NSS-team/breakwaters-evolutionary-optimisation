@@ -65,6 +65,7 @@ class EvoAnalytics:
     @staticmethod
     def save_cantidate(pop_num, objectives, genotype, referenced_dataset="None", subfolder_name=None):
 
+
         if not os.path.isdir(f'HistoryFiles'):
             os.mkdir(f'HistoryFiles')
 
