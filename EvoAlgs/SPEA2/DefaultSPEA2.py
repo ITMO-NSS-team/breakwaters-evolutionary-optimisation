@@ -36,6 +36,9 @@ class DefaultSPEA2(SPEA2):
             print(f'Generation {self.generation_number}')
             self.visualiser.state = VisualiserState(self.generation_number)
 
+            for individ in self._pop:
+                individ.population_number=self.generation_number
+
             self.fitness()
 
             # [EvoAnalytics.save_cantidate(generation_number, ind.objectives, ind.genotype.genotype_array,
