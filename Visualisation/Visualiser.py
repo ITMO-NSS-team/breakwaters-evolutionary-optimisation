@@ -2,16 +2,18 @@ import math
 import os
 import re
 import warnings
-
+import pygmo
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from PIL import Image
-
+from EvoAlgs.SPEA2.RawFitness import raw_fitness
 from CommonUtils.StaticStorage import StaticStorage
 from EvoAlgs.EvoAnalytics import EvoAnalytics
 from Optimisation.Objective import CostObjective
 from Visualisation.ModelVisualization import ModelsVisualization
+from  Breakers.BreakersUtils import BreakersUtils
+from EvoAlgs.SPEA2 import SPEA2
 
 warnings.filterwarnings("ignore")
 
@@ -34,10 +36,11 @@ class VisualisationSettings:
 
 
 class VisualisationData:
-    def __init__(self, optimisation_objectives, base_breakers, task, data_for_pareto_set_chart=None):
+    def __init__(self, optimisation_objectives, base_breakers, task, data_for_pareto_set_chart=None,model=None):
         self.optimisation_objectives = optimisation_objectives
         self.base_breakers = base_breakers
         self.task = task
+        self.model=model
         self.data_for_pareto_set_chart = data_for_pareto_set_chart
         return
 
@@ -119,6 +122,7 @@ class Visualiser:
                                              population_num=j, types_of_data=[x_axis, y_axis], min_max_x_y=min_max_x_y)
             # df = df.drop(df[df['pop_num'] != num_of_generations].index)  # Удаление строк не содержащих последнее поколение
 
+
     def print_configuration(self, simulation_result, all_breakers, objective, dir, image_for_gif, num_of_population,
                             ind_num):
 
@@ -136,8 +140,40 @@ class Visualiser:
 
         del visualiser
 
-    def print_individuals(self, objectives, simulation_result_store, all_breakers_store,
-                          fitnesses=None, maxiters=None):
+    def print_individuals(self, population, fitnesses=None, maxiters=None,):
+
+        num_of_population = self.state.generation_number
+
+        if self.visualisation_settings.store_best_individuals:
+            if StaticStorage.multi_objective_optimization:
+                if self.visualisation_data.task.goal == "minimize":
+                    best_individuals_indexes = np.argsort(raw_fitness(population))
+                    #pygmo.fast_non_dominated_sorting([ind.objectives for ind in population])
+                else:
+                    best_individuals_indexes = np.argsort(raw_fitness(population))[::-1]
+
+            else:
+                # TO DO
+                # The case for  signgle-objective optimization
+                pass
+
+            for ind_num, ind_index in enumerate(best_individuals_indexes):
+                self.print_configuration(population[ind_index].simulation_result, BreakersUtils.merge_breakers_with_modifications(self.visualisation_data.model.domain.base_breakers,
+                                                                           population[ind_index].genotype.get_genotype_as_breakers()),
+                                         population[ind_index].genotype.get_parameterized_chromosome_as_num_list(), dir="best_individuals", image_for_gif=True,
+                                         num_of_population=self.state.generation_number, ind_num=ind_num)
+
+        if self.visualisation_settings.store_all_individuals:
+
+            for ind_num,individ in enumerate(population):
+                self.print_configuration(individ.simulation_result, BreakersUtils.merge_breakers_with_modifications(self.visualisation_data.model.domain.base_breakers,
+                                                                           individ.genotype.get_genotype_as_breakers()),
+                                         individ.genotype.get_parameterized_chromosome_as_num_list(), dir="all_individuals", image_for_gif=False,
+                                         num_of_population=self.state.generation_number, ind_num=ind_num)
+
+
+
+    def print_individuals1(self, population, fitnesses=None, maxiters=None):
 
         '''
         if StaticStorage.multi_objective_optimization:
@@ -148,16 +184,19 @@ class Visualiser:
 
         num_of_population = self.state.generation_number
 
-        if num_of_population == 0:
-            self.maxiters = maxiters
+        #if num_of_population == 0:
+            #self.maxiters = maxiters
 
         if self.visualisation_settings.store_best_individuals:
             if StaticStorage.multi_objective_optimization:
-                # mean_fit=[np.mean(objective) for objective in objectives]
+                #best_individuals_for_print=[ind.objective for ind in population]
                 mean_fit = [0.8 * objective[0] + 0.9 * objective[1] + 0.5 * objective[2] + sum(objective[3:]) for
                             objective in objectives]
             else:
                 mean_fit = fitnesses
+
+
+
 
             if self.visualisation_data.task.goal == "minimization":
                 best_for_print = np.argsort(mean_fit)[:self.visualisation_settings.num_of_best_individuals]

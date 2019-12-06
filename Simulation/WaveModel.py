@@ -86,6 +86,7 @@ class WaveModel(object):
         serialised_breakers = BreakersEvoUtils.serialise_breakers(breakers)
 
         db = pickledb.load(self.model_results_file_name, False)
+
         responce = db.get(serialised_breakers)
 
         if responce is False or not os.path.exists(f'D:\\SWAN_sochi\\r\\hs{responce}.d'):

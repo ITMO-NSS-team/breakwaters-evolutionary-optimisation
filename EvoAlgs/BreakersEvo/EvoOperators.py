@@ -76,15 +76,15 @@ def calculate_objectives(model, task, population, visualiser=None):
 
         # un-list objectives
         objectives_values = _flatten(objectives_values)
-
         individual.objectives = objectives_values
         individual.simulation_result = simulation_result
 
-        EvoAnalytics.save_cantidate(individual.population_number, individual.objectives, individual.genotype.get_parameterized_chromosome_as_num_list(task))
+        EvoAnalytics.save_cantidate(individual.population_number, individual.objectives, individual.genotype.get_parameterized_chromosome_as_num_list())
 
-        # if visualiser is not None:
-        #    visualiser.print_individuals([individual.objectives], [individual.simulation_result],
-        #                                     [proposed_breakers], fitnesses=None, maxiters=1)
+    if visualiser is not None:
+        visualiser.print_individuals(population, fitnesses=None)
+        #visualiser.print_individuals([individual.objectives], [individual.simulation_result],
+                                         #[proposed_breakers], fitnesses=None)
 
 
 def crossover(p1, p2, rate):

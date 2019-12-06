@@ -33,6 +33,9 @@ class DefaultSPEA2(SPEA2):
 
             self.fitness()
 
+            for individ in self._pop:
+                print("RAW fitnesses",individ.raw_fitness)
+
             # [EvoAnalytics.save_cantidate(generation_number, ind.objectives, ind.genotype.genotype_array,
             #                             ind.referenced_dataset) for ind in self._pop]
 
@@ -75,11 +78,11 @@ class DefaultSPEA2(SPEA2):
                     print("All greedy steps are done, genotype is fixed")
                     break
 
-            #to_add = copy.deepcopy(self._archive + self._pop)
+            to_add = copy.deepcopy(self._archive + self._pop)
 
             #self.calculate_objectives(to_add, self.visualiser)
 
-            #archive_history.append(to_add)
+            archive_history.append(to_add)
 
             # EvoAnalytics.create_chart(gen)
 

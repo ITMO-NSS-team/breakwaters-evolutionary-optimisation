@@ -152,6 +152,10 @@ class RelativeNavigationObjective(NavigationObjective):
         nav_obj_new = NavigationObjective().get_obj_value(obj_data)
         nav_obj_base = NavigationObjective().get_obj_value(obj_data)
         nav_obj_rel = (nav_obj_new - nav_obj_base) / nav_obj_base * 100
+
+        if np.isnan(nav_obj_rel):
+            nav_obj_rel = 0
+
         return nav_obj_rel
 
 

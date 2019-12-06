@@ -141,7 +141,7 @@ class ExperimentalEnvironment:
                                                  create_boxplots=True,
                                                  print_pareto_front=True)
 
-            vis_data = VisualisationData(optimisation_objectives, base_breakers=exp_domain.base_breakers, task=task)
+            vis_data = VisualisationData(optimisation_objectives, base_breakers=exp_domain.base_breakers, task=task,model=wave_model)
 
             visualiser = Visualiser(vis_settings, vis_data)
 
