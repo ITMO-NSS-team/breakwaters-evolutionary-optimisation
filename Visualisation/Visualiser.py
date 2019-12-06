@@ -56,6 +56,7 @@ class Visualiser:
 
     def pareto_set_2D(self, x_axis=None, y_axis=None, file=None, directory=None):
 
+
         if not file:
             file = f'HistoryFiles/pareto_set/history_{EvoAnalytics.run_id}.csv'
         else:
@@ -143,7 +144,7 @@ class Visualiser:
 
         num_of_population = self.state.generation_number
 
-        if self.visualisation_settings.store_best_individuals:
+        if self.visualisation_settings.store_best_individuals or self.visualisation_settings.print_pareto_front:
             if StaticStorage.multi_objective_optimization:
                 if self.visualisation_data.task.goal == "minimize":
                     best_individuals_indexes = np.argsort(raw_fitness(population))
@@ -171,6 +172,14 @@ class Visualiser:
                                          num_of_population=self.state.generation_number, ind_num=ind_num)
 
 
+        if self.visualisation_settings.create_charts_during_optimization:
+            if self.visualisation_settings.print_pareto_front:
+                for i in self.visualisation_data.data_for_pareto_set_chart:
+                    pass
+                    #self.pareto_set_2D(*i, file=f'HistoryFiles/pareto_set/history_{EvoAnalytics.run_id}.csv',best_individuals_indexes)
+
+
+
     def print_individuals1(self, population, fitnesses=None, maxiters=None):
 
 
@@ -186,9 +195,6 @@ class Visualiser:
                             objective in objectives]
             else:
                 mean_fit = fitnesses
-
-
-
 
             if self.visualisation_data.task.goal == "minimization":
                 best_for_print = np.argsort(mean_fit)[:self.visualisation_settings.num_of_best_individuals]

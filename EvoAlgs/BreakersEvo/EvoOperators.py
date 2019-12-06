@@ -81,6 +81,8 @@ def calculate_objectives(model, task, population, visualiser=None):
 
         EvoAnalytics.save_cantidate(individual.population_number, individual.objectives, individual.genotype.get_parameterized_chromosome_as_num_list())
 
+
+
     if visualiser is not None:
         visualiser.print_individuals(population, fitnesses=None)
         #visualiser.print_individuals([individual.objectives], [individual.simulation_result],
