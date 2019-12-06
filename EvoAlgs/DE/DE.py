@@ -146,7 +146,8 @@ class DE:
 
     @staticmethod
     def initialize_random_state(seed):
-        np.random.seed(seed)
+        #np.random.seed(seed)
+        return
 
     @staticmethod
     def crossover(target, mutant, probability):

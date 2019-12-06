@@ -12,7 +12,8 @@ class BreakerStructureRepresentation:
 
     def get_parameterized_chromosome(self):
         genotype_encoder = StaticStorage.genotype_encoder
-        return genotype_encoder.breakers_to_parameterized_genotype(self.genotype,StaticStorage.task)
+        return genotype_encoder.breakers_to_parameterized_genotype(self.genotype, StaticStorage.task,
+                                                                   StaticStorage.exp_domain.model_grid)
 
     def get_parameterized_chromosome_as_num_list(self):
         return [int(round(g, 0)) for g in self.get_parameterized_chromosome()]

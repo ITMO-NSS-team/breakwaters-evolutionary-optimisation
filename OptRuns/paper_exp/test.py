@@ -1,4 +1,4 @@
-from OptRuns.paper_exp.ExperimentalEnvironment import ExpCases, ExpEncoders, ExpAlgs, ExperimentalEnvironment
+from OptRuns.paper_exp.ExperimentalEnvironment import ExpCases, ExpEncoders, ExpAlgs, TestEnvironment
 import random
 import numpy as np
 
@@ -12,5 +12,5 @@ seed = 42
 np.random.seed(seed)
 random.seed(seed)
 
-env = ExperimentalEnvironment()
+env = TestEnvironment()
 env.run_optimisation_experiment(task_id, enc_id, opt_id, run_local=True)

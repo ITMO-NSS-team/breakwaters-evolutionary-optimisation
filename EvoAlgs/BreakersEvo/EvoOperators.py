@@ -16,7 +16,7 @@ from CommonUtils.StaticStorage import StaticStorage
 from EvoAlgs.BreakersEvo.BreakersEvoUtils import BreakersEvoUtils
 from EvoAlgs.BreakersEvo.BreakerStructureRepresentation import BreakerStructureRepresentation
 from EvoAlgs.EvoAnalytics import EvoAnalytics
-from Optimisation.Objective import ObjectiveData, NavigationObjective, StructuralObjective, ConstraintComparisonType
+from Optimisation.Objective import ObjectiveData, ConstraintComparisonType
 from Visualisation.ModelVisualization import ModelsVisualization
 from Simulation.Results import WaveSimulationResult
 
@@ -33,11 +33,9 @@ def _flatten(items, seqtypes=(list, tuple)):
 
 
 def calculate_objectives(model, task, population, visualiser=None):
-    pre_simulated_results = model.computational_manager.prepare_simulations_for_population(population, model)
-
-    all_labels = []
-
-    all_objectives = []
+    if any(obj.is_simulation_required for obj in task.objectives):
+        pre_simulated_results = model.computational_manager.prepare_simulations_for_population(population, model) \
+            if any(obj.is_simulation_required for obj in task.objectives) else None
 
     for individ_index, individual in enumerate(population):
         label_to_reference = None
@@ -50,7 +48,7 @@ def calculate_objectives(model, task, population, visualiser=None):
 
         for obj_ind, obj in enumerate(task.objectives):
             if obj.is_simulation_required:
-                base_simulation_result = model.run_simulation_for_constructions(model.domain.base_breakers, "default")
+                base_simulation_result = pre_simulated_results[len(pre_simulated_results) - 1]
                 simulation_result = pre_simulated_results[individ_index]
 
             objective_calculation_data = ObjectiveData(model.domain, proposed_breakers, model.domain.base_breakers,
@@ -66,6 +64,7 @@ def calculate_objectives(model, task, population, visualiser=None):
                     simulation_result = pre_simulated_results[individ_index]
                 except:
                     print("Simulated result not found in pre-simulated results")
+
             else:
                 if not any(obj.is_simulation_required for obj in task.objectives):
                     # stub for simulation results if no simulations needed
@@ -76,6 +75,7 @@ def calculate_objectives(model, task, population, visualiser=None):
 
         # un-list objectives
         objectives_values = _flatten(objectives_values)
+
         individual.objectives = objectives_values
         individual.simulation_result = simulation_result
 
@@ -102,14 +102,14 @@ def crossover(p1, p2, rate):
     while is_bad:
         print(f'CROSSOVER_{iteration}')
 
-        new_breakers = genotype_encoder.crossover(p1.genotype, p2.genotype)
+        new_breakers = genotype_encoder.onepoint_crossover(p1.genotype, p2.genotype)
 
         constraints = StaticStorage.task.constraints
 
         is_bad = _validate_constraints(new_breakers, constraints)
         if not is_bad:
             print("Accepted")
-            new_individ.genotype = copy.copy(new_breakers)
+            new_individ.genotype = copy.deepcopy(new_breakers)
         iteration += 1
 
     return new_individ
@@ -120,7 +120,7 @@ def mutation(individ, rate, mutation_value_rate):
 
     random_val = random.random()
 
-    if random_val >= rate:
+    if random_val < rate:
         genotype_encoder = StaticStorage.genotype_encoder
         iteration = 0
         is_bad = True
@@ -135,7 +135,7 @@ def mutation(individ, rate, mutation_value_rate):
 
             if not is_bad:
                 print("Accepted")
-                new_individ.genotype = copy.copy(new_breakers)
+                new_individ.genotype = copy.deepcopy(new_breakers)
 
             iteration += 1
     return new_individ

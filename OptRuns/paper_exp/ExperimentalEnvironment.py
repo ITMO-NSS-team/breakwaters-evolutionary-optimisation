@@ -3,16 +3,15 @@ import random
 from builtins import staticmethod
 from enum import Enum
 
-import numpy as np
-
-from Breakers.Breaker import xy_to_points, Breaker
+from Breakers.Breaker import xy_to_points
 from CommonUtils.StaticStorage import StaticStorage
 from Computation.СomputationalEnvironment import SwanWinRemoteComputationalManager, SwanWinLocalComputationalManager
 from Configuration.Domains import SochiHarbor
-from EvoAlgs.BreakersEvo.GenotypeEncoders import AngularGenotypeEncoder, CartesianGenotypeEncoder
+from EvoAlgs.BreakersEvo.GenotypeEncoders.AngularEncoder import AngularGenotypeEncoder
+from EvoAlgs.BreakersEvo.GenotypeEncoders.CartesianEncoder import CartesianGenotypeEncoder
+
 from EvoAlgs.EvoAnalytics import EvoAnalytics
-from Optimisation.Objective import RelativeCostObjective, RelativeNavigationObjective, RelativeWaveHeightObjective, \
-    StructuralObjective, ConstraintComparisonType, RelativeQuailityObjective
+from Optimisation.Objective import *
 from Optimisation.OptimisationTask import OptimisationTask
 from Optimisation.Optimiser import ParetoEvolutionaryOptimiser, GreedyParetoEvolutionaryOptimiser, DEOptimiser
 from Simulation.WaveModel import SwanWaveModel
@@ -75,6 +74,9 @@ class ExperimentalEnvironment:
             StaticStorage.wind = "23.1 135"
             StaticStorage.bdy = "5.3 9.1 200 30"
             StaticStorage.exp_domain = domain
+
+
+
         else:
             raise NotImplementedError
 
@@ -96,11 +98,10 @@ class ExperimentalEnvironment:
             return DEOptimiser()
         raise NotImplementedError
 
-    def run_optimisation_experiment(self, task_id, enc_id, algopt_id):
+    def run_optimisation_experiment(self, task_id, enc_id, algopt_id, run_local):
         if __name__ == 'OptRuns.paper_exp.ExperimentalEnvironment':
-
-            np.random.seed(self.seed)
-            random.seed(self.seed)
+            #np.random.seed(self.seed)
+            #random.seed(self.seed)
 
             exp_domain = SochiHarbor()
 
@@ -110,8 +111,11 @@ class ExperimentalEnvironment:
             EvoAnalytics.clear()
             EvoAnalytics.run_id = 'run_{exp_name}_{date:%Y_%m_%d_%H_%M_%S}'.format(exp_name=exp_name,
                                                                                    date=datetime.datetime.now())
-            parallel_computational_manager = SwanWinLocalComputationalManager()
-            wave_model = SwanWaveModel(exp_domain, parallel_computational_manager)
+            if run_local:
+                computational_manager = SwanWinLocalComputationalManager()
+            else:
+                computational_manager = SwanWinRemoteComputationalManager(resources_names=["125", "124", "123", "121"])
+            wave_model = SwanWaveModel(exp_domain, computational_manager)
             wave_model.model_results_file_name = 'D:\SWAN_sochi\model_results_paper_martech.db'
 
             optimiser = ExperimentalEnvironment._get_optimiser_for_experiment(algopt_id)
@@ -124,11 +128,13 @@ class ExperimentalEnvironment:
                 RelativeWaveHeightObjective()]
 
             analytics_objectives = [
+                CostObjective,
+                NavigationObjective,
+                WaveHeightObjective,
                 RelativeQuailityObjective()]
 
             task = OptimisationTask(optimisation_objectives, selected_modifications_for_tuning,
                                     goal="minimise")
-
             task.constraints = [(StructuralObjective(), ConstraintComparisonType.equal, 0)]
 
             StaticStorage.task = task
@@ -140,9 +146,63 @@ class ExperimentalEnvironment:
                                                  create_gif_image=True,
                                                  create_boxplots=True,
                                                  print_pareto_front=True)
-
-            vis_data = VisualisationData(optimisation_objectives, base_breakers=exp_domain.base_breakers, task=task,model=wave_model)
+            vis_data = VisualisationData(optimisation_objectives, base_breakers=exp_domain.base_breakers, task=task)
 
             visualiser = Visualiser(vis_settings, vis_data)
 
             optimiser.optimise(wave_model, task, visualiser=visualiser)
+
+
+class TestEnvironment(ExperimentalEnvironment):
+    def run_optimisation_experiment(self, task_id, enc_id, algopt_id, run_local):
+        if __name__ == 'OptRuns.paper_exp.ExperimentalEnvironment':
+
+
+            exp_domain = SochiHarbor()
+
+            ExperimentalEnvironment._init_conditions_for_experiment(exp_domain)
+
+            exp_name = f"test_{algopt_id}_task{task_id}_enc{enc_id}"
+            EvoAnalytics.clear()
+            EvoAnalytics.run_id = 'run_{exp_name}_{date:%Y_%m_%d_%H_%M_%S}'.format(exp_name=exp_name,
+                                                                                   date=datetime.datetime.now())
+            if run_local:
+                computational_manager = SwanWinLocalComputationalManager()
+            else:
+                computational_manager = SwanWinRemoteComputationalManager(resources_names=["125", "124", "123", "121"])
+            wave_model = SwanWaveModel(exp_domain, computational_manager)
+            wave_model.model_results_file_name = 'D:\SWAN_sochi\model_results_paper_martech.db'
+
+            optimiser = ExperimentalEnvironment._get_optimiser_for_experiment(algopt_id)
+
+            selected_modifications_for_tuning = ExperimentalEnvironment._get_modifications_for_experiment(task_id)
+
+            optimisation_objectives = [
+                RelativeCostObjective()]
+
+            analytics_objectives = [
+                CostObjective,
+                NavigationObjective,
+                WaveHeightObjective,
+                RelativeQuailityObjective()]
+
+            task = OptimisationTask(optimisation_objectives, selected_modifications_for_tuning,
+                                    goal="minimise")
+            task.constraints = [(StructuralObjective(), ConstraintComparisonType.equal, 0)]
+
+            StaticStorage.task = task
+
+            StaticStorage.genotype_encoder = ExperimentalEnvironment._get_encoder_for_experiment(enc_id)
+
+            vis_settings = VisualisationSettings(store_all_individuals=False, store_best_individuals=True,
+                                                 num_of_best_individuals_from_population_for_print=5,
+                                                 create_gif_image=True,
+                                                 create_boxplots=True,
+                                                 print_pareto_front=True)
+            vis_data = VisualisationData(optimisation_objectives, base_breakers=exp_domain.base_breakers, task=task)
+
+            visualiser = Visualiser(vis_settings, vis_data)
+
+            opt_res = optimiser.optimise(wave_model, task, visualiser=visualiser)
+            #print("Final result")
+            #print(opt_res.history[19][0].genotype.get_parameterized_chromosome_as_num_list())

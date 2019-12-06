@@ -38,6 +38,7 @@ class Objective(object):
     def get_obj_value(self, obj_data: ObjectiveData):
         return
 
+
 class StructuralObjective(Objective):
 
     def _selfintersection(self, breaker1, breaker2):
@@ -93,6 +94,7 @@ class StructuralObjective(Objective):
 
 
 class CostObjective(Objective):
+    is_simulation_required = False
 
     def get_obj_value(self, obj_data):
         cost = sum([breaker.get_length() for breaker in obj_data.breakers]) * 10
@@ -146,7 +148,7 @@ class NavigationObjective(Objective):
 
 
 class RelativeNavigationObjective(NavigationObjective):
-    is_simulation_required = True
+    is_simulation_required = False
 
     def get_obj_value(self, obj_data):
         nav_obj_new = NavigationObjective().get_obj_value(obj_data)
