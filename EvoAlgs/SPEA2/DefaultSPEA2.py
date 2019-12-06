@@ -27,15 +27,10 @@ class DefaultSPEA2(SPEA2):
         history = SPEA2.ErrorHistory()
 
         self.generation_number = 0
-        mask_index = 0
 
-        if self.is_greedy:
-            StaticStorage.genotype_encoder.genotype_mask[1:len(StaticStorage.genotype_encoder.genotype_mask)] = 1
-            StaticStorage.genotype_encoder.genotype_mask[mask_index] = 0
-            StaticStorage.genotype_encoder.genotype_mask[mask_index + 1] = 0
-            greedy_gen_step = np.floor(self.params.max_gens / len(StaticStorage.genotype_encoder.genotype_mask) * 2)
-
-        mask_index = 2
+        if self.greedy_heuristic is not None:
+            StaticStorage.genotype_encoder.genotype_mask = self.greedy_heuristic.init_mask(
+                StaticStorage.genotype_encoder.genotype_mask, self.params.max_gens)
 
         while self.generation_number <= self.params.max_gens:
             print(f'Generation {self.generation_number}')
@@ -64,15 +59,9 @@ class DefaultSPEA2(SPEA2):
 
             if extended_debug: self._print_pop("REPR", self._pop)
 
-            if self.is_greedy and self.generation_number != 0 and self.generation_number % greedy_gen_step == 0:
-                if mask_index < len(StaticStorage.genotype_encoder.genotype_mask):
-                    StaticStorage.genotype_encoder.genotype_mask[mask_index - 2] = 1
-                    StaticStorage.genotype_encoder.genotype_mask[mask_index - 1] = 1
-                    StaticStorage.genotype_encoder.genotype_mask[mask_index] = 0
-                    StaticStorage.genotype_encoder.genotype_mask[mask_index + 1] = 0
-                    mask_index += 2
-                    genotype_mask_txt = ",".join([str(int(g)) for g in StaticStorage.genotype_encoder.genotype_mask])
-                    print(f'Current mask is [{genotype_mask_txt}]')
+            if self.greedy_heuristic is not None:
+                StaticStorage.genotype_encoder.genotype_mask = self.greedy_heuristic.modify_mask(
+                    StaticStorage.genotype_encoder.genotype_mask, self.generation_number)
 
             # EvoAnalytics.create_chart(gen)
 

@@ -10,7 +10,6 @@ class CartesianGenotypeEncoder(DirectGenotypeEncoder):
     def __init__(self):
         self.min_for_init = [-5, -5]
         self.max_for_init = [5, 5]
-        self.genotype_mask = None
 
     def parameterized_genotype_to_breakers(self, genotype, task, grid):
         gen_id = 0

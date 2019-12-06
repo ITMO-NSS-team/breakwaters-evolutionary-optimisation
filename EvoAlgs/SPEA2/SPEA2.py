@@ -8,7 +8,7 @@ from CommonUtils.StaticStorage import StaticStorage
 
 
 class SPEA2:
-    def __init__(self, params, calculate_objectives, evolutionary_operators, visualiser, is_greedy):
+    def __init__(self, params, calculate_objectives, evolutionary_operators, visualiser, greedy_heuristic):
         '''
          Strength Pareto Evolutionary Algorithm
         :param params: Meta-parameters of the SPEA2
@@ -25,7 +25,7 @@ class SPEA2:
         self.__init_populations()
 
         self.visualiser = visualiser
-        self.is_greedy = is_greedy
+        self.greedy_heuristic = greedy_heuristic
 
     def __init_operators(self):
         self.init_population = self.operators.init_population
