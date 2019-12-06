@@ -37,8 +37,6 @@ class ExpAlgs(Enum):
 
 
 class ExperimentalEnvironment:
-    def __init__(self, seed):
-        self.seed = seed
 
     selected_modifications_for_tuning1 = [
         Breaker('mod1', list(map(xy_to_points, [[-1, -1], [33, 22], [42, 17]])), 0, 'Ia'),
@@ -135,6 +133,7 @@ class ExperimentalEnvironment:
 
             task = OptimisationTask(optimisation_objectives, selected_modifications_for_tuning,
                                     goal="minimise")
+
             task.constraints = [(StructuralObjective(), ConstraintComparisonType.equal, 0)]
 
             StaticStorage.task = task
@@ -145,8 +144,10 @@ class ExperimentalEnvironment:
                                                  num_of_best_individuals_from_population_for_print=5,
                                                  create_gif_image=True,
                                                  create_boxplots=True,
-                                                 print_pareto_front=True)
-            vis_data = VisualisationData(optimisation_objectives, base_breakers=exp_domain.base_breakers, task=task)
+                                                 print_pareto_front=True,
+                                                 create_charts_during_optimization=True)
+
+            vis_data = VisualisationData(optimisation_objectives, base_breakers=exp_domain.base_breakers, task=task,model=wave_model)
 
             visualiser = Visualiser(vis_settings, vis_data)
 
