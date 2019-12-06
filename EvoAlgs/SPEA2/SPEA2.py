@@ -4,7 +4,6 @@ from math import sqrt
 from operator import itemgetter
 
 from EvoAlgs.SPEA2.RawFitness import raw_fitness
-from CommonUtils.StaticStorage import StaticStorage
 
 
 class SPEA2:
@@ -57,7 +56,7 @@ class SPEA2:
             self.dominators = []
             self.raw_fitness = 0
             self.density = 0
-            self.population_number=0
+            self.population_number = 0
 
         def fitness(self):
             return self.raw_fitness + self.density

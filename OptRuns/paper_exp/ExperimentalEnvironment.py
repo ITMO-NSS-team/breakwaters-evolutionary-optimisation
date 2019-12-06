@@ -131,6 +131,8 @@ class ExperimentalEnvironment:
                 WaveHeightObjective,
                 RelativeQuailityObjective()]
 
+            best_selection_objective = RelativeQuailityObjective()
+
             task = OptimisationTask(optimisation_objectives, selected_modifications_for_tuning,
                                     goal="minimise")
 
