@@ -37,14 +37,12 @@ class VisualisationSettings:
 
 
 class VisualisationData:
-    def __init__(self, optimisation_objectives, base_breakers, task, data_for_pareto_set_chart=None,model=None):
+    def __init__(self, optimisation_objectives, base_breakers, task, data_for_pareto_set_chart=None):
         self.optimisation_objectives = optimisation_objectives
         self.base_breakers = base_breakers
         self.task = task
-        self.model=model
         self.data_for_pareto_set_chart = data_for_pareto_set_chart
         return
-
 
 class Visualiser:
 
@@ -160,7 +158,7 @@ class Visualiser:
 
 
             for ind_num, ind_index in enumerate(best_individuals_indexes):
-                self.print_configuration(simulation_result=population[ind_index].simulation_result, all_breakers=BreakersUtils.merge_breakers_with_modifications(self.visualisation_data.model.domain.base_breakers,
+                self.print_configuration(simulation_result=population[ind_index].simulation_result, all_breakers=BreakersUtils.merge_breakers_with_modifications(self.visualisation_data.base_breakers,
                                                                            population[ind_index].genotype.get_genotype_as_breakers()),
                                          objective=population[ind_index].genotype.get_parameterized_chromosome_as_num_list(), dir="best_individuals", image_for_gif=True,
                                          num_of_population=self.state.generation_number, ind_num=ind_num)
@@ -168,13 +166,11 @@ class Visualiser:
         if self.visualisation_settings.store_all_individuals:
 
             for ind_num,individ in enumerate(population):
-                self.print_configuration(simulation_result=individ.simulation_result, all_breakers=BreakersUtils.merge_breakers_with_modifications(self.visualisation_data.model.domain.base_breakers,
+                self.print_configuration(simulation_result=individ.simulation_result, all_breakers=BreakersUtils.merge_breakers_with_modifications(self.visualisation_data.base_breakers,
                                                                            individ.genotype.get_genotype_as_breakers()), objective=individ.genotype.get_parameterized_chromosome_as_num_list(), dir="all_individuals", image_for_gif=False,
                                          num_of_population=self.state.generation_number, ind_num=ind_num)
 
 
-
-    '''
     def print_individuals1(self, population, fitnesses=None, maxiters=None):
 
 
@@ -258,7 +254,7 @@ class Visualiser:
                                     StaticStorage.exp_domain.fairways, StaticStorage.exp_domain.target_points,
                                     objective, dir=dir, image_for_gif=image_for_gif,
                                     population_and_ind_number=[num_of_population, ind_num])
-    '''
+
 
     def gif_image_maker(self, directory=EvoAnalytics.run_id, gif_type="breakers"):
 

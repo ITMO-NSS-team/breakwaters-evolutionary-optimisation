@@ -140,14 +140,14 @@ class ExperimentalEnvironment:
 
             StaticStorage.genotype_encoder = ExperimentalEnvironment._get_encoder_for_experiment(enc_id)
 
-            vis_settings = VisualisationSettings(store_all_individuals=False, store_best_individuals=True,
+            vis_settings = VisualisationSettings(store_all_individuals=True, store_best_individuals=True,
                                                  num_of_best_individuals_from_population_for_print=5,
                                                  create_gif_image=True,
                                                  create_boxplots=True,
                                                  print_pareto_front=True,
                                                  create_charts_during_optimization=True)
 
-            vis_data = VisualisationData(optimisation_objectives, base_breakers=exp_domain.base_breakers, task=task,model=wave_model)
+            vis_data = VisualisationData(optimisation_objectives, base_breakers=exp_domain.base_breakers, task=task)
 
             visualiser = Visualiser(vis_settings, vis_data)
 
@@ -195,11 +195,12 @@ class TestEnvironment(ExperimentalEnvironment):
 
             StaticStorage.genotype_encoder = ExperimentalEnvironment._get_encoder_for_experiment(enc_id)
 
-            vis_settings = VisualisationSettings(store_all_individuals=False, store_best_individuals=True,
+            vis_settings = VisualisationSettings(store_all_individuals=True, store_best_individuals=True,
                                                  num_of_best_individuals_from_population_for_print=5,
                                                  create_gif_image=True,
                                                  create_boxplots=True,
-                                                 print_pareto_front=True)
+                                                 print_pareto_front=True,
+                                                 create_charts_during_optimization=True)
             vis_data = VisualisationData(optimisation_objectives, base_breakers=exp_domain.base_breakers, task=task)
 
             visualiser = Visualiser(vis_settings, vis_data)
