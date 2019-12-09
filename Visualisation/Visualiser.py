@@ -110,8 +110,6 @@ class Visualiser:
                                                  save_directory=f'pareto_front/{chart_name}/{directory}/{self.state.generation_number+1}.png',
                                                  population_num=self.state.generation_number,labels=[self.visualisation_data.labels[chart_num][i] for i in range(1,len(self.visualisation_data.labels[chart_num]),2)])
 
-            if True:
-                print("stop")
 
     def print_pareto_set_from_history(self):
         #TO DO method to create patero set chart using history data from csv file
