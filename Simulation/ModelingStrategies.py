@@ -27,7 +27,7 @@ class SimpleGeomSimulationStrategy(SimulationStrategyAbstract):
 
         stop = 0
         hs = np.zeros(shape=(configuration_info.domain.model_grid.grid_y, configuration_info.domain.model_grid.grid_x))
-        # visualiser.SimpleModelVisualization(hs, configuration_info.breakers, configuration_info.domain.fairways)
+        # visualiser.SimpleModelVisualization(hs, configuration_info.new_breakers, configuration_info.domain.fairways)
         # self.heatmap2d(hs, configuration_info.info, configuration_info.domain.fairways)
 
         if stop == 1:

@@ -48,7 +48,6 @@ class VisualisationData:
 class Visualiser:
 
     def __init__(self, visualisation_settings, visualisation_data):
-
         self.exp_name = EvoAnalytics.run_id
         self.state = VisualiserState(0)
         self.maxiters = None
@@ -263,7 +262,7 @@ class Visualiser:
                                     population_and_ind_number=[num_of_population, ind_num])
     '''
 
-    def gif_image_maker(self, directory=EvoAnalytics.run_id, gif_type="breakers"):
+    def gif_image_maker(self, directory=EvoAnalytics.run_id, gif_type="new_breakers"):
 
         if gif_type == "pareto2D":
             for data_types in self.visualisation_data.data_for_pareto_set_chart:
@@ -285,7 +284,7 @@ class Visualiser:
         if not os.path.isdir(f'wave_gif_imgs/{directory}'):
             os.mkdir(f'wave_gif_imgs/{directory}')
 
-        if gif_type == "breakers":
+        if gif_type == "new_breakers":
             path = "wave_gif_imgs/" + directory + "/"
         else:
             path = "boxplots/" + str(gif_type) + "/" + directory + "/"
@@ -302,7 +301,7 @@ class Visualiser:
 
         save_path = str(os.path.abspath(os.curdir)) + "\\gif_img\\" + directory + "\\"
 
-        if gif_type == "breakers":
+        if gif_type == "new_breakers":
             images[0].save("{}breakers.gif".format(save_path), save_all=True, append_images=images[1:], duration=100,
                            loop=0)
         else:
@@ -323,12 +322,12 @@ class Visualiser:
         if not os.path.isdir(f'gif_img/{run_id}'):
             os.mkdir(f'gif_img/{run_id}')
 
-        self.gif_image_maker(run_id, gif_type="breakers")
+        self.gif_image_maker(run_id, gif_type="new_breakers")
         self.gif_image_maker(run_id, gif_type="gen_len")
         self.gif_image_maker(run_id, gif_type="obj")
         self.gif_image_maker(run_id, gif_type="pareto2D")
 
-    def gif_series_maker(self, directory=None, gif_type="breakers"):
+    def gif_series_maker(self, directory=None, gif_type="new_breakers"):
 
         if not os.path.isdir('series'):
             os.mkdir('series')

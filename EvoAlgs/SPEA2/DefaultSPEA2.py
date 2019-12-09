@@ -34,7 +34,8 @@ class DefaultSPEA2(SPEA2):
 
         while self.generation_number <= self.params.max_gens:
             print(f'Generation {self.generation_number}')
-            self.visualiser.state = VisualiserState(self.generation_number)
+            if self.visualiser is not None:
+                self.visualiser.state = VisualiserState(self.generation_number)
 
             for individ in self._pop:
                 individ.population_number=self.generation_number

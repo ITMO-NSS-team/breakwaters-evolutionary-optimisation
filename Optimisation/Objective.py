@@ -6,7 +6,7 @@ from shapely.geometry import LineString
 from Breakers.Breaker import Breaker
 from Configuration.Domains import Fairway
 from Simulation.Results import WaveSimulationResult
-
+from Breakers.BreakersUtils import BreakersUtils
 
 class ConstraintComparisonType(Enum):
     not_equal = 0
@@ -18,17 +18,22 @@ class ConstraintComparisonType(Enum):
 
 
 class ObjectiveData:
-    def __init__(self, domain, breakers, base_breakers, simulation_result: WaveSimulationResult,
+    def __init__(self, domain, proposed_breakers, base_breakers, simulation_result: WaveSimulationResult,
                  simulation_result_base: WaveSimulationResult):
         self.domain = domain
-        self.breakers = breakers
         self.base_breakers = base_breakers
-        self.simulation_result = simulation_result
         self.simulation_result_base = simulation_result_base
+
+        if proposed_breakers is None and simulation_result is None:
+            self.new_breakers = self.base_breakers
+            self.simulation_result = self.simulation_result_base
+        else:
+            self.new_breakers = BreakersUtils.merge_breakers_with_modifications(base_breakers, proposed_breakers)
+            self.simulation_result = simulation_result
         return
 
     def data_for_base_construction(self):
-        return ObjectiveData(self.domain, self.base_breakers, self.base_breakers, self.simulation_result_base,
+        return ObjectiveData(self.domain, None, self.base_breakers, None,
                              self.simulation_result_base)
 
 
@@ -87,8 +92,8 @@ class StructuralObjective(Objective):
 
     def get_obj_value(self, obj_data):
         num_self_intersection = sum(
-            [sum([int(self._selfintersection(breaker1, breaker2)) for breaker2 in obj_data.breakers]) for breaker1 in
-             obj_data.breakers])
+            [sum([int(self._selfintersection(breaker1, breaker2)) for breaker2 in obj_data.new_breakers]) for breaker1 in
+             obj_data.new_breakers])
 
         return round(num_self_intersection * 100, -1)
 
@@ -97,7 +102,7 @@ class CostObjective(Objective):
     is_simulation_required = False
 
     def get_obj_value(self, obj_data):
-        cost = sum([breaker.get_length() for breaker in obj_data.breakers]) * 10
+        cost = sum([breaker.get_length() for breaker in obj_data.new_breakers]) * 25
         return round(cost, 0)
 
 
@@ -139,7 +144,7 @@ class NavigationObjective(Objective):
     def get_obj_value(self, obj_data):
 
         min_dist_to_fairway = min(
-            [min([(self._dist_from_fairway_to_breaker(fairway, breaker)) for breaker in obj_data.breakers])
+            [min([(self._dist_from_fairway_to_breaker(fairway, breaker)) for breaker in obj_data.new_breakers])
              for
              fairway in
              obj_data.domain.fairways])

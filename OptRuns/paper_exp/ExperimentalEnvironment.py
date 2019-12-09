@@ -40,13 +40,13 @@ class ExperimentalEnvironment:
 
     selected_modifications_for_tuning1 = [
         Breaker('mod1', list(map(xy_to_points, [[-1, -1], [33, 22], [42, 17]])), 0, 'Ia'),
-        Breaker('mod2_top', list(map(xy_to_points, [[-1, -1], [50, 32], [50, 39]])), 0, 'II'),
+        Breaker('mod2_top', list(map(xy_to_points, [[-1, -1], [50, 32], [50, 38]])), 0, 'II'),
         Breaker('mod2_bottom', list(map(xy_to_points, [[-1, -1], [50, 39], [50, 38]])), 0, 'II')
     ]
 
     selected_modifications_for_tuning2 = [
         Breaker('mod1', list(map(xy_to_points, [[-1, -1], [-1, -1], [33, 22], [42, 17]])), 0, 'Ia'),
-        Breaker('mod2_top', list(map(xy_to_points, [[-1, -1], [-1, -1], [50, 32], [50, 39]])), 0, 'II'),
+        Breaker('mod2_top', list(map(xy_to_points, [[-1, -1], [-1, -1], [50, 32], [50, 38]])), 0, 'II'),
         Breaker('mod2_bottom', list(map(xy_to_points, [[-1, -1], [-1, -1], [50, 39], [50, 38]])), 0, 'II')
     ]
 
@@ -207,6 +207,6 @@ class TestEnvironment(ExperimentalEnvironment):
 
             visualiser = Visualiser(vis_settings, vis_data)
 
-            opt_res = optimiser.optimise(wave_model, task, visualiser=visualiser)
+            opt_res = optimiser.optimise(wave_model, task, visualiser=None)
             #print("Final result")
             #print(opt_res.history[19][0].genotype.get_parameterized_chromosome_as_num_list())

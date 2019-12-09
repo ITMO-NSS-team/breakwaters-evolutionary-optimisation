@@ -8,8 +8,8 @@ from EvoAlgs.BreakersEvo.GenotypeEncoders.GenotypeEncoder import DirectGenotypeE
 class CartesianGenotypeEncoder(DirectGenotypeEncoder):
 
     def __init__(self):
-        self.min_for_init = [-5, -5]
-        self.max_for_init = [5, 5]
+        self.min_for_init = [-4, -4]
+        self.max_for_init = [4, 4]
 
     def parameterized_genotype_to_breakers(self, genotype, task, grid):
         gen_id = 0
@@ -64,7 +64,7 @@ class CartesianGenotypeEncoder(DirectGenotypeEncoder):
         return chromosome
 
     def mutate_components(self, comp_values):
-        mutation_params = [3, 0.5, 1]
+        mutation_params = [2, 0.5, 1]
         mutation_ratio_x = abs(
             np.random.RandomState().normal(mutation_params[0], mutation_params[1],
                                            mutation_params[2])[0])

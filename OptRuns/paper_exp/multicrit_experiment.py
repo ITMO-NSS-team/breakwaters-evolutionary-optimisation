@@ -4,8 +4,8 @@ import numpy as np
 
 # experiment_params
 task_id = ExpCases.double3
-enc_id = ExpEncoders.cartesian
-opt_id = ExpAlgs.greedy_multi
+enc_id = ExpEncoders.angular
+opt_id = ExpAlgs.multi
 
 seed = 42
 
