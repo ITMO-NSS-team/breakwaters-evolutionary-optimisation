@@ -143,7 +143,7 @@ class EvoAnalytics:
         # the case with 3D
 
     @staticmethod
-    def create_chart(num_of_generation=None, f=None, data_for_analyze='obj', analyze_only_last_generation=True,
+    def create_boxplot(num_of_generation=None, f=None, data_for_analyze='obj', analyze_only_last_generation=True,
                      chart_for_gif=False, first_generation=False, num_of_launches=1):
 
         if not os.path.isdir("boxplots"):

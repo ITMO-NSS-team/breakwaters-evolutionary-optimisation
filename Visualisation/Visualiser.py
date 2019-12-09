@@ -171,7 +171,7 @@ class Visualiser:
 
             f = f'HistoryFiles/history_{EvoAnalytics.run_id}.csv'
             for parameter in ('obj','gen_len'):
-                EvoAnalytics.create_chart(num_of_generation=self.state.generation_number, f=f, data_for_analyze=parameter, analyze_only_last_generation=True,
+                EvoAnalytics.create_boxplot(num_of_generation=self.state.generation_number, f=f, data_for_analyze=parameter, analyze_only_last_generation=True,
                                           chart_for_gif=self.visualisation_settings.create_gif_image)
 
     def gif_image_maker(self, directory=EvoAnalytics.run_id, gif_type="breakers"):
