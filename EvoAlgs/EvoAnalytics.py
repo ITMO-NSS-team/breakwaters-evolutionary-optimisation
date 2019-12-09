@@ -65,7 +65,6 @@ class EvoAnalytics:
     @staticmethod
     def save_cantidate(pop_num, objectives, genotype, referenced_dataset="None", subfolder_name=None):
 
-
         if not os.path.isdir(f'HistoryFiles'):
             os.mkdir(f'HistoryFiles')
 
@@ -85,11 +84,13 @@ class EvoAnalytics:
             with open(hist_file_name, 'a', newline='') as f:
                 EvoAnalytics._write_candidate_to_csv(f, pop_num, objectives, genotype, referenced_dataset)
 
+        EvoAnalytics.change_symbol_in_file(file=hist_file_name)
+
     @staticmethod
     def _write_candidate_to_csv(f, pop_num, objs, genotype, referenced_dataset):
         # Количество значений целевых функций
         # print("objs",objs)
-        writer = csv.writer(f, delimiter=';', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        writer = csv.writer(f, delimiter=',', quotechar=' ')
         writer.writerow(
             [pop_num, referenced_dataset, ','.join([str(round(_, 1)) for _ in objs]),
              ','.join([str(round(_, 1)) for _ in genotype])])
@@ -97,7 +98,7 @@ class EvoAnalytics:
     @staticmethod
     def _write_header_to_csv(f, objectives, genotype, referenced_dataset):
 
-        writer = csv.writer(f, delimiter=';', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        writer = csv.writer(f, delimiter=',',quotechar=' ')
         writer.writerow(
             ["pop_num", "referenced_dataset", ','.join([f'obj{_}' for _ in range(0, len(objectives))]),
              ','.join([f'gen_len_{int(_ / 2)}' if _ % 2 == 0 else f'gen_dir_{int(_ / 2)}' for _ in

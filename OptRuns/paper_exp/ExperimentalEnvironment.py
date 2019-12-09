@@ -120,6 +120,7 @@ class ExperimentalEnvironment:
 
             selected_modifications_for_tuning = ExperimentalEnvironment._get_modifications_for_experiment(task_id)
 
+
             optimisation_objectives = [
                 RelativeCostObjective(),
                 RelativeNavigationObjective(),
@@ -130,6 +131,9 @@ class ExperimentalEnvironment:
                 NavigationObjective,
                 WaveHeightObjective,
                 RelativeQuailityObjective()]
+
+            pareto_objectives = [[RelativeCostObjective(),
+                RelativeWaveHeightObjective()]]
 
             best_selection_objective = RelativeQuailityObjective()
 
@@ -149,7 +153,7 @@ class ExperimentalEnvironment:
                                                  print_pareto_front=True,
                                                  create_charts_during_optimization=True)
 
-            vis_data = VisualisationData(optimisation_objectives, base_breakers=exp_domain.base_breakers, task=task)
+            vis_data = VisualisationData(optimisation_objectives, base_breakers=exp_domain.base_breakers, task=task,data_for_pareto_set_chart=pareto_objectives)
 
             visualiser = Visualiser(vis_settings, vis_data)
 
