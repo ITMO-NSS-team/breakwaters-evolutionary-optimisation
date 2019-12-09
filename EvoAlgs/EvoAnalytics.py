@@ -90,7 +90,7 @@ class EvoAnalytics:
     def _write_candidate_to_csv(f, pop_num, objs, genotype, referenced_dataset):
         # Количество значений целевых функций
         # print("objs",objs)
-        writer = csv.writer(f, delimiter=',', quotechar=' ')
+        writer = csv.writer(f, delimiter=',', quotechar=' ', quoting=csv.QUOTE_MINIMAL)
         writer.writerow(
             [pop_num, referenced_dataset, ','.join([str(round(_, 1)) for _ in objs]),
              ','.join([str(round(_, 1)) for _ in genotype])])
@@ -98,7 +98,7 @@ class EvoAnalytics:
     @staticmethod
     def _write_header_to_csv(f, objectives, genotype, referenced_dataset):
 
-        writer = csv.writer(f, delimiter=',',quotechar=' ')
+        writer = csv.writer(f, delimiter=',', quotechar=' ', quoting=csv.QUOTE_MINIMAL)
         writer.writerow(
             ["pop_num", "referenced_dataset", ','.join([f'obj{_}' for _ in range(0, len(objectives))]),
              ','.join([f'gen_len_{int(_ / 2)}' if _ % 2 == 0 else f'gen_dir_{int(_ / 2)}' for _ in
@@ -110,53 +110,37 @@ class EvoAnalytics:
         if not file:
             file = f'HistoryFiles/history_{EvoAnalytics.run_id}.csv'
         if os._exists(file):
-            with open(file, 'r+') as f:
-                txt = f.read().replace(symbol_for_change, symbol)
+            with open(file, 'w') as f:
+                txt = f.write().replace(symbol_for_change, symbol)
                 f.seek(0)
                 f.truncate()
                 f.write(txt)
 
     @staticmethod
-    def print_pareto_set_2D(data, save_directory, population_num, types_of_data, min_max_x_y):
-
-        print("data", data)
-        print("population_num", population_num)
-        print("types_of_data", types_of_data)
-        print("min_max_x_y", min_max_x_y)
-
+    def print_pareto_set_(data, save_directory, population_num,labels):
         fig, ax = plt.subplots()
-
         ax.set_title("Популяция " + str(population_num + 1))
-        for i in range(len(types_of_data)):
 
-            if types_of_data[i] == "cost":
-                if i == 0:
-                    ax.invert_xaxis()
-                    plt.xlim(min_max_x_y[0][1] - 1, min_max_x_y[0][0] + 1)
-                    plt.ylim(min_max_x_y[1][0] - 1, min_max_x_y[1][1] + 1)
-                    ax.set_xlabel("Цена", fontsize=15)
-                elif i == 1:
-                    ax.invert_yaxis()
-                    plt.ylim(min_max_x_y[1][1] - 1, min_max_x_y[1][0] + 1)
-                    plt.xlim(min_max_x_y[0][0] - 1, min_max_x_y[0][1] + 1)
-                    ax.set_ylabel("Цена", fontsize=15)
-            else:
-                plt.ylim(min_max_x_y[1][0] - 1, min_max_x_y[1][1] + 1)
-                plt.xlim(min_max_x_y[0][0] - 1, min_max_x_y[0][1] + 1)
+        if labels[0]=="Повышение цены":
+            ax.invert_xaxis()
+            plt.xlim(60, 0)
+            plt.ylim(0, 100)
+        elif labels[1]=="Повышение цены":
+            ax.invert_yaxis()
+            plt.xlim(0,100)
+            plt.ylim(60, 0)
 
-                if types_of_data[i] == "hs average decrease":
-                    if i == 0:
-                        ax.set_xlabel("Среднее снижение hs по всем точкам", fontsize=15)
-                    elif i == 1:
-                        ax.set_ylabel("Среднее снижение hs по всем точкам", fontsize=15)
-
-        ax.scatter(data[0], data[1], linewidths=7, color='g')
-        plt.tick_params(axis='both', labelsize=15)
-        # plt.ylim(min_max_x_y[1][0] - 1, min_max_x_y[1][1] + 1)
-        # plt.xlim(min_max_x_y[0][0] - 1, min_max_x_y[0][1] + 1)
-        fig.set_figwidth(7)
-        fig.set_figheight(7)
-        plt.savefig(save_directory, bbox_inches='tight')
+        if len(data)==2: #2D chart
+            ax.set_xlabel(labels[0], fontsize=15)
+            ax.set_ylabel(labels[1], fontsize=15)
+            ax.scatter(data[0], data[1], linewidths=7, color='g')
+            plt.tick_params(axis='both', labelsize=15)
+            fig.set_figwidth(7)
+            fig.set_figheight(7)
+            plt.savefig(save_directory, bbox_inches='tight')
+        else:
+            pass # TO DO
+        # the case with 3D
 
     @staticmethod
     def create_chart(num_of_generation=None, f=None, data_for_analyze='obj', analyze_only_last_generation=True,

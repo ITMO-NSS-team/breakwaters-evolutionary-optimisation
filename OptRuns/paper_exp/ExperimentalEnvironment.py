@@ -127,13 +127,13 @@ class ExperimentalEnvironment:
                 RelativeWaveHeightObjective()]
 
             analytics_objectives = [
-                CostObjective,
-                NavigationObjective,
-                WaveHeightObjective,
+                CostObjective(),
+                NavigationObjective(),
+                WaveHeightObjective(),
                 RelativeQuailityObjective()]
 
-            pareto_objectives = [[RelativeCostObjective(),
-                RelativeWaveHeightObjective()]]
+            pareto_objectives = [[RelativeWaveHeightObjective(), RelativeCostObjective()]]
+
 
             task = OptimisationTask(optimisation_objectives, selected_modifications_for_tuning,
                                     goal="minimise")
@@ -149,7 +149,7 @@ class ExperimentalEnvironment:
                                                  create_gif_image=True,
                                                  create_boxplots=True,
                                                  print_pareto_front=True,
-                                                 create_charts_during_optimization=True)
+                                                 create_pareto_set_chart_during_optimization=True)
 
             vis_data = VisualisationData(optimisation_objectives, base_breakers=exp_domain.base_breakers, task=task,data_for_pareto_set_chart=pareto_objectives)
 
@@ -204,7 +204,8 @@ class TestEnvironment(ExperimentalEnvironment):
                                                  create_gif_image=True,
                                                  create_boxplots=True,
                                                  print_pareto_front=True,
-                                                 create_charts_during_optimization=True)
+                                                 create_pareto_set_chart_during_optimization=True,
+                                                 create_boxplots_during_optimization=True)
             vis_data = VisualisationData(optimisation_objectives, base_breakers=exp_domain.base_breakers, task=task)
 
             visualiser = Visualiser(vis_settings, vis_data)
