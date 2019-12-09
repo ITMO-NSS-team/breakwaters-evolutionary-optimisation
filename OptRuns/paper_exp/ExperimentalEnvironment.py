@@ -149,7 +149,8 @@ class ExperimentalEnvironment:
                                                  create_gif_image=True,
                                                  create_boxplots=True,
                                                  print_pareto_front=True,
-                                                 create_pareto_set_chart_during_optimization=True)
+                                                 create_pareto_set_chart_during_optimization=True,
+                                                 create_boxplots_during_optimization=True)
 
             vis_data = VisualisationData(optimisation_objectives, base_breakers=exp_domain.base_breakers, task=task,data_for_pareto_set_chart=pareto_objectives)
 

@@ -161,12 +161,18 @@ class Visualiser:
                                          num_of_population=self.state.generation_number, ind_num=ind_num)
 
 
-
         if self.visualisation_settings.create_pareto_set_chart_during_optimization:
             self.print_pareto_set(best_individuals_indexes,population)
 
         if self.visualisation_settings.create_boxplots_during_optimization:
-            pass #TO DO
+            EvoAnalytics.num_of_rows = math.ceil(EvoAnalytics.num_of_generations / EvoAnalytics.num_of_cols)
+            EvoAnalytics.pop_size = len(population)
+            EvoAnalytics.set_params()
+
+            f = f'HistoryFiles/history_{EvoAnalytics.run_id}.csv'
+            for parameter in ('obj','gen_len'):
+                EvoAnalytics.create_chart(num_of_generation=self.state.generation_number, f=f, data_for_analyze=parameter, analyze_only_last_generation=True,
+                                          chart_for_gif=self.visualisation_settings.create_gif_image)
 
     def gif_image_maker(self, directory=EvoAnalytics.run_id, gif_type="breakers"):
 
