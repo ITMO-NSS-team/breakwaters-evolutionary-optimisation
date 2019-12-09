@@ -211,7 +211,7 @@ class EvoAnalytics:
                         EvoAnalytics.df_max_obj = max([df[i].max() for i in df.columns])
 
                 ax = plt.subplot()
-
+                plt.rcParams['axes.titlesize']=30
                 ax.set_title("Population " + str(num_of_generation + 1))
 
                 '''
