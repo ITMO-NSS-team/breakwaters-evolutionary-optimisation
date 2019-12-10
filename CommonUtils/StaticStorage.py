@@ -9,3 +9,4 @@ class StaticStorage:
     mean_hhs = []
     costs = []
     genotype_encoder=None
+    max_gens=None
