@@ -10,7 +10,7 @@ from PIL import Image
 from EvoAlgs.SPEA2.RawFitness import raw_fitness
 from CommonUtils.StaticStorage import StaticStorage
 from EvoAlgs.EvoAnalytics import EvoAnalytics
-from Optimisation.Objective import CostObjective
+from Optimisation.Objective import CostObjective,RelativeCostObjective,RelativeNavigationObjective,RelativeQuailityObjective,RelativeWaveHeightObjective
 from Visualisation.ModelVisualization import ModelsVisualization
 from  Breakers.BreakersUtils import BreakersUtils
 from EvoAlgs.SPEA2 import SPEA2
@@ -25,14 +25,15 @@ class VisualiserState:
 
 class VisualisationSettings:
     def __init__(self, store_all_individuals, store_best_individuals, num_of_best_individuals_from_population_for_print,
-                 create_gif_image, create_boxplots, print_pareto_front=True,create_charts_during_optimization=None):
+                 create_gif_image, create_boxplots, print_pareto_front=True,create_pareto_set_chart_during_optimization=None,create_boxplots_during_optimization=None):
         self.store_all_individuals = store_all_individuals
         self.store_best_individuals = store_best_individuals
         self.num_of_best_individuals = num_of_best_individuals_from_population_for_print
         self.create_gif_image = create_gif_image
         self.create_boxplots = create_boxplots
         self.print_pareto_front = print_pareto_front
-        self.create_charts_during_optimization=create_charts_during_optimization
+        self.create_pareto_set_chart_during_optimization=create_pareto_set_chart_during_optimization
+        self.create_boxplots_during_optimization=create_boxplots_during_optimization
         return
 
 
@@ -42,6 +43,22 @@ class VisualisationData:
         self.base_breakers = base_breakers
         self.task = task
         self.data_for_pareto_set_chart = data_for_pareto_set_chart
+        self.labels=[[] for i in range(len(data_for_pareto_set_chart))]
+        for chart_num,chart_data in enumerate(data_for_pareto_set_chart):
+            for axis in range(len(chart_data)):
+                if isinstance(data_for_pareto_set_chart[chart_num][axis],RelativeCostObjective):
+                    self.labels[chart_num].append("cost")
+                    self.labels[chart_num].append("Повышение цены")
+                    continue
+                if isinstance(data_for_pareto_set_chart[chart_num][axis],RelativeWaveHeightObjective):
+                    self.labels[chart_num].append("hs")
+                    self.labels[chart_num].append("Среднее снижение hs по всем точкам")
+                    continue
+                if isinstance(data_for_pareto_set_chart[chart_num][axis],RelativeNavigationObjective):
+                    self.labels[chart_num].append("navigation")
+                    self.labels[chart_num].append("Ухудшение/улучшение безопасности мореплавания")
+                    continue
+
         return
 
 class Visualiser:
@@ -54,80 +71,52 @@ class Visualiser:
         self.visualisation_settings = visualisation_settings
         self.visualisation_data = visualisation_data
 
-    def pareto_set_2D(self, x_axis=None, y_axis=None, file=None, directory=None):
+    def print_pareto_set(self, best_individuals_indexes,population):
 
-
-        if not file:
-            file = f'HistoryFiles/pareto_set/history_{EvoAnalytics.run_id}.csv'
-        else:
-            file = file
-
-        if not directory:
-            directory = EvoAnalytics.run_id
+        directory = EvoAnalytics.run_id
 
         if not os.path.isdir("pareto_front"):
             os.mkdir("pareto_front")
-        if not os.path.isdir(f'pareto_front/img'):
-            os.mkdir(f'pareto_front/img')
-        if not os.path.isdir(f'pareto_front/img/{str(x_axis)}_to_{str(y_axis)}'):
-            os.mkdir(f'pareto_front/img/{str(x_axis)}_to_{str(y_axis)}')
-        if not os.path.isdir(f'pareto_front/img/{str(x_axis)}_to_{str(y_axis)}/{directory}'):
-            os.mkdir(f'pareto_front/img/{str(x_axis)}_to_{str(y_axis)}/{directory}')
 
-        EvoAnalytics.change_symbol_in_file(file)
-        df = pd.read_csv(file, header=0)
-        df['pop_num'] = pd.to_numeric(df['pop_num'])
-        min_max_x_y = [[], []]
-        columns_x_y = []
-        for j in range(self.maxiters):
-            data = [[], []]
-            indexes = df[df['pop_num'] == j].index
+        for chart_num,chart_data in enumerate(self.visualisation_data.labels):
 
-            for i, axis in enumerate((x_axis, y_axis)):
+            for i in range(0,len(chart_data),2):
+                if i==0:
+                    chart_name=chart_data[i]
 
-                if j == 0:
-                    if axis == "hs average decrease" or axis == "cost":  # and other characteristics related with objectives
-                        columns = [i for i in df.columns if re.search('obj', i)]
-                if axis == "hs average decrease":
-                    if j == 0:
-                        columns_x_y.append(columns[len(self.task.objectives) - 1:])
-                        for col in columns:
-                            df[col] = pd.to_numeric(df[col])
+                else:
+                    chart_name=chart_name+'_and_'+chart_data[i]
 
-                        data1 = []
-                        for k in range(len(df)):
-                            data1.append(np.mean(sum([df[col][k] for col in columns_x_y[i]])) * (-1))
+            if not os.path.isdir(f'pareto_front/{chart_name}'):
+                os.mkdir(f'pareto_front/{chart_name}')
+            if not os.path.isdir(f'pareto_front/{chart_name}/{directory}'):
+                os.mkdir(f'pareto_front/{chart_name}/{directory}')
 
-                        min_max_x_y[i].append(min(data1))
-                        min_max_x_y[i].append(max(data1))
+            axis_data = [[] for axis in range(len(self.visualisation_data.data_for_pareto_set_chart[chart_num]))]
+            for num_of_index, index_of_best_ind in enumerate(best_individuals_indexes):
 
-                    for k in indexes:
-                        data[i].append(np.mean(sum([df[col][k] for col in columns_x_y[i]])) * (-1))
+                for axis_num,axis in enumerate(self.visualisation_data.data_for_pareto_set_chart[chart_num]):
 
-                elif axis == "cost":  # or some other char-s
-                    if j == 0:
-                        for obj_num, obj in enumerate(self.task.objectives):
-                            if isinstance(obj, CostObjective):
-                                df["obj" + str(obj_num)] = pd.to_numeric(df["obj" + str(obj_num)])
-                                min_max_x_y[i].append(df["obj" + str(obj_num)].min())
-                                min_max_x_y[i].append(df["obj" + str(obj_num)].max())
-                                columns_x_y.append(["obj" + str(obj_num)])
-                                break
-                    for k in indexes:
-                        data[i].append(df[columns_x_y[i][0]][k])
+                    if isinstance(axis, RelativeWaveHeightObjective):
+                        axis_data[axis_num].append(math.fabs(np.mean([population[index_of_best_ind].objectives[objective_number] for objective_number in range(len(StaticStorage.task.objectives) - 1, len(population[index_of_best_ind].objectives))])))
+                        continue
+                    else:
+                        for obj_num, obj in enumerate(StaticStorage.task.objectives[:len(StaticStorage.task.objectives)-1]):
+                            if isinstance(axis, type(obj)):
+                                axis_data[axis_num].append(math.fabs(population[index_of_best_ind].objectives[obj_num]))
 
-            # create chart
-            EvoAnalytics.print_pareto_set_2D(data=data,
-                                             save_directory=f'pareto_front/img/{str(x_axis)}_to_{str(y_axis)}/{directory}/{j}.png',
-                                             population_num=j, types_of_data=[x_axis, y_axis], min_max_x_y=min_max_x_y)
-            # df = df.drop(df[df['pop_num'] != num_of_generations].index)  # Удаление строк не содержащих последнее поколение
+            if len(self.visualisation_data.data_for_pareto_set_chart[chart_num])==2:
+                EvoAnalytics.print_pareto_set_(data=axis_data,
+                                                 save_directory=f'pareto_front/{chart_name}/{directory}/{self.state.generation_number+1}.png',
+                                                 population_num=self.state.generation_number,labels=[self.visualisation_data.labels[chart_num][i] for i in range(1,len(self.visualisation_data.labels[chart_num]),2)])
 
+
+    def print_pareto_set_from_history(self):
+        #TO DO method to create patero set chart using history data from csv file
+        pass
 
     def print_configuration(self, simulation_result, all_breakers, objective, dir, image_for_gif, num_of_population,
                             ind_num):
-
-        #print("population_number", num_of_population)
-        #print("ind num", ind_num)
 
         visualiser = ModelsVisualization(str(num_of_population + 1) + "_" + str(ind_num + 1))
 
@@ -172,95 +161,18 @@ class Visualiser:
                                          num_of_population=self.state.generation_number, ind_num=ind_num)
 
 
-        if self.visualisation_settings.create_charts_during_optimization:
-            if self.visualisation_settings.print_pareto_front:
-                for i in self.visualisation_data.data_for_pareto_set_chart:
-                    pass
-                    #self.pareto_set_2D(*i, file=f'HistoryFiles/pareto_set/history_{EvoAnalytics.run_id}.csv',best_individuals_indexes)
+        if self.visualisation_settings.create_pareto_set_chart_during_optimization:
+            self.print_pareto_set(best_individuals_indexes,population)
 
+        if self.visualisation_settings.create_boxplots_during_optimization:
+            EvoAnalytics.num_of_rows = math.ceil(EvoAnalytics.num_of_generations / EvoAnalytics.num_of_cols)
+            EvoAnalytics.pop_size = len(population)
+            EvoAnalytics.set_params()
 
-
-    def print_individuals1(self, population, fitnesses=None, maxiters=None):
-
-
-        num_of_population = self.state.generation_number
-
-        #if num_of_population == 0:
-            #self.maxiters = maxiters
-
-        if self.visualisation_settings.store_best_individuals:
-            if StaticStorage.multi_objective_optimization:
-                #best_individuals_for_print=[ind.objective for ind in population]
-                mean_fit = [0.8 * objective[0] + 0.9 * objective[1] + 0.5 * objective[2] + sum(objective[3:]) for
-                            objective in objectives]
-            else:
-                mean_fit = fitnesses
-
-            if self.visualisation_data.task.goal == "minimization":
-                best_for_print = np.argsort(mean_fit)[:self.visualisation_settings.num_of_best_individuals]
-            else:
-                best_for_print = np.argsort(mean_fit)[::-1][:self.visualisation_settings.num_of_best_individuals]
-                # best_for_print = [i.genotype.genotype_array for i in sorted(enumerate(obj.ectives), key=lambda fit: np.mean(fit[1]) )[:EvoAnalytics.num_of_best_inds_for_print]]
-
-        if self.visualisation_settings.store_all_individuals:
-            image_for_gif = False
-            dir = "img"
-            for ind_num in range(0, len(simulation_result_store)):
-                self.print_configuration(simulation_result_store[ind_num], all_breakers_store[ind_num],
-                                         objectives[ind_num], dir="img", image_for_gif=False,
-                                         num_of_population=num_of_population, ind_num=ind_num)
-
-        if self.visualisation_settings.store_best_individuals:
-
-            for i, ind_num in enumerate(best_for_print):
-                self.print_configuration(simulation_result_store[ind_num], all_breakers_store[ind_num],
-                                         objectives[ind_num], dir="wave_gif_imgs", image_for_gif=True,
-                                         num_of_population=num_of_population, ind_num=i)
-
-        #print("num of population", num_of_population + 1)
-        if num_of_population + 1 == maxiters:
-
-            if self.visualisation_settings.print_pareto_front:
-                for i in self.visualisation_data.data_for_pareto_set_chart:
-                    self.pareto_set_2D(x_axis=i[0], y_axis=i[1],
-                                       file=f'HistoryFiles/pareto_set/history_{EvoAnalytics.run_id}.csv')
-
-            if self.visualisation_settings.create_boxplots:
-
-                EvoAnalytics.num_of_rows = math.ceil(EvoAnalytics.num_of_generations / EvoAnalytics.num_of_cols)
-                EvoAnalytics.pop_size = len(objectives)
-                EvoAnalytics.set_params()
-                print("EvoAnalytics.num_of_generations", EvoAnalytics.num_of_generations)
-                print("EvoAnalytics.num_of_cols", EvoAnalytics.num_of_cols)
-                print("num_of_rows", EvoAnalytics.num_of_rows)
-                print("pop_size", EvoAnalytics.pop_size)
-
-                if StaticStorage.multi_objective_optimization:
-                    f = f'HistoryFiles/pareto_set/history_{EvoAnalytics.run_id}.csv'
-                else:
-                    f = f'HistoryFiles/history_{EvoAnalytics.run_id}.csv'
-                EvoAnalytics.create_chart(f=f, data_for_analyze='obj', analyze_only_last_generation=False,
-                                          chart_for_gif=True)
-                EvoAnalytics.create_chart(f=f, data_for_analyze='gen_len', analyze_only_last_generation=False,
-                                          chart_for_gif=True)
-
-            if self.visualisation_settings.create_gif_image:
-                self.maxiters = maxiters
-                self.gif_images_maker()
-                self.gif_series_maker()
-
-    def print_individ(self, objective, num_of_population, ind_num, simulation_result, all_breakers):
-        image_for_gif = False
-        dir = "img"
-
-        visualiser = ModelsVisualization(str(num_of_population + 1) + "_" + str(ind_num + 1))
-
-        visualiser.simple_visualise(simulation_result.get_5percent_output_for_field(), all_breakers,
-                                    self.visualisation_data.base_breakers,
-                                    StaticStorage.exp_domain.fairways, StaticStorage.exp_domain.target_points,
-                                    objective, dir=dir, image_for_gif=image_for_gif,
-                                    population_and_ind_number=[num_of_population, ind_num])
-
+            f = f'HistoryFiles/history_{EvoAnalytics.run_id}.csv'
+            for parameter in ('obj','gen_len'):
+                EvoAnalytics.create_boxplot(num_of_generation=self.state.generation_number, f=f, data_for_analyze=parameter, analyze_only_last_generation=True,
+                                          chart_for_gif=self.visualisation_settings.create_gif_image)
 
     def gif_image_maker(self, directory=EvoAnalytics.run_id, gif_type="breakers"):
 

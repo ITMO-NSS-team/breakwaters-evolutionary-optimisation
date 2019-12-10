@@ -39,10 +39,8 @@ def calculate_objectives(model, task, population, visualiser=None):
 
     for individ_index, individual in enumerate(population):
         label_to_reference = None
-
         proposed_breakers = individual.genotype.get_genotype_as_breakers()
         objectives_values = []
-
         simulation_result = None
         base_simulation_result = None
 
