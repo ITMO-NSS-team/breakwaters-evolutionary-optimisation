@@ -66,11 +66,11 @@ class CartesianGenotypeEncoder(DirectGenotypeEncoder):
     def mutate_components(self, comp_values):
         mutation_params = [2, 0.5, 1]
         mutation_ratio_x = abs(
-            np.random.RandomState().normal(mutation_params[0], mutation_params[1],
+            np.random.normal(mutation_params[0], mutation_params[1],
                                            mutation_params[2])[0])
 
         mutation_ratio_y = abs(
-            np.random.RandomState().normal(mutation_params[0], mutation_params[1],
+            np.random.normal(mutation_params[0], mutation_params[1],
                                            mutation_params[2])[0])
 
         sign = 1 if random.random() < 0.5 else -1

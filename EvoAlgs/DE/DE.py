@@ -93,7 +93,7 @@ class DEIterator:
 
 class DE:
     def __init__(self, fobj, bounds, mutation=(0.5, 1.0), crossover=0.7, maxiters=30,
-                 self_adaptive=False, popsize=None, seed=None, dimensions=2, save_gif=True, min_or_max=None):
+                 self_adaptive=False, popsize=None, dimensions=2, save_gif=True, min_or_max=None):
 
         self.save_gif_images = save_gif
         self.goal = min_or_max
@@ -141,13 +141,7 @@ class DE:
             self.popsize = self.dims * 5
         else:
             self.popsize = popsize
-        self.initialize_random_state(seed)
         self.name = 'DE'
-
-    @staticmethod
-    def initialize_random_state(seed):
-        #np.random.seed(seed)
-        return
 
     @staticmethod
     def crossover(target, mutant, probability):

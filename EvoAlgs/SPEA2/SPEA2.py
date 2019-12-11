@@ -41,7 +41,6 @@ class SPEA2:
         def __init__(self, max_gens, pop_size, archive_size, crossover_rate, mutation_rate, mutation_value_rate,
                      min_or_max):
             self.max_gens = max_gens
-            StaticStorage.max_gens=self.max_gens
             self.pop_size = pop_size
 
             self.archive_size = archive_size

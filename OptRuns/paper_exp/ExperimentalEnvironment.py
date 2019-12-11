@@ -37,7 +37,6 @@ class ExpAlgs(Enum):
 
 
 class ExperimentalEnvironment:
-
     selected_modifications_for_tuning1 = [
         Breaker('mod1', list(map(xy_to_points, [[-1, -1], [33, 22], [42, 17]])), 0, 'Ia'),
         Breaker('mod2_top', list(map(xy_to_points, [[-1, -1], [50, 32], [50, 38]])), 0, 'II'),
@@ -98,8 +97,6 @@ class ExperimentalEnvironment:
 
     def run_optimisation_experiment(self, task_id, enc_id, algopt_id, run_local):
         if __name__ == 'OptRuns.paper_exp.ExperimentalEnvironment':
-            #np.random.seed(self.seed)
-            #random.seed(self.seed)
 
             exp_domain = SochiHarbor()
 
@@ -120,7 +117,6 @@ class ExperimentalEnvironment:
 
             selected_modifications_for_tuning = ExperimentalEnvironment._get_modifications_for_experiment(task_id)
 
-
             optimisation_objectives = [
                 RelativeCostObjective(),
                 RelativeNavigationObjective(),
@@ -134,11 +130,10 @@ class ExperimentalEnvironment:
 
             pareto_objectives = [[RelativeWaveHeightObjective(), RelativeCostObjective()]]
 
-
             best_selection_objective = RelativeQuailityObjective()
 
             task = OptimisationTask(optimisation_objectives, selected_modifications_for_tuning,
-                                    goal="minimise",analytics_objectives=analytics_objectives)
+                                    goal="minimise", analytics_objectives=analytics_objectives)
 
             task.constraints = [(StructuralObjective(), ConstraintComparisonType.equal, 0)]
 
@@ -154,7 +149,8 @@ class ExperimentalEnvironment:
                                                  create_pareto_set_chart_during_optimization=True,
                                                  create_boxplots_during_optimization=True)
 
-            vis_data = VisualisationData(optimisation_objectives, base_breakers=exp_domain.base_breakers, task=task,data_for_pareto_set_chart=pareto_objectives)
+            vis_data = VisualisationData(optimisation_objectives, base_breakers=exp_domain.base_breakers, task=task,
+                                         data_for_pareto_set_chart=pareto_objectives)
 
             visualiser = Visualiser(vis_settings, vis_data)
 
@@ -164,7 +160,6 @@ class ExperimentalEnvironment:
 class TestEnvironment(ExperimentalEnvironment):
     def run_optimisation_experiment(self, task_id, enc_id, algopt_id, run_local):
         if __name__ == 'OptRuns.paper_exp.ExperimentalEnvironment':
-
 
             exp_domain = SochiHarbor()
 
@@ -194,8 +189,11 @@ class TestEnvironment(ExperimentalEnvironment):
                 WaveHeightObjective,
                 RelativeQuailityObjective()]
 
+            pareto_objectives = [[RelativeWaveHeightObjective(), RelativeCostObjective()]]
+
+
             task = OptimisationTask(optimisation_objectives, selected_modifications_for_tuning,
-                                    goal="minimise",analytics_objectives=analytics_objectives)
+                                    goal="minimise", analytics_objectives=analytics_objectives)
             task.constraints = [(StructuralObjective(), ConstraintComparisonType.equal, 0)]
 
             StaticStorage.task = task
@@ -209,10 +207,12 @@ class TestEnvironment(ExperimentalEnvironment):
                                                  print_pareto_front=True,
                                                  create_pareto_set_chart_during_optimization=True,
                                                  create_boxplots_during_optimization=True)
-            vis_data = VisualisationData(optimisation_objectives, base_breakers=exp_domain.base_breakers, task=task)
+
+            vis_data = VisualisationData(optimisation_objectives, base_breakers=exp_domain.base_breakers, task=task,
+                                         data_for_pareto_set_chart=pareto_objectives)
 
             visualiser = Visualiser(vis_settings, vis_data)
 
             opt_res = optimiser.optimise(wave_model, task, visualiser=None)
-            #print("Final result")
-            #print(opt_res.history[19][0].genotype.get_parameterized_chromosome_as_num_list())
+            # print("Final result")
+            # print(opt_res.history[19][0].genotype.get_parameterized_chromosome_as_num_list())

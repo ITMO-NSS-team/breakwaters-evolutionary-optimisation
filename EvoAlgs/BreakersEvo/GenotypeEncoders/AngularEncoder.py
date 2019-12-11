@@ -80,11 +80,11 @@ class AngularGenotypeEncoder(DirectGenotypeEncoder):
         mutation_params_dir = [35, 5, 1]
 
         mutation_ratio_len = abs(
-            np.random.RandomState().normal(mutation_params_len[0], mutation_params_len[1],
+            np.random.normal(mutation_params_len[0], mutation_params_len[1],
                                            mutation_params_len[2])[0])
 
         mutation_ratio_dir = abs(
-            np.random.RandomState().normal(mutation_params_dir[0], mutation_params_dir[1],
+            np.random.normal(mutation_params_dir[0], mutation_params_dir[1],
                                            mutation_params_dir[2])[0])
 
         sign = 1 if random.random() < 0.5 else -1
