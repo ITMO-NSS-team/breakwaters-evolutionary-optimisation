@@ -153,15 +153,12 @@ class Visualiser:
 
         del visualiser
 
-    def print_individuals(self, population, fitnesses=None, maxiters=None, ):
-
-        num_of_population = self.state.generation_number
+    def print_individuals(self, population):
 
         if self.visualisation_settings.store_best_individuals or self.visualisation_settings.print_pareto_front:
             if StaticStorage.multi_objective_optimization:
                 if self.visualisation_data.task.goal == "minimize":
                     best_individuals_indexes = np.argsort(raw_fitness(population))
-                    # pygmo.fast_non_dominated_sorting([ind.objectives for ind in population])
                 else:
                     best_individuals_indexes = np.argsort(raw_fitness(population))[::-1]
 
@@ -348,5 +345,3 @@ class Visualiser:
 
         images[0].save("gif_img/{}/Graphs.gif".format(directory), save_all=True, append_images=images[1:], duration=100,
                        loop=0)
-
-    # def print_pareto_front(self, objectives):

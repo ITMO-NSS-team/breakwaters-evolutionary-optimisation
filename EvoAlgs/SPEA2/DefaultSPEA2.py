@@ -65,16 +65,3 @@ class DefaultSPEA2(SPEA2):
             self.generation_number += 1
 
         return history, archive_history
-
-
-def mean_obj(individ):
-    return np.mean(individ.objectives)
-
-
-def print_new_best_individ(best, gen_index):
-    print("new best: ", round(best.fitness(), 5), round(best.genotype.drf, 2),
-          round(best.genotype.cfw, 6),
-          round(best.genotype.stpm, 6),
-          0,
-          mean_obj(best))
-    print(gen_index)
