@@ -38,17 +38,10 @@ class DefaultSPEA2(SPEA2):
                 self.visualiser.state = VisualiserState(self.generation_number)
 
             for individ in self._pop:
-                individ.population_number=self.generation_number
+                individ.population_number = self.generation_number
 
             self.fitness()
 
-            # [EvoAnalytics.save_cantidate(generation_number, ind.objectives, ind.genotype.genotype_array,
-            #                             ind.referenced_dataset) for ind in self._pop]
-
-            # self.visualiser.print_individuals([obj.objectives for obj in self._pop],
-            #                                  [obj.simulation_result for obj in self._pop],
-            #                                  [obj.genotype.get_genotype_as_breakers() for obj in self._pop],
-            #                                  fitnesses=None, maxiters=self.params.max_gens)
             if extended_debug: self._print_pop("beforeA", self._pop)
             self._archive = self.environmental_selection(self._pop, self._archive)
 

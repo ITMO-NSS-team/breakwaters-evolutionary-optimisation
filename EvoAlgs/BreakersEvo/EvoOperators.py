@@ -36,7 +36,7 @@ def calculate_objectives(model, task, population, visualiser=None):
     if any(obj.is_simulation_required for obj in task.objectives):
         pre_simulated_results = model.computational_manager.prepare_simulations_for_population(population, model) \
             if any(obj.is_simulation_required for obj in task.objectives) else None
-
+    local_id = 1
     for individ_index, individual in enumerate(population):
         label_to_reference = None
         proposed_breakers = individual.genotype.get_genotype_as_breakers()
@@ -80,10 +80,13 @@ def calculate_objectives(model, task, population, visualiser=None):
         individual.objectives = objectives_values
         individual.simulation_result = simulation_result
         individual.referenced_dataset = label_to_reference
+        individual.local_id = local_id
 
         EvoAnalytics.save_cantidate(individual.population_number, individual.objectives,
                                     individual.genotype.get_parameterized_chromosome_as_num_list(),
                                     individual.referenced_dataset)
+
+        local_id = local_id + 1
 
     if visualiser is not None:
         visualiser.print_individuals(population, fitnesses=None)
