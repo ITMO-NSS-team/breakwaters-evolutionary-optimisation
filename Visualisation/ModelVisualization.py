@@ -19,16 +19,6 @@ class ModelsVisualization:
             self.exp_name = EvoAnalytics.run_id
         else:
             self.exp_name = exp_name
-        # to clear to plot
-
-        plt.rcParams.update({'figure.max_open_warning': 0})
-        plt.rcParams['figure.figsize'] = [15, 10]
-        plt.xticks([])
-        fig = plt.figure()
-        ax = plt.subplot()
-        ax.axes.set_aspect('equal')
-        plt.axis('off')
-        # plt.savefig('dump.png')
 
     def simple_visualise(self, hs: np.ndarray, all_breakers, base_breakers, fairways, target_points, fitness=None,
                          dir="img", image_for_gif=False, \
@@ -43,15 +33,16 @@ class ModelsVisualization:
         plt.rcParams['axes.titlesize'] = 20
         plt.rcParams['axes.labelsize'] = 20
         plt.rcParams['figure.figsize'] = [15, 10]
-        plt.rcParams["font.size"] = "1"
-        fig = plt.figure()
-        plt.axis('off')
-        plt.tick_params(axis='both', left='off', top='off', right='off', bottom='off', labelleft='off', labeltop='off',
-                        labelright='off', labelbottom='off')
+        plt.rcParams["font.size"] = "1" #точки
 
         # fig = plt.figure(figsize=(15, 10))
         ax = plt.subplot()
+        plt.xticks([])
+        plt.axis('off')
+        plt.tick_params(axis='both', left='off', top='off', right='off', bottom='off', labelleft='off', labeltop='off',
+                        labelright='off', labelbottom='off')
         ax.axes.set_aspect('equal')
+
 
         values = str(round(hs[target_points[0].y][target_points[0].x], 2))
         for i in range(1, len(target_points)):
@@ -80,7 +71,7 @@ class ModelsVisualization:
                     mask[i][j] = 0
 
         with sb.axes_style("white"):
-            ax = sb.heatmap(hs, mask=mask, vmax=6, vmin=0, cmap='RdYlBu_r', cbar_kws={"shrink": 0.85})
+            sb.heatmap(hs, mask=mask, vmax=6, vmin=0, cmap='RdYlBu_r', cbar_kws={"shrink": 0.85,'ticks' : []}, xticklabels=False, yticklabels=False)
 
         breaker_points = []
         for i in range(len(all_breakers)):

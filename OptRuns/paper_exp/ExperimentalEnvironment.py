@@ -138,7 +138,7 @@ class ExperimentalEnvironment:
             best_selection_objective = RelativeQuailityObjective()
 
             task = OptimisationTask(optimisation_objectives, selected_modifications_for_tuning,
-                                    goal="minimise")
+                                    goal="minimise",analytics_objectives=analytics_objectives)
 
             task.constraints = [(StructuralObjective(), ConstraintComparisonType.equal, 0)]
 
@@ -195,7 +195,7 @@ class TestEnvironment(ExperimentalEnvironment):
                 RelativeQuailityObjective()]
 
             task = OptimisationTask(optimisation_objectives, selected_modifications_for_tuning,
-                                    goal="minimise")
+                                    goal="minimise",analytics_objectives=analytics_objectives)
             task.constraints = [(StructuralObjective(), ConstraintComparisonType.equal, 0)]
 
             StaticStorage.task = task
