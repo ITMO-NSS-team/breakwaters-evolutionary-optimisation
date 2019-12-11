@@ -12,6 +12,7 @@ from Simulation.ConfigurationStrategies import GeomConfigurationStrategy, Config
 from Simulation.ModelingStrategies import SimpleGeomSimulationStrategy, SwanSimulationStrategy
 from Simulation.Results import SimulationResult
 
+
 class WaveModel(object):
 
     def __init__(self, domain, simulation_strategy, configuration_strategy,
@@ -21,13 +22,15 @@ class WaveModel(object):
         self._configuration_strategy = configuration_strategy
         self.computational_manager = computational_manager
         self.print_info = print_info
-        computational_manager.print_info = print_info
+        if computational_manager is not None:
+            computational_manager.print_info = print_info
 
         self.expensive = False
         self.model_results_file_name = 'D:\SWAN_sochi\model_results.db'
+        self.output_time_step = 1
 
     def run_simulation(self, configuration: ConfigurationInfo, computational_manager: ComputationalManager):
-        return self._simulation_strategy.simulate(configuration, computational_manager)
+        return self._simulation_strategy.simulate(configuration, computational_manager, self.output_time_step)
 
     def configurate(self, modifications, configuration_label: str):
         return self._configuration_strategy.configurate(self.domain, modifications, configuration_label)

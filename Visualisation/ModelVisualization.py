@@ -148,16 +148,22 @@ class ModelsVisualization:
         for point_ind, point in enumerate(target_points):
             plt.scatter(point.x, point.y, color='orange', marker='o', zorder=10)
 
-        values = str(round(hs[target_points[0].y][target_points[0].x], 2))
+        values = (round(hs[target_points[0].y][target_points[0].x], 2))
+        values = f'{values:1.2f}'
         for i in range(1, len(target_points)):
-            values += ', ' + str(round(hs[target_points[i].y][target_points[i].x], 2))
+            v2 = (round(hs[target_points[i].y][target_points[i].x], 2))
+            v2 = f'{v2:1.2f}'
+            values += ', ' + v2
 
         wind_str = "без учета локального ветра."
         if is_wind:
             wind_str = "с учетом локального ветра."
-
-        ax.set_title(
-            f'{order_id} Высоты волн с {title_mod}% обеспеченностью в целевых точках: {values} м. \n Направление волнения {dir_info} для повторяемости раз в  {rep_info} лет,\n {wind_str} Длины доп. сооружений:\n {len_info}')
+        if title_mod != "mean":
+            ax.set_title(
+                f'{order_id} Высоты волн с {title_mod}% обеспеченностью в целевых точках: {values} м. \n Направление волнения {dir_info} для повторяемости раз в  {rep_info} лет,\n {wind_str} Длины доп. сооружений:\n {len_info}')
+        else:
+            ax.set_title(
+                f'{order_id} Средние высоты волн в целевых точках: {values} м. \n Направление волнения {dir_info} для повторяемости раз в  {rep_info} лет,\n {wind_str}')
 
         map_of_place = hs
 

@@ -48,6 +48,7 @@ def calculate_objectives(model, task, population, visualiser=None):
             if obj.is_simulation_required:
                 base_simulation_result = pre_simulated_results[len(pre_simulated_results) - 1]
                 simulation_result = pre_simulated_results[individ_index]
+                label_to_reference = simulation_result.configuration_label
 
             objective_calculation_data = ObjectiveData(model.domain, proposed_breakers, model.domain.base_breakers,
                                                        simulation_result,
@@ -60,6 +61,7 @@ def calculate_objectives(model, task, population, visualiser=None):
             if obj.is_simulation_required:
                 try:
                     simulation_result = pre_simulated_results[individ_index]
+                    label_to_reference = simulation_result.configuration_label
                 except:
                     print("Simulated result not found in pre-simulated results")
 
@@ -70,21 +72,21 @@ def calculate_objectives(model, task, population, visualiser=None):
                     simulation_result = WaveSimulationResult(
                         hs=np.zeros(shape=(model.domain.model_grid.grid_y, model.domain.model_grid.grid_x)),
                         configuration_label=label)
+                    label_to_reference = None
 
         # un-list objectives
         objectives_values = _flatten(objectives_values)
 
         individual.objectives = objectives_values
         individual.simulation_result = simulation_result
+        individual.referenced_dataset = label_to_reference
 
         EvoAnalytics.save_cantidate(individual.population_number, individual.objectives,
-                                    individual.genotype.get_parameterized_chromosome_as_num_list())
-
-
+                                    individual.genotype.get_parameterized_chromosome_as_num_list(),
+                                    individual.referenced_dataset)
 
     if visualiser is not None:
         visualiser.print_individuals(population, fitnesses=None)
-
 
 
 def crossover(p1, p2, rate):

@@ -2,7 +2,6 @@ import math
 import os
 import re
 import warnings
-import pygmo
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
