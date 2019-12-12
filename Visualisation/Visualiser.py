@@ -1,6 +1,7 @@
 import math
 import os
 import re
+import glob
 import warnings
 import matplotlib.pyplot as plt
 import numpy as np
@@ -96,15 +97,6 @@ class Visualiser:
 
         for chart_num, chart_data in enumerate(self.visualisation_data.labels):
 
-            '''
-            for i in range(0,len(chart_data),2):
-                if i==0:
-                    chart_name=chart_data[i]
-
-                else:
-                    chart_name=chart_name+'_and_'+chart_data[i]
-            '''
-
             if not os.path.isdir(f'pareto_front/{self.visualisation_data.pareto_charts_folder_names[chart_num]}'):
                 os.mkdir(f'pareto_front/{self.visualisation_data.pareto_charts_folder_names[chart_num]}')
             if not os.path.isdir(
@@ -140,9 +132,10 @@ class Visualiser:
         pass
 
     def print_configuration(self, simulation_result, all_breakers, objective, dir, image_for_gif, num_of_population,
-                            ind_num):
+                            ind_num,local_id):
 
-        visualiser = ModelsVisualization(str(num_of_population + 1) + "_" + str(ind_num + 1))
+
+        visualiser = ModelsVisualization(str(num_of_population + 1) + "_" + str(ind_num + 1)+"(id "+str(local_id)+")")
 
         visualiser.simple_visualise(simulation_result.get_5percent_output_for_field(),
                                     all_breakers,
@@ -175,7 +168,7 @@ class Visualiser:
                                          objective=population[
                                              ind_index].genotype.get_parameterized_chromosome_as_num_list(),
                                          dir="best_individuals", image_for_gif=True,
-                                         num_of_population=self.state.generation_number, ind_num=ind_num)
+                                         num_of_population=self.state.generation_number, ind_num=ind_num,local_id=population[ind_index].local_id)
 
         if self.visualisation_settings.store_all_individuals:
 
@@ -186,7 +179,7 @@ class Visualiser:
                                              individ.genotype.get_genotype_as_breakers()),
                                          objective=individ.genotype.get_parameterized_chromosome_as_num_list(),
                                          dir="all_individuals", image_for_gif=False,
-                                         num_of_population=self.state.generation_number, ind_num=ind_num)
+                                         num_of_population=self.state.generation_number, ind_num=ind_num,local_id=population[ind_index].local_id)
 
         if self.visualisation_settings.create_pareto_set_chart_during_optimization:
             self.print_pareto_set(best_individuals_indexes, population)
@@ -212,8 +205,7 @@ class Visualiser:
         if not save_path:
             save_path = f'{str(os.path.abspath(os.curdir))}/gif_img/{directory}/'
 
-        if gif_type == "pareto_set":  # TO DO! Change all logic: to take pictures from different folders for each type of pareto self chart
-            # pass
+        if gif_type == "pareto_set":
             for chart_name in self.visualisation_data.pareto_charts_folder_names:
                 path = f'pareto_front/{chart_name}/{directory}/'
 
@@ -225,23 +217,6 @@ class Visualiser:
                                append_images=images[1:], duration=300,
                                loop=0)
                 return
-
-            '''
-            for data_types in self.visualisation_data.data_for_pareto_set_chart:
-                path = str(os.path.abspath(os.curdir)) + "\\pareto_front\\" + "img\\" + data_types[0] + "_to_" + \
-                       data_types[1] + "\\" + directory + "\\"
-                save_path = str(os.path.abspath(os.curdir)) + "\\gif_img\\" + directory + "\\"
-                
-                images = []
-                for i in range(StaticStorage.max_gens):
-                    images.append(Image.open(path + str(i) + ".png"))
-
-                images[0].save("{}.gif".format(save_path + data_types[0] + "_to_" + data_types[1]), save_all=True,
-                               append_images=images[1:], duration=300,
-                               loop=0)
-
-            return
-            '''
 
         if gif_type == "breakers":
             if self.visualisation_settings.store_best_individuals:
@@ -256,10 +231,15 @@ class Visualiser:
 
         for i1 in range(StaticStorage.max_gens):
             for i2 in range(self.visualisation_settings.num_of_best_individuals):
-                sorted_names_of_images.append("{}_{}.png".format(i1 + 1, i2 + 1))
+
+                if gif_type=="breakers":
+                    for filename_in_dir in glob.glob(f'{path}*{i1 + 1}_{i2 + 1}(*'):
+                        sorted_names_of_images.append(filename_in_dir)
+                else:
+                    sorted_names_of_images.append(f'{path}{i1 + 1}_{i2 + 1}.png')
 
         for filename in sorted_names_of_images:
-            images.append(Image.open(path + filename))
+            images.append(Image.open(filename))
 
         if gif_type == "breakers":
             images[0].save("{}breakers.gif".format(save_path), save_all=True, append_images=images[1:], duration=100,
@@ -309,6 +289,8 @@ class Visualiser:
         for i1 in range(StaticStorage.max_gens):
 
             for i2 in range(self.visualisation_settings.num_of_best_individuals):
+
+
                 images = []
                 # sorted_names_of_images.append("{}_{}.png".format(i1 + 1, i2 + 1))
                 if self.visualisation_settings.store_best_individuals:
@@ -316,12 +298,11 @@ class Visualiser:
                 else:
                     breakers_folder = 'all_individuals'
 
-                images.append(
-                    Image.open(breakers_folder + "/" + directory + "/" + str(i1 + 1) + "_" + str(i2 + 1) + ".png"))
-                images.append(Image.open(
-                    "boxplots/" + "gen_len" + "/" + directory + "/" + str(i1 + 1) + "_" + str(i2 + 1) + ".png"))
-                images.append(
-                    Image.open("boxplots/" + "obj" + "/" + directory + "/" + str(i1 + 1) + "_" + str(i2 + 1) + ".png"))
+                name_of_breaker_image=[filename_in_dir for filename_in_dir in glob.glob(f'{breakers_folder}/{directory}/*{i1 + 1}_{i2 + 1}(*')][0]
+
+                images.append(Image.open(name_of_breaker_image))
+                images.append(Image.open(f'boxplots/gen_len/{directory}/{i1+1}_{i2+1}.png'))
+                images.append(Image.open(f'boxplots/obj/{directory}/{i1+1}_{i2+1}.png'))
 
                 plt.rcParams['figure.figsize'] = [25, 15]
 
@@ -333,8 +314,7 @@ class Visualiser:
                     axarr[j].set_xticklabels([])
                     axarr[j].imshow(images[j])
 
-                plt.savefig("series/" + EvoAnalytics.run_id + "/" + str(i1 + 1) + "_" + str(i2 + 1) + ".png",
-                            bbox_inches='tight')
+                plt.savefig(f'series/{EvoAnalytics.run_id}/{i1+1}_{i2+1}.png',bbox_inches='tight')
 
         if not os.path.isdir(f'gif_img/{directory}'):
             os.mkdir(f'gif_img/{directory}')

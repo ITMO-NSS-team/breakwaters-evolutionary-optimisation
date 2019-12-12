@@ -19,6 +19,7 @@ from EvoAlgs.EvoAnalytics import EvoAnalytics
 from Optimisation.Objective import ObjectiveData, ConstraintComparisonType
 from Visualisation.ModelVisualization import ModelsVisualization
 from Simulation.Results import WaveSimulationResult
+from Optimisation.Objective import RelativeWaveHeightObjective,WaveHeightObjective
 
 # TODO refactor
 len_range = [0, 3]
@@ -41,10 +42,16 @@ def calculate_objectives(model, task, population, visualiser=None):
         label_to_reference = None
         proposed_breakers = individual.genotype.get_genotype_as_breakers()
         objectives_values = []
+        analytics_objectives_values=[]
         simulation_result = None
         base_simulation_result = None
 
-        for obj_ind, obj in enumerate(task.objectives):
+        if task.analytics_objectives:
+            objectives_to_calculate=task.objectives+task.analytics_objectives
+        else:
+            objectives_to_calculate=task.objectives
+
+        for obj_ind, obj in enumerate(objectives_to_calculate):
             if obj.is_simulation_required:
                 base_simulation_result = pre_simulated_results[len(pre_simulated_results) - 1]
                 simulation_result = pre_simulated_results[individ_index]
@@ -56,7 +63,13 @@ def calculate_objectives(model, task, population, visualiser=None):
 
             new_obj_value = obj.get_obj_value(objective_calculation_data)
 
-            objectives_values.append(new_obj_value)
+            if obj_ind < len(task.objectives):
+                objectives_values.append(new_obj_value)
+            else:
+                if isinstance(new_obj_value, list):
+                    analytics_objectives_values += new_obj_value
+                else:
+                    analytics_objectives_values.append(new_obj_value)
 
             if obj.is_simulation_required:
                 try:
@@ -80,11 +93,13 @@ def calculate_objectives(model, task, population, visualiser=None):
         individual.objectives = objectives_values
         individual.simulation_result = simulation_result
         individual.referenced_dataset = label_to_reference
+        individual.analytics_objectives = analytics_objectives_values
+
         individual.local_id = local_id
 
-        EvoAnalytics.save_cantidate(individual.population_number, individual.objectives,
+        EvoAnalytics.save_cantidate(individual.population_number, individual.objectives,individual.analytics_objectives,
                                     individual.genotype.get_parameterized_chromosome_as_num_list(),
-                                    individual.referenced_dataset)
+                                    individual.referenced_dataset,individual.local_id)
 
         local_id = local_id + 1
 
