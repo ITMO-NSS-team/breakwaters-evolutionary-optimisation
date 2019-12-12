@@ -63,7 +63,7 @@ class EvoAnalytics:
             os.remove(hist_file_name)
 
     @staticmethod
-    def save_cantidate(pop_num, objectives, genotype, referenced_dataset, subfolder_name=None):
+    def save_cantidate(pop_num, objectives,anlytics_objectives, genotype, referenced_dataset, local_id, subfolder_name=None):
 
         if not os.path.isdir(f'HistoryFiles'):
             os.mkdir(f'HistoryFiles')
@@ -78,31 +78,31 @@ class EvoAnalytics:
             hist_file_name = f'HistoryFiles/history_{EvoAnalytics.run_id}.csv'
         if not os.path.isfile(hist_file_name):
             with open(hist_file_name, 'w', newline='') as f:
-                EvoAnalytics._write_header_to_csv(f, objectives, genotype)
-                EvoAnalytics._write_candidate_to_csv(f, pop_num, objectives, genotype, referenced_dataset)
+                EvoAnalytics._write_header_to_csv(f, objectives,anlytics_objectives, genotype)
+                EvoAnalytics._write_candidate_to_csv(f, pop_num, objectives,anlytics_objectives, genotype, referenced_dataset,local_id)
         else:
             with open(hist_file_name, 'a', newline='') as f:
-                EvoAnalytics._write_candidate_to_csv(f, pop_num, objectives, genotype, referenced_dataset)
+                EvoAnalytics._write_candidate_to_csv(f, pop_num, objectives,anlytics_objectives, genotype, referenced_dataset,local_id)
 
         EvoAnalytics.change_symbol_in_file(file=hist_file_name)
 
     @staticmethod
-    def _write_candidate_to_csv(f, pop_num, objs, genotype, referenced_dataset):
+    def _write_candidate_to_csv(f, pop_num, objs,analytics_objectives, genotype, referenced_dataset,local_id):
         # Количество значений целевых функций
         # print("objs",objs)
         writer = csv.writer(f, delimiter=',', quotechar=' ', quoting=csv.QUOTE_MINIMAL)
         writer.writerow(
-            [pop_num, referenced_dataset, ','.join([str(round(_, 1)) for _ in objs]),
-             ','.join([str(round(_, 1)) for _ in genotype])])
+            [pop_num, referenced_dataset, ','.join([str(round(_, 1)) for _ in objs]),','.join([str(round(_, 1)) for _ in analytics_objectives]),
+             ','.join([str(round(_, 1)) for _ in genotype]),local_id])
 
     @staticmethod
-    def _write_header_to_csv(f, objectives, genotype):
+    def _write_header_to_csv(f, objectives,analytics_objectives, genotype):
 
         writer = csv.writer(f, delimiter=',', quotechar=' ', quoting=csv.QUOTE_MINIMAL)
         writer.writerow(
-            ["pop_num", "referenced_dataset", ','.join([f'obj{_}' for _ in range(0, len(objectives))]),
+            ["pop_num", "referenced_dataset", ','.join([f'obj{_}' for _ in range(0, len(objectives))]),','.join([f'ananlytics_ob{_}' for _ in range(0, len(analytics_objectives))]),
              ','.join([f'gen_len_{int(_ / 2)}' if _ % 2 == 0 else f'gen_dir_{int(_ / 2)}' for _ in
-                       range(0, len(genotype))])])
+                       range(0, len(genotype))]), "local_id"])
 
     @staticmethod
     # TODO move to file creation method

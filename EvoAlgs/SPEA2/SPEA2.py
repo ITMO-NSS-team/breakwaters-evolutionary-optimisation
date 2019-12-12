@@ -52,6 +52,7 @@ class SPEA2:
     class Individ:
         def __init__(self, genotype):
             self.objectives = ()
+            self.analytics_objectives=()
             self.genotype = copy.deepcopy(genotype)
             self.dominators = []
             self.raw_fitness = 0

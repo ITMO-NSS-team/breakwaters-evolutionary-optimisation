@@ -213,6 +213,6 @@ class TestEnvironment(ExperimentalEnvironment):
 
             visualiser = Visualiser(vis_settings, vis_data)
 
-            opt_res = optimiser.optimise(wave_model, task, visualiser=None)
+            opt_res = optimiser.optimise(wave_model, task, visualiser=visualiser)
             # print("Final result")
             # print(opt_res.history[19][0].genotype.get_parameterized_chromosome_as_num_list())
