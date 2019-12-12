@@ -32,8 +32,10 @@ class ExpEncoders(Enum):
 class ExpAlgs(Enum):
     multi = 0
     greedy_multi = 1
-    single = 2
-    greedy_single = 3
+    verygreedy_multi=3
+    single = 4
+    greedy_single = 5
+    varygreedy_single = 6
 
 
 class ExperimentalEnvironment:
@@ -87,9 +89,14 @@ class ExperimentalEnvironment:
 
     @staticmethod
     def _get_optimiser_for_experiment(enc_id):
+        StaticStorage.crossover_type = "SP"
+
         if enc_id == ExpAlgs.multi:
             return ParetoEvolutionaryOptimiser()
         if enc_id == ExpAlgs.greedy_multi:
+            return GreedyParetoEvolutionaryOptimiser()
+        if enc_id == ExpAlgs.verygreedy_multi:
+            StaticStorage.crossover_type = "I"
             return GreedyParetoEvolutionaryOptimiser()
         if enc_id == ExpAlgs.single:
             return DEOptimiser()
@@ -202,11 +209,11 @@ class TestEnvironment(ExperimentalEnvironment):
 
             vis_settings = VisualisationSettings(store_all_individuals=True, store_best_individuals=True,
                                                  num_of_best_individuals_from_population_for_print=5,
-                                                 create_gif_image=True,
-                                                 create_boxplots=True,
-                                                 print_pareto_front=True,
-                                                 create_pareto_set_chart_during_optimization=True,
-                                                 create_boxplots_during_optimization=True)
+                                                 create_gif_image=False,
+                                                 create_boxplots=False,
+                                                 print_pareto_front=False,
+                                                 create_pareto_set_chart_during_optimization=False,
+                                                 create_boxplots_during_optimization=False)
 
             vis_data = VisualisationData(optimisation_objectives, base_breakers=exp_domain.base_breakers, task=task,
                                          data_for_pareto_set_chart=pareto_objectives)

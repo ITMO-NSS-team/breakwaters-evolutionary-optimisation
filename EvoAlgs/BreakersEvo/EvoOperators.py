@@ -122,7 +122,12 @@ def crossover(p1, p2, rate):
     while is_bad:
         print(f'CROSSOVER_{iteration}')
 
-        new_breakers = genotype_encoder.onepoint_crossover(p1.genotype, p2.genotype)
+        if StaticStorage.crossover_type == "SP":
+            new_breakers = genotype_encoder.onepoint_crossover(p1.genotype, p2.genotype)
+        elif StaticStorage.crossover_type == "I":
+            new_breakers = genotype_encoder.individual_crossover(p1.genotype, p2.genotype)
+
+        else: raise NotImplementedError()
 
         constraints = StaticStorage.task.constraints
 

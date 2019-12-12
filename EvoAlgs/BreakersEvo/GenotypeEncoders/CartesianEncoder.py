@@ -95,8 +95,8 @@ class CartesianGenotypeEncoder(DirectGenotypeEncoder):
         part1_rate = abs(random.random())
         part2_rate = 1 - part1_rate
 
-        new_value2 = round(comp_values1[0] * part1_rate +
-                           comp_values2[0] * part2_rate)
+        new_value2 = round(comp_values1[1] * part1_rate +
+                           comp_values2[1] * part2_rate)
 
         return new_value1, new_value2
 
