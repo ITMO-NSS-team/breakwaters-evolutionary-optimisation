@@ -142,14 +142,13 @@ class NavigationObjective(Objective):
         return dist
 
     def get_obj_value(self, obj_data):
-
         min_dist_to_fairway = min(
             [min([(self._dist_from_fairway_to_breaker(fairway, breaker)) for breaker in obj_data.new_breakers])
              for
              fairway in
              obj_data.domain.fairways])
 
-        return -round(min_dist_to_fairway * 100, -1)
+        return -min_dist_to_fairway * 100
 
 
 class RelativeNavigationObjective(NavigationObjective):
@@ -157,14 +156,13 @@ class RelativeNavigationObjective(NavigationObjective):
 
     def get_obj_value(self, obj_data):
         nav_obj_new = NavigationObjective().get_obj_value(obj_data)
-        nav_obj_base = NavigationObjective().get_obj_value(obj_data)
-        nav_obj_rel = (nav_obj_new - nav_obj_base) / nav_obj_base * 100
+        nav_obj_base = NavigationObjective().get_obj_value(obj_data.data_for_base_construction())
+        nav_obj_rel = (nav_obj_base - nav_obj_new) / nav_obj_base * 100
 
         if np.isnan(nav_obj_rel):
             nav_obj_rel = 0
 
         return nav_obj_rel
-
 
 class WaveHeightObjective(Objective):
     is_simulation_required = True
