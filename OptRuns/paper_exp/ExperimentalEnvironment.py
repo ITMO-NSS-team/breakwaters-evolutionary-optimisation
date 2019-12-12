@@ -120,6 +120,7 @@ class ExperimentalEnvironment:
             optimisation_objectives = [
                 RelativeCostObjective(),
                 RelativeNavigationObjective(),
+                WaveHeightObjective(),
                 RelativeWaveHeightObjective()]
 
             analytics_objectives = [
@@ -187,6 +188,7 @@ class TestEnvironment(ExperimentalEnvironment):
                 CostObjective,
                 NavigationObjective,
                 WaveHeightObjective,
+                RelativeWaveHeightObjective(),
                 RelativeQuailityObjective()]
 
             pareto_objectives = [[RelativeWaveHeightObjective(), RelativeCostObjective()]]
