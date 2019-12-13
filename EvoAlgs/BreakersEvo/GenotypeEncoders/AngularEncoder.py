@@ -100,6 +100,23 @@ class AngularGenotypeEncoder(DirectGenotypeEncoder):
 
         return comp_value1, comp_value2
 
+
+    def crossover_components(self, comp_values1, comp_values2):
+        part1_rate = abs(random.random())
+        part2_rate = 1 - part1_rate
+
+        new_value1 = round(comp_values1[0] * part1_rate +
+                           comp_values2[0] * part2_rate)
+
+        rate = abs(random.random())
+
+        if rate<0.5:
+            new_value2 = comp_values1[1]
+        else:
+            new_value2 = comp_values2[1]
+
+        return new_value1, new_value2
+
     def mutate(self, ancestor_genotype):
         return super(AngularGenotypeEncoder, self).mutate(ancestor_genotype)
 

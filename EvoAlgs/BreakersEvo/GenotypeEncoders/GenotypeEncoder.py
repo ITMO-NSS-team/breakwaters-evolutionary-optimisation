@@ -75,7 +75,7 @@ class DirectGenotypeEncoder(GenotypeEncoder):
         return self.parameterized_genotype_to_breakers(new_encoded_genotype, StaticStorage.task,
                                                        StaticStorage.exp_domain.model_grid)
 
-    def individual_crossover(self, ancestor_genotype1, ancestor_genotype2, fun_to_crossover_components):
+    def individual_crossover(self, ancestor_genotype1, ancestor_genotype2):
 
         ancestor_genotype1_encoded = self.breakers_to_parameterized_genotype(ancestor_genotype1, StaticStorage.task,
                                                                              StaticStorage.exp_domain.model_grid)
@@ -85,7 +85,11 @@ class DirectGenotypeEncoder(GenotypeEncoder):
         new_encoded_genotype = copy.deepcopy(ancestor_genotype1_encoded)
 
         block_size = 2
-        num_of_blocks_to_crossover = 1
+
+        if any([g == 1 for g in self.genotype_mask]):
+            num_of_blocks_to_crossover = round(len([ind for ind, g in enumerate(self.genotype_mask) if g == 0]) / 2)
+        else:
+            num_of_blocks_to_crossover = max(round(len(ancestor_genotype1_encoded) / block_size / 4), 1)
 
         indexs_of_pairs_to_change = self._obtain_random_pair_indeces(len(ancestor_genotype1_encoded), block_size,
                                                                      num_of_blocks_to_crossover)
@@ -102,7 +106,7 @@ class DirectGenotypeEncoder(GenotypeEncoder):
                 first_ind = gen_ind * block_size
                 second_ind = gen_ind * block_size + 1
 
-                new_encoded_genotype[first_ind], new_encoded_genotype[second_ind] = fun_to_crossover_components(
+                new_encoded_genotype[first_ind], new_encoded_genotype[second_ind] = self.crossover_components(
                     (ancestor_genotype1_encoded[first_ind], ancestor_genotype1_encoded[second_ind]),
                     (ancestor_genotype2_encoded[first_ind], ancestor_genotype2_encoded[second_ind]))
 
