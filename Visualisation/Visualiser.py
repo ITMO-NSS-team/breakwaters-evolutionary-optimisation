@@ -103,6 +103,7 @@ class Visualiser:
         if not os.path.isdir("pareto_front"):
             os.mkdir("pareto_front")
 
+        n_points_to_opt=len(StaticStorage.task.mod_points_to_optimise)-1
         for chart_num,chart_data in enumerate(self.visualisation_data.labels):
 
             if not os.path.isdir(f'pareto_front/{self.visualisation_data.pareto_charts_folder_names[chart_num]}'):
@@ -130,7 +131,7 @@ class Visualiser:
 
                                 axis_data[axis_num].append(math.fabs(np.mean(
                                     [objective_values_of_ind[obj_value_num] for obj_value_num in
-                                     range(obj_num+num_of_wh_functions_before*len(StaticStorage.task.mod_points_to_optimise), obj_num + len(StaticStorage.task.mod_points_to_optimise))])))
+                                     range(obj_num+num_of_wh_functions_before*n_points_to_opt, obj_num+num_of_wh_functions_before*n_points_to_opt+n_points_to_opt)])))
 
                         else:
                             for index_of_best_ind in best_individuals_indexes:
