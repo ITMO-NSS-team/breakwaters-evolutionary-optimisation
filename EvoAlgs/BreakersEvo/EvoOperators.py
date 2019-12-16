@@ -88,7 +88,8 @@ def calculate_objectives(model, task, population, visualiser=None):
                     label_to_reference = None
 
         # un-list objectives
-        objectives_values = _flatten(objectives_values)
+        if len(objectives_values)>1:
+            objectives_values = _flatten(objectives_values)
 
         individual.objectives = objectives_values
         individual.simulation_result = simulation_result
@@ -106,7 +107,6 @@ def calculate_objectives(model, task, population, visualiser=None):
 
     if visualiser is not None:
         visualiser.print_individuals(population)
-
 
 def crossover(p1, p2, rate):
     random_val = random.random()
@@ -213,3 +213,5 @@ def _validate_constraints(proposed_breakers, constraints):
             is_bad = True
             break
     return is_bad
+
+

@@ -66,13 +66,12 @@ class VisualisationData:
                         self.labels[chart_num].append("navigation")
                         self.labels[chart_num].append("Ухудшение/улучшение безопасности мореплавания")
                         continue
-                    if data_for_pareto_set_chart[chart_num][axis].__class__.__name__ == 'RelativeNavigationObjective':
+                    if data_for_pareto_set_chart[chart_num][axis].__class__.__name__ == 'CostObjective':
                         self.labels[chart_num].append("cost")
                         self.labels[chart_num].append("Цена")
                         continue
                     # TO DO
                     # add others
-
 
         self.pareto_charts_folder_names = []
         for chart_num, chart_data in enumerate(self.labels):
@@ -117,14 +116,12 @@ class Visualiser:
 
                 for obj_num, obj in enumerate(StaticStorage.task.objectives+StaticStorage.task.analytics_objectives):
                     if axis.__class__.__name__ == obj.__class__.__name__:
-                    #if isinstance(axis,type(obj)):
                         num_of_wh_functions_before=0
                         if obj_num != 0:
                             num_of_wh_functions_before=len([True for
                                     objective_type in (StaticStorage.task.objectives+StaticStorage.task.analytics_objectives)[:obj_num] if isinstance(objective_type, (WaveHeightObjective, RelativeWaveHeightObjective)) is True])
 
                         if axis.__class__.__name__ in ('WaveHeightObjective','RelativeWaveHeightObjective'):
-                        # if isinstance(axis,(WaveHeightObjective,RelativeWaveHeightObjective)):
                             for index_of_best_ind in best_individuals_indexes:
 
                                 objective_values_of_ind=(population[index_of_best_ind].objectives+population[index_of_best_ind].analytics_objectives)
@@ -132,7 +129,6 @@ class Visualiser:
                                 axis_data[axis_num].append(math.fabs(np.mean(
                                     [objective_values_of_ind[obj_value_num] for obj_value_num in
                                      range(obj_num+num_of_wh_functions_before*n_points_to_opt, obj_num+num_of_wh_functions_before*n_points_to_opt+n_points_to_opt)])))
-
                         else:
                             for index_of_best_ind in best_individuals_indexes:
 
@@ -140,50 +136,6 @@ class Visualiser:
                                     index_of_best_ind].analytics_objectives)
 
                                 axis_data[axis_num].append(math.fabs(objective_values_of_ind[obj_num +num_of_wh_functions_before*len(StaticStorage.mod_points_to_optimise)]))
-
-            if len(self.visualisation_data.data_for_pareto_set_chart[chart_num]) == 2:
-                EvoAnalytics.print_pareto_set_(data=axis_data,
-                                               save_directory=f'pareto_front/{self.visualisation_data.pareto_charts_folder_names[chart_num]}/{directory}/{self.state.generation_number+1}.png',
-                                               population_num=self.state.generation_number,
-                                               labels=[self.visualisation_data.labels[chart_num][i] for i in
-                                                       range(1, len(self.visualisation_data.labels[chart_num]), 2)])
-
-
-            print("axis_data",axis_data)
-
-            print("sd")
-
-    def print_pareto_set1(self, best_individuals_indexes, population):
-
-        directory = EvoAnalytics.run_id
-
-        if not os.path.isdir("pareto_front"):
-            os.mkdir("pareto_front")
-
-        for chart_num, chart_data in enumerate(self.visualisation_data.labels):
-
-            if not os.path.isdir(f'pareto_front/{self.visualisation_data.pareto_charts_folder_names[chart_num]}'):
-                os.mkdir(f'pareto_front/{self.visualisation_data.pareto_charts_folder_names[chart_num]}')
-            if not os.path.isdir(
-                    f'pareto_front/{self.visualisation_data.pareto_charts_folder_names[chart_num]}/{directory}'):
-                os.mkdir(f'pareto_front/{self.visualisation_data.pareto_charts_folder_names[chart_num]}/{directory}')
-
-            axis_data = [[] for axis in range(len(self.visualisation_data.data_for_pareto_set_chart[chart_num]))]
-            for num_of_index, index_of_best_ind in enumerate(best_individuals_indexes):
-
-                for axis_num, axis in enumerate(self.visualisation_data.data_for_pareto_set_chart[chart_num]):
-
-                    if isinstance(axis, RelativeWaveHeightObjective):
-                        axis_data[axis_num].append(math.fabs(np.mean(
-                            [population[index_of_best_ind].objectives[objective_number] for objective_number in
-                             range(len(StaticStorage.task.objectives) - 1,
-                                   len(population[index_of_best_ind].objectives))])))
-                        continue
-                    else:
-                        for obj_num, obj in enumerate(
-                                StaticStorage.task.objectives[:len(StaticStorage.task.objectives) - 1]):
-                            if isinstance(axis, type(obj)):
-                                axis_data[axis_num].append(math.fabs(population[index_of_best_ind].objectives[obj_num]))
 
             if len(self.visualisation_data.data_for_pareto_set_chart[chart_num]) == 2:
                 EvoAnalytics.print_pareto_set_(data=axis_data,
@@ -221,9 +173,11 @@ class Visualiser:
                     best_individuals_indexes = np.argsort(raw_fitness(population))[::-1]
 
             else:
-                # TO DO
-                # The case for  signgle-objective optimization
-                pass
+                if self.visualisation_data.task.goal == "minimize":
+                    best_individuals_indexes=np.argsort([ind.objectives[0] for ind in population])[:self.visualisation_settings.num_of_best_individuals]
+                else:
+                    best_individuals_indexes = np.argsort([ind.objectives[0] for ind in population])[::-1][
+                                               :self.visualisation_settings.num_of_best_individuals]
 
             for ind_num, ind_index in enumerate(best_individuals_indexes):
                 self.print_configuration(simulation_result=population[ind_index].simulation_result,

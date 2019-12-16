@@ -5,7 +5,8 @@ import numpy as np
 # experiment_params
 task_id = ExpCases.double3
 enc_id = ExpEncoders.angular
-opt_id = ExpAlgs.multi
+#opt_id = ExpAlgs.multi
+opt_id = ExpAlgs.single
 
 seed = 42
 

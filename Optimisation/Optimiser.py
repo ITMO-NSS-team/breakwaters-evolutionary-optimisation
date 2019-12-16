@@ -1,6 +1,6 @@
 
 from Optimisation.OptimisationStrategies.SPEA2Strategy import SPEA2OptimisationStrategy
-from Optimisation.OptimisationStrategies.DEStrategy import DEStrategy
+from Optimisation.OptimisationStrategies.DEStrategy import DEOptimisationStrategy
 from Optimisation.OptimisationTask import OptimisationTask
 from EvoAlgs.BreakersEvo.GreedyHeurictics.GreedyHeuristic import SequentialGreedyHeurictic
 
@@ -14,7 +14,7 @@ class Optimiser(object):
 
 class DEOptimiser(Optimiser):
     def __init__(self):
-        strategy = DEStrategy()
+        strategy = DEOptimisationStrategy()
         super(DEOptimiser, self).__init__(strategy)
 
 

@@ -4,13 +4,13 @@ from math import sqrt
 import numpy as np
 import math
 
-from EvoAlgs.SPEA2.SPEA2 import SPEA2
+from EvoAlgs.DE.DE_ import DE_
 from EvoAlgs.EvoAnalytics import EvoAnalytics
 from CommonUtils.StaticStorage import StaticStorage
 from Visualisation.Visualiser import VisualiserState
 
 
-class DefaultSPEA2(SPEA2):
+class DefaultDE(DE_):
 
     def _print_pop(self, label, lpop):
         print(label)
@@ -23,9 +23,6 @@ class DefaultSPEA2(SPEA2):
 
     def solution(self, verbose=True, **kwargs):
         extended_debug = True
-        archive_history = []
-        history = SPEA2.ErrorHistory()
-
         self.generation_number = 0
 
         if self.greedy_heuristic is not None:
@@ -33,7 +30,9 @@ class DefaultSPEA2(SPEA2):
                 StaticStorage.genotype_encoder.genotype_mask, self.params.max_gens)
 
         while self.generation_number <= self.params.max_gens:
+
             print(f'Generation {self.generation_number}')
+
             if self.visualiser is not None:
                 self.visualiser.state = VisualiserState(self.generation_number)
 
@@ -42,17 +41,10 @@ class DefaultSPEA2(SPEA2):
 
             self.fitness()
 
-            if extended_debug: self._print_pop("beforeA", self._pop)
-            self._archive = self.environmental_selection(self._pop, self._archive)
-
-            if extended_debug: self._print_pop("ARCH", self._archive)
-
-            union = self._archive + self._pop
-            selected = self.selected(self.params.pop_size, union)
-
-            if extended_debug: self._print_pop("SEL", selected)
+            selected=self.tournament_selection(group_size=5)
 
             self._pop = self.reproduce(selected, self.params.pop_size)
+            print("self. pop",self._pop)
 
             if extended_debug: self._print_pop("REPR", self._pop)
 
@@ -60,8 +52,6 @@ class DefaultSPEA2(SPEA2):
                 StaticStorage.genotype_encoder.genotype_mask = self.greedy_heuristic.modify_mask(
                     StaticStorage.genotype_encoder.genotype_mask, self.generation_number)
 
-            # EvoAnalytics.create_chart(gen)
-
             self.generation_number += 1
 
-        return history, archive_history
+        return 0

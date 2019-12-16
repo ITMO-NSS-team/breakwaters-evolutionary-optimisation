@@ -50,6 +50,8 @@ class DefaultSPEA2(SPEA2):
             union = self._archive + self._pop
             selected = self.selected(self.params.pop_size, union)
 
+            print("selected",selected)
+
             if extended_debug: self._print_pop("SEL", selected)
 
             self._pop = self.reproduce(selected, self.params.pop_size)

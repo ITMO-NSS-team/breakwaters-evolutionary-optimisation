@@ -124,17 +124,20 @@ class ExperimentalEnvironment:
 
             selected_modifications_for_tuning = ExperimentalEnvironment._get_modifications_for_experiment(task_id)
 
+            '''
             optimisation_objectives = [
                 RelativeCostObjective(),
                 RelativeNavigationObjective(),
                 WaveHeightObjective(),
                 RelativeWaveHeightObjective()]
+            '''
+
+            optimisation_objectives = [CompositeObjective()]
 
             analytics_objectives = [
-                CostObjective(),
                 NavigationObjective(),
-                WaveHeightObjective(),
-                RelativeQuailityObjective()]
+                RelativeWaveHeightObjective(),
+                RelativeCostObjective()]
 
             pareto_objectives = [[RelativeWaveHeightObjective(), RelativeCostObjective()]]
 

@@ -207,6 +207,6 @@ class CompositeObjective(Objective):
         nav_obj_rel = RelativeNavigationObjective().get_obj_value(obj_data)
         wh_obj_rel = RelativeWaveHeightObjective().get_obj_value(obj_data)
 
-        composite_objective = wh_obj_rel * 2 + cost_obj_rel * 1 + nav_obj_rel * 0.5
+        composite_objective = sum(wh_obj_rel) * 2 + cost_obj_rel * 1 + nav_obj_rel * 0.5
 
         return composite_objective
