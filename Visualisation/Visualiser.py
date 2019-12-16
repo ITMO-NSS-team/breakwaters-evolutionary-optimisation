@@ -11,7 +11,7 @@ from EvoAlgs.SPEA2.RawFitness import raw_fitness
 from CommonUtils.StaticStorage import StaticStorage
 from EvoAlgs.EvoAnalytics import EvoAnalytics
 from Optimisation.Objective import CostObjective, RelativeCostObjective, RelativeNavigationObjective, \
-    RelativeQuailityObjective, RelativeWaveHeightObjective
+    RelativeQuailityObjective, RelativeWaveHeightObjective,WaveHeightObjective
 from Visualisation.ModelVisualization import ModelsVisualization
 from Breakers.BreakersUtils import BreakersUtils
 from EvoAlgs.SPEA2 import SPEA2
@@ -54,18 +54,25 @@ class VisualisationData:
         if data_for_pareto_set_chart:
             for chart_num, chart_data in enumerate(data_for_pareto_set_chart):
                 for axis in range(len(chart_data)):
-                    if isinstance(data_for_pareto_set_chart[chart_num][axis], RelativeCostObjective):
-                        self.labels[chart_num].append("cost")
+                    if data_for_pareto_set_chart[chart_num][axis].__class__.__name__ =='RelativeCostObjective':
+                        self.labels[chart_num].append("cost increase")
                         self.labels[chart_num].append("Повышение цены")
                         continue
-                    if isinstance(data_for_pareto_set_chart[chart_num][axis], RelativeWaveHeightObjective):
+                    if data_for_pareto_set_chart[chart_num][axis].__class__.__name__== 'RelativeWaveHeightObjective':
                         self.labels[chart_num].append("hs")
                         self.labels[chart_num].append("Среднее снижение hs по всем точкам")
                         continue
-                    if isinstance(data_for_pareto_set_chart[chart_num][axis], RelativeNavigationObjective):
+                    if data_for_pareto_set_chart[chart_num][axis].__class__.__name__ == 'RelativeNavigationObjective':
                         self.labels[chart_num].append("navigation")
                         self.labels[chart_num].append("Ухудшение/улучшение безопасности мореплавания")
                         continue
+                    if data_for_pareto_set_chart[chart_num][axis].__class__.__name__ == 'RelativeNavigationObjective':
+                        self.labels[chart_num].append("cost")
+                        self.labels[chart_num].append("Цена")
+                        continue
+                    # TO DO
+                    # add others
+
 
         self.pareto_charts_folder_names = []
         for chart_num, chart_data in enumerate(self.labels):
@@ -89,6 +96,64 @@ class Visualiser:
         self.visualisation_data = visualisation_data
 
     def print_pareto_set(self, best_individuals_indexes, population):
+
+        print("labels",self.visualisation_data.labels)
+        directory = EvoAnalytics.run_id
+
+        if not os.path.isdir("pareto_front"):
+            os.mkdir("pareto_front")
+
+        n_points_to_opt=len(StaticStorage.task.mod_points_to_optimise)-1
+        for chart_num,chart_data in enumerate(self.visualisation_data.labels):
+
+            if not os.path.isdir(f'pareto_front/{self.visualisation_data.pareto_charts_folder_names[chart_num]}'):
+                os.mkdir(f'pareto_front/{self.visualisation_data.pareto_charts_folder_names[chart_num]}')
+            if not os.path.isdir(f'pareto_front/{self.visualisation_data.pareto_charts_folder_names[chart_num]}/{directory}'):
+                os.mkdir(f'pareto_front/{self.visualisation_data.pareto_charts_folder_names[chart_num]}/{directory}')
+
+            axis_data = [[] for axis in range(len(self.visualisation_data.data_for_pareto_set_chart[chart_num]))]
+
+            for axis_num, axis in enumerate(self.visualisation_data.data_for_pareto_set_chart[chart_num]):
+
+                for obj_num, obj in enumerate(StaticStorage.task.objectives+StaticStorage.task.analytics_objectives):
+                    if axis.__class__.__name__ == obj.__class__.__name__:
+                    #if isinstance(axis,type(obj)):
+                        num_of_wh_functions_before=0
+                        if obj_num != 0:
+                            num_of_wh_functions_before=len([True for
+                                    objective_type in (StaticStorage.task.objectives+StaticStorage.task.analytics_objectives)[:obj_num] if isinstance(objective_type, (WaveHeightObjective, RelativeWaveHeightObjective)) is True])
+
+                        if axis.__class__.__name__ in ('WaveHeightObjective','RelativeWaveHeightObjective'):
+                        # if isinstance(axis,(WaveHeightObjective,RelativeWaveHeightObjective)):
+                            for index_of_best_ind in best_individuals_indexes:
+
+                                objective_values_of_ind=(population[index_of_best_ind].objectives+population[index_of_best_ind].analytics_objectives)
+
+                                axis_data[axis_num].append(math.fabs(np.mean(
+                                    [objective_values_of_ind[obj_value_num] for obj_value_num in
+                                     range(obj_num+num_of_wh_functions_before*n_points_to_opt, obj_num+num_of_wh_functions_before*n_points_to_opt+n_points_to_opt)])))
+
+                        else:
+                            for index_of_best_ind in best_individuals_indexes:
+
+                                objective_values_of_ind = (population[index_of_best_ind].objectives + population[
+                                    index_of_best_ind].analytics_objectives)
+
+                                axis_data[axis_num].append(math.fabs(objective_values_of_ind[obj_num +num_of_wh_functions_before*len(StaticStorage.mod_points_to_optimise)]))
+
+            if len(self.visualisation_data.data_for_pareto_set_chart[chart_num]) == 2:
+                EvoAnalytics.print_pareto_set_(data=axis_data,
+                                               save_directory=f'pareto_front/{self.visualisation_data.pareto_charts_folder_names[chart_num]}/{directory}/{self.state.generation_number+1}.png',
+                                               population_num=self.state.generation_number,
+                                               labels=[self.visualisation_data.labels[chart_num][i] for i in
+                                                       range(1, len(self.visualisation_data.labels[chart_num]), 2)])
+
+
+            print("axis_data",axis_data)
+
+            print("sd")
+
+    def print_pareto_set1(self, best_individuals_indexes, population):
 
         directory = EvoAnalytics.run_id
 

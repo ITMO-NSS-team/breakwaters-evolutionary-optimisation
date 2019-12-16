@@ -88,6 +88,7 @@ def calculate_objectives(model, task, population, visualiser=None):
 
         local_id = local_id + 1
 
+
     if visualiser is not None:
         visualiser.print_individuals(population)
 
