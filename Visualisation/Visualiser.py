@@ -132,10 +132,10 @@ class Visualiser:
         pass
 
     def print_configuration(self, simulation_result, all_breakers, objective, dir, image_for_gif, num_of_population,
-                            ind_num,local_id):
+                            ind_num, local_id):
 
-
-        visualiser = ModelsVisualization(str(num_of_population + 1) + "_" + str(ind_num + 1)+"(id "+str(local_id)+")")
+        visualiser = ModelsVisualization(
+            str(num_of_population + 1) + "_" + str(ind_num + 1) + "(id " + str(local_id) + ")")
 
         visualiser.simple_visualise(simulation_result.get_5percent_output_for_field(),
                                     all_breakers,
@@ -147,58 +147,62 @@ class Visualiser:
         del visualiser
 
     def print_individuals(self, population):
+        try:
+            if self.visualisation_settings.store_best_individuals or self.visualisation_settings.print_pareto_front:
+                if StaticStorage.multi_objective_optimization:
+                    if self.visualisation_data.task.goal == "minimize":
+                        best_individuals_indexes = np.argsort(raw_fitness(population))
+                    else:
+                        best_individuals_indexes = np.argsort(raw_fitness(population))[::-1]
 
-        if self.visualisation_settings.store_best_individuals or self.visualisation_settings.print_pareto_front:
-            if StaticStorage.multi_objective_optimization:
-                if self.visualisation_data.task.goal == "minimize":
-                    best_individuals_indexes = np.argsort(raw_fitness(population))
                 else:
-                    best_individuals_indexes = np.argsort(raw_fitness(population))[::-1]
+                    # TO DO
+                    # The case for  signgle-objective optimization
+                    pass
 
-            else:
-                # TO DO
-                # The case for  signgle-objective optimization
-                pass
+                for ind_num, ind_index in enumerate(best_individuals_indexes):
+                    self.print_configuration(simulation_result=population[ind_index].simulation_result,
+                                             all_breakers=BreakersUtils.merge_breakers_with_modifications(
+                                                 self.visualisation_data.base_breakers,
+                                                 population[ind_index].genotype.get_genotype_as_breakers()),
+                                             objective=population[
+                                                 ind_index].genotype.get_parameterized_chromosome_as_num_list(),
+                                             dir="best_individuals", image_for_gif=True,
+                                             num_of_population=self.state.generation_number, ind_num=ind_num,
+                                             local_id=population[ind_index].local_id)
 
-            for ind_num, ind_index in enumerate(best_individuals_indexes):
-                self.print_configuration(simulation_result=population[ind_index].simulation_result,
-                                         all_breakers=BreakersUtils.merge_breakers_with_modifications(
-                                             self.visualisation_data.base_breakers,
-                                             population[ind_index].genotype.get_genotype_as_breakers()),
-                                         objective=population[
-                                             ind_index].genotype.get_parameterized_chromosome_as_num_list(),
-                                         dir="best_individuals", image_for_gif=True,
-                                         num_of_population=self.state.generation_number, ind_num=ind_num,local_id=population[ind_index].local_id)
+            if self.visualisation_settings.store_all_individuals:
 
-        if self.visualisation_settings.store_all_individuals:
+                for ind_num, individ in enumerate(population):
+                    self.print_configuration(simulation_result=individ.simulation_result,
+                                             all_breakers=BreakersUtils.merge_breakers_with_modifications(
+                                                 self.visualisation_data.base_breakers,
+                                                 individ.genotype.get_genotype_as_breakers()),
+                                             objective=individ.genotype.get_parameterized_chromosome_as_num_list(),
+                                             dir="all_individuals", image_for_gif=False,
+                                             num_of_population=self.state.generation_number, ind_num=ind_num,
+                                             local_id=population[ind_index].local_id)
 
-            for ind_num, individ in enumerate(population):
-                self.print_configuration(simulation_result=individ.simulation_result,
-                                         all_breakers=BreakersUtils.merge_breakers_with_modifications(
-                                             self.visualisation_data.base_breakers,
-                                             individ.genotype.get_genotype_as_breakers()),
-                                         objective=individ.genotype.get_parameterized_chromosome_as_num_list(),
-                                         dir="all_individuals", image_for_gif=False,
-                                         num_of_population=self.state.generation_number, ind_num=ind_num,local_id=population[ind_index].local_id)
+            if self.visualisation_settings.create_pareto_set_chart_during_optimization:
+                self.print_pareto_set(best_individuals_indexes, population)
 
-        if self.visualisation_settings.create_pareto_set_chart_during_optimization:
-            self.print_pareto_set(best_individuals_indexes, population)
+            if self.visualisation_settings.create_boxplots_during_optimization:
+                EvoAnalytics.num_of_rows = math.ceil(EvoAnalytics.num_of_generations / EvoAnalytics.num_of_cols)
 
-        if self.visualisation_settings.create_boxplots_during_optimization:
-            EvoAnalytics.num_of_rows = math.ceil(EvoAnalytics.num_of_generations / EvoAnalytics.num_of_cols)
+                EvoAnalytics.pop_size = len(population)
+                EvoAnalytics.set_params()
 
-            EvoAnalytics.pop_size = len(population)
-            EvoAnalytics.set_params()
+                f = f'HistoryFiles/history_{EvoAnalytics.run_id}.csv'
+                for parameter in ('obj', 'gen_len'):
+                    EvoAnalytics.create_boxplot(num_of_generation=self.state.generation_number, f=f,
+                                                data_for_analyze=parameter, analyze_only_last_generation=True,
+                                                chart_for_gif=self.visualisation_settings.create_gif_image)
 
-            f = f'HistoryFiles/history_{EvoAnalytics.run_id}.csv'
-            for parameter in ('obj', 'gen_len'):
-                EvoAnalytics.create_boxplot(num_of_generation=self.state.generation_number, f=f,
-                                            data_for_analyze=parameter, analyze_only_last_generation=True,
-                                            chart_for_gif=self.visualisation_settings.create_gif_image)
-
-        if self.state.generation_number == StaticStorage.max_gens - 1:
-            self.gif_images_maker()
-            self.gif_series_maker()
+            if self.state.generation_number == StaticStorage.max_gens - 1:
+                self.gif_images_maker()
+                self.gif_series_maker()
+        except:
+            print("Visualisation error")
 
     def gif_image_maker(self, directory=EvoAnalytics.run_id, gif_type="breakers", save_path=None):
 
@@ -232,7 +236,7 @@ class Visualiser:
         for i1 in range(StaticStorage.max_gens):
             for i2 in range(self.visualisation_settings.num_of_best_individuals):
 
-                if gif_type=="breakers":
+                if gif_type == "breakers":
                     for filename_in_dir in glob.glob(f'{path}*{i1 + 1}_{i2 + 1}(*'):
                         sorted_names_of_images.append(filename_in_dir)
                 else:
@@ -290,7 +294,6 @@ class Visualiser:
 
             for i2 in range(self.visualisation_settings.num_of_best_individuals):
 
-
                 images = []
                 # sorted_names_of_images.append("{}_{}.png".format(i1 + 1, i2 + 1))
                 if self.visualisation_settings.store_best_individuals:
@@ -298,7 +301,8 @@ class Visualiser:
                 else:
                     breakers_folder = 'all_individuals'
 
-                name_of_breaker_image=[filename_in_dir for filename_in_dir in glob.glob(f'{breakers_folder}/{directory}/*{i1 + 1}_{i2 + 1}(*')][0]
+                name_of_breaker_image = [filename_in_dir for filename_in_dir in
+                                         glob.glob(f'{breakers_folder}/{directory}/*{i1 + 1}_{i2 + 1}(*')][0]
 
                 images.append(Image.open(name_of_breaker_image))
                 images.append(Image.open(f'boxplots/gen_len/{directory}/{i1+1}_{i2+1}.png'))
@@ -314,7 +318,7 @@ class Visualiser:
                     axarr[j].set_xticklabels([])
                     axarr[j].imshow(images[j])
 
-                plt.savefig(f'series/{EvoAnalytics.run_id}/{i1+1}_{i2+1}.png',bbox_inches='tight')
+                plt.savefig(f'series/{EvoAnalytics.run_id}/{i1+1}_{i2+1}.png', bbox_inches='tight')
 
         if not os.path.isdir(f'gif_img/{directory}'):
             os.mkdir(f'gif_img/{directory}')

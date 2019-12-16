@@ -32,7 +32,7 @@ class ExpEncoders(Enum):
 class ExpAlgs(Enum):
     multi = 0
     greedy_multi = 1
-    verygreedy_multi=3
+    verygreedy_multi = 3
     single = 4
     greedy_single = 5
     varygreedy_single = 6
@@ -102,7 +102,7 @@ class ExperimentalEnvironment:
             return DEOptimiser()
         raise NotImplementedError
 
-    def run_optimisation_experiment(self, task_id, enc_id, algopt_id, run_local):
+    def run_optimisation_experiment(self, task_id, enc_id, algopt_id, run_local, add_label="", is_vis=False):
         if __name__ == 'OptRuns.paper_exp.ExperimentalEnvironment':
 
             exp_domain = SochiHarbor()
@@ -111,12 +111,13 @@ class ExperimentalEnvironment:
 
             exp_name = f"{algopt_id}_task{task_id}_enc{enc_id}"
             EvoAnalytics.clear()
-            EvoAnalytics.run_id = 'run_{exp_name}_{date:%Y_%m_%d_%H_%M_%S}'.format(exp_name=exp_name,
-                                                                                   date=datetime.datetime.now())
+            EvoAnalytics.run_id = 'run{add_label}_{exp_name}_{date:%Y_%m_%d_%H_%M_%S}'.format(add_label=add_label,
+                                                                                              exp_name=exp_name,
+                                                                                              date=datetime.datetime.now())
             if run_local:
                 computational_manager = SwanWinLocalComputationalManager()
             else:
-                computational_manager = SwanWinRemoteComputationalManager(resources_names=["125", "124", "123", "121"])
+                computational_manager = SwanWinRemoteComputationalManager(resources_names=["125", "124", "123"])
             wave_model = SwanWaveModel(exp_domain, computational_manager)
             wave_model.model_results_file_name = 'D:\SWAN_sochi\model_results_paper_martech.db'
 
@@ -148,13 +149,13 @@ class ExperimentalEnvironment:
 
             StaticStorage.genotype_encoder = ExperimentalEnvironment._get_encoder_for_experiment(enc_id)
 
-            vis_settings = VisualisationSettings(store_all_individuals=True, store_best_individuals=True,
+            vis_settings = VisualisationSettings(store_all_individuals=is_vis, store_best_individuals=is_vis,
                                                  num_of_best_individuals_from_population_for_print=5,
-                                                 create_gif_image=True,
-                                                 create_boxplots=True,
-                                                 print_pareto_front=True,
-                                                 create_pareto_set_chart_during_optimization=True,
-                                                 create_boxplots_during_optimization=True)
+                                                 create_gif_image=is_vis,
+                                                 create_boxplots=is_vis,
+                                                 print_pareto_front=is_vis,
+                                                 create_pareto_set_chart_during_optimization=is_vis,
+                                                 create_boxplots_during_optimization=is_vis)
 
             vis_data = VisualisationData(optimisation_objectives, base_breakers=exp_domain.base_breakers, task=task,
                                          data_for_pareto_set_chart=pareto_objectives)
@@ -198,7 +199,6 @@ class TestEnvironment(ExperimentalEnvironment):
 
             pareto_objectives = [[RelativeWaveHeightObjective(), RelativeCostObjective()]]
 
-
             task = OptimisationTask(optimisation_objectives, selected_modifications_for_tuning,
                                     goal="minimise", analytics_objectives=analytics_objectives)
             task.constraints = [(StructuralObjective(), ConstraintComparisonType.equal, 0)]
@@ -207,7 +207,7 @@ class TestEnvironment(ExperimentalEnvironment):
 
             StaticStorage.genotype_encoder = ExperimentalEnvironment._get_encoder_for_experiment(enc_id)
 
-            vis_settings = VisualisationSettings(store_all_individuals=True, store_best_individuals=True,
+            vis_settings = VisualisationSettings(store_all_individuals=False, store_best_individuals=False,
                                                  num_of_best_individuals_from_population_for_print=5,
                                                  create_gif_image=False,
                                                  create_boxplots=False,

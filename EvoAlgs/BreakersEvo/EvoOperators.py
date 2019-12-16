@@ -1,29 +1,14 @@
 import copy
-import itertools
-import os
 import random
 import uuid
-from itertools import chain
-import copy
 
 import numpy as np
-import pandas as pd
-from pyDOE import lhs
-from scipy.stats.distributions import norm
 
-from Breakers.BreakersUtils import BreakersUtils
 from CommonUtils.StaticStorage import StaticStorage
-from EvoAlgs.BreakersEvo.BreakersEvoUtils import BreakersEvoUtils
 from EvoAlgs.BreakersEvo.BreakerStructureRepresentation import BreakerStructureRepresentation
 from EvoAlgs.EvoAnalytics import EvoAnalytics
 from Optimisation.Objective import ObjectiveData, ConstraintComparisonType
-from Visualisation.ModelVisualization import ModelsVisualization
 from Simulation.Results import WaveSimulationResult
-from Optimisation.Objective import RelativeWaveHeightObjective,WaveHeightObjective
-
-# TODO refactor
-len_range = [0, 3]
-dir_range = [-50, 50]
 
 
 def _flatten(items, seqtypes=(list, tuple)):
@@ -34,22 +19,21 @@ def _flatten(items, seqtypes=(list, tuple)):
 
 
 def calculate_objectives(model, task, population, visualiser=None):
+
     if any(obj.is_simulation_required for obj in task.objectives):
         pre_simulated_results = model.computational_manager.prepare_simulations_for_population(population, model) \
             if any(obj.is_simulation_required for obj in task.objectives) else None
+
     local_id = 1
     for individ_index, individual in enumerate(population):
         label_to_reference = None
         proposed_breakers = individual.genotype.get_genotype_as_breakers()
         objectives_values = []
-        analytics_objectives_values=[]
+        analytics_objectives_values = []
         simulation_result = None
         base_simulation_result = None
 
-        if task.analytics_objectives:
-            objectives_to_calculate=task.objectives+task.analytics_objectives
-        else:
-            objectives_to_calculate=task.objectives
+        objectives_to_calculate = task.objectives + task.analytics_objectives if task.analytics_objectives else task.objectives
 
         for obj_ind, obj in enumerate(objectives_to_calculate):
             if obj.is_simulation_required:
@@ -97,9 +81,10 @@ def calculate_objectives(model, task, population, visualiser=None):
 
         individual.local_id = local_id
 
-        EvoAnalytics.save_cantidate(individual.population_number, individual.objectives,individual.analytics_objectives,
+        EvoAnalytics.save_cantidate(individual.population_number, individual.objectives,
+                                    individual.analytics_objectives,
                                     individual.genotype.get_parameterized_chromosome_as_num_list(),
-                                    individual.referenced_dataset,individual.local_id)
+                                    individual.referenced_dataset, individual.local_id)
 
         local_id = local_id + 1
 
@@ -127,7 +112,8 @@ def crossover(p1, p2, rate):
         elif StaticStorage.crossover_type == "I":
             new_breakers = genotype_encoder.individual_crossover(p1.genotype, p2.genotype)
 
-        else: raise NotImplementedError()
+        else:
+            raise NotImplementedError()
 
         constraints = StaticStorage.task.constraints
 
