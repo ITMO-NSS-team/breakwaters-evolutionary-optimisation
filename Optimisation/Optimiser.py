@@ -1,15 +1,15 @@
-
 from Optimisation.OptimisationStrategies.SPEA2Strategy import SPEA2OptimisationStrategy
 from Optimisation.OptimisationStrategies.DEStrategy import DEStrategy
 from Optimisation.OptimisationTask import OptimisationTask
 from EvoAlgs.BreakersEvo.GreedyHeurictics.GreedyHeuristic import SequentialGreedyHeurictic
 
+
 class Optimiser(object):
     def __init__(self, optimisation_strategy):
         self._optimisation_strategy = optimisation_strategy
 
-    def optimise(self, model, task: OptimisationTask,visualiser):
-        return self._optimisation_strategy.optimise(model, task,visualiser)
+    def optimise(self, model, task: OptimisationTask, visualiser, external_params = None):
+        return self._optimisation_strategy.optimise(model, task, visualiser, external_params)
 
 
 class DEOptimiser(Optimiser):

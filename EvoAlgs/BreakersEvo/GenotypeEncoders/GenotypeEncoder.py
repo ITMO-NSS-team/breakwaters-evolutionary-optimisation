@@ -71,7 +71,9 @@ class DirectGenotypeEncoder(GenotypeEncoder):
         old_chromosome_txt = ','.join([str(int(round(_))) for _ in ancestor_genotype_encoded])
         new_chromosome_txt = ','.join([str(int(round(_))) for _ in new_encoded_genotype])
 
-        print(f'Mutated:\n[{old_chromosome_txt}]\nto\n[{new_chromosome_txt}]')
+        if StaticStorage.is_verbose:
+            print(f'Mutated:\n[{old_chromosome_txt}]\nto\n[{new_chromosome_txt}]')
+
         return self.parameterized_genotype_to_breakers(new_encoded_genotype, StaticStorage.task,
                                                        StaticStorage.exp_domain.model_grid)
 
@@ -113,9 +115,9 @@ class DirectGenotypeEncoder(GenotypeEncoder):
         old_chromosome1_txt = ','.join([str(int(round(_))) for _ in ancestor_genotype1_encoded])
         old_chromosome2_txt = ','.join([str(int(round(_))) for _ in ancestor_genotype2_encoded])
         new_chromosome_txt = ','.join([str(int(round(_))) for _ in new_encoded_genotype])
-
-        print(
-            f'Crossovered:\n[{old_chromosome1_txt}],\n[{old_chromosome2_txt}]\nto\n[{new_chromosome_txt}]')
+        if StaticStorage.is_verbose:
+            print(
+                f'Crossovered:\n[{old_chromosome1_txt}],\n[{old_chromosome2_txt}]\nto\n[{new_chromosome_txt}]')
         return self.parameterized_genotype_to_breakers(new_encoded_genotype, StaticStorage.task,
                                                        StaticStorage.exp_domain.model_grid)
 
@@ -149,8 +151,9 @@ class DirectGenotypeEncoder(GenotypeEncoder):
         old_chromosome2_txt = ','.join([str(int(round(_))) for _ in ancestor_genotype2_encoded])
         new_chromosome_txt = ','.join([str(int(round(_))) for _ in new_encoded_genotype])
 
-        print(
-            f'Crossovered by {indexs_of_pair_to_split}:\n[{old_chromosome1_txt}],\n[{old_chromosome2_txt}]\nto\n[{new_chromosome_txt}]')
+        if StaticStorage.is_verbose:
+            print(
+                f'Crossovered by {indexs_of_pair_to_split}:\n[{old_chromosome1_txt}],\n[{old_chromosome2_txt}]\nto\n[{new_chromosome_txt}]')
         return self.parameterized_genotype_to_breakers(new_encoded_genotype, StaticStorage.task,
                                                        StaticStorage.exp_domain.model_grid)
 
@@ -172,6 +175,7 @@ class DirectGenotypeEncoder(GenotypeEncoder):
 
         new_chromosome_txt = ','.join([str(int(round(_))) for _ in new_encoded_genotype])
 
-        print(f'Initiated with encoding: [{new_chromosome_txt}]')
+        if StaticStorage.is_verbose:
+            print(f'Initiated with encoding: [{new_chromosome_txt}]')
         return self.parameterized_genotype_to_breakers(new_encoded_genotype, StaticStorage.task,
                                                        StaticStorage.exp_domain.model_grid)

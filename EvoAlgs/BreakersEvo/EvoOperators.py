@@ -106,7 +106,8 @@ def crossover(p1, p2, rate):
     genotype_encoder = StaticStorage.genotype_encoder
 
     while is_bad:
-        print(f'CROSSOVER_{iteration}')
+        if StaticStorage.is_verbose:
+            print(f'CROSSOVER_{iteration}')
 
         if StaticStorage.crossover_type == "SP":
             new_breakers = genotype_encoder.onepoint_crossover(p1.genotype, p2.genotype)
@@ -120,7 +121,8 @@ def crossover(p1, p2, rate):
 
         is_bad = _validate_constraints(new_breakers, constraints)
         if not is_bad:
-            print("Accepted")
+            if StaticStorage.is_verbose:
+                print("Accepted")
             new_individ.genotype = copy.deepcopy(new_breakers)
         iteration += 1
 
@@ -138,15 +140,16 @@ def mutation(individ, rate, mutation_value_rate):
         is_bad = True
 
         while is_bad:
-            print(f'MUTATION_{iteration}')
-
+            if StaticStorage.is_verbose:
+                print(f'MUTATION_{iteration}')
             new_breakers = genotype_encoder.mutate(new_individ.genotype)
             constraints = StaticStorage.task.constraints
 
             is_bad = _validate_constraints(new_breakers, constraints)
 
             if not is_bad:
-                print("Accepted")
+                if StaticStorage.is_verbose:
+                    print("Accepted")
                 new_individ.genotype = copy.deepcopy(new_breakers)
 
             iteration += 1
@@ -154,7 +157,8 @@ def mutation(individ, rate, mutation_value_rate):
 
 
 def initial_pop_random(size, **kwargs):
-    print("INITIAL")
+    if StaticStorage.is_verbose:
+        print("INITIAL")
     population_new = []
 
     genotype_encoder = StaticStorage.genotype_encoder
@@ -169,7 +173,8 @@ def initial_pop_random(size, **kwargs):
             is_bad = _validate_constraints(new_breakers, constraints)
 
             if not is_bad:
-                print("Accepted")
+                if StaticStorage.is_verbose:
+                    print("Accepted")
                 population_new.append(
                     BreakerStructureRepresentation(new_breakers))
 

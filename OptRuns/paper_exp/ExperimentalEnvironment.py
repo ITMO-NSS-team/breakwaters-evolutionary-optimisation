@@ -1,7 +1,5 @@
 import datetime
-import random
 from builtins import staticmethod
-from enum import Enum
 
 from Breakers.Breaker import xy_to_points
 from CommonUtils.StaticStorage import StaticStorage
@@ -9,8 +7,8 @@ from Computation.СomputationalEnvironment import SwanWinRemoteComputationalMana
 from Configuration.Domains import SochiHarbor
 from EvoAlgs.BreakersEvo.GenotypeEncoders.AngularEncoder import AngularGenotypeEncoder
 from EvoAlgs.BreakersEvo.GenotypeEncoders.CartesianEncoder import CartesianGenotypeEncoder
-
 from EvoAlgs.EvoAnalytics import EvoAnalytics
+from EvoAlgs.SPEA2.DefaultSPEA2 import DefaultSPEA2
 from Optimisation.Objective import *
 from Optimisation.OptimisationTask import OptimisationTask
 from Optimisation.Optimiser import ParetoEvolutionaryOptimiser, GreedyParetoEvolutionaryOptimiser, DEOptimiser
@@ -114,10 +112,13 @@ class ExperimentalEnvironment:
             EvoAnalytics.run_id = 'run{add_label}_{exp_name}_{date:%Y_%m_%d_%H_%M_%S}'.format(add_label=add_label,
                                                                                               exp_name=exp_name,
                                                                                               date=datetime.datetime.now())
+
+            print(EvoAnalytics.run_id)
+
             if run_local:
                 computational_manager = SwanWinLocalComputationalManager()
             else:
-                computational_manager = SwanWinRemoteComputationalManager(resources_names=["125", "124", "123"])
+                computational_manager = SwanWinRemoteComputationalManager(resources_names=["125", "124", "123", "121"])
             wave_model = SwanWaveModel(exp_domain, computational_manager)
             wave_model.model_results_file_name = 'D:\SWAN_sochi\model_results_paper_martech.db'
 
@@ -163,7 +164,12 @@ class ExperimentalEnvironment:
 
             visualiser = Visualiser(vis_settings, vis_data)
 
-            optimiser.optimise(wave_model, task, visualiser=visualiser)
+            StaticStorage.max_gens = 30
+            params = DefaultSPEA2.Params(max_gens=StaticStorage.max_gens, pop_size=30, archive_size=20,
+                                         crossover_rate=0.5, mutation_rate=0.5,
+                                         mutation_value_rate=[], min_or_max=task.goal)
+
+            optimiser.optimise(wave_model, task, visualiser=visualiser, external_params=params)
 
 
 class TestEnvironment(ExperimentalEnvironment):
@@ -181,22 +187,19 @@ class TestEnvironment(ExperimentalEnvironment):
             if run_local:
                 computational_manager = SwanWinLocalComputationalManager()
             else:
-                computational_manager = SwanWinRemoteComputationalManager(resources_names=["125", "124", "123", "121"])
+                computational_manager = SwanWinRemoteComputationalManager(resources_names=["125", "124", "123"])
             wave_model = SwanWaveModel(exp_domain, computational_manager)
-            wave_model.model_results_file_name = 'D:\SWAN_sochi\model_results_paper_martech.db'
+            wave_model.model_results_file_name = 'D:\\SWAN_sochi\\test2.db'
 
             optimiser = ExperimentalEnvironment._get_optimiser_for_experiment(algopt_id)
 
             selected_modifications_for_tuning = ExperimentalEnvironment._get_modifications_for_experiment(task_id)
 
             optimisation_objectives = [
-                RelativeCostObjective()]
+                RelativeCostObjective(),
+                RelativeWaveHeightObjective()]
 
             analytics_objectives = [
-                CostObjective,
-                NavigationObjective,
-                WaveHeightObjective,
-                RelativeWaveHeightObjective(),
                 RelativeQuailityObjective()]
 
             pareto_objectives = [[RelativeWaveHeightObjective(), RelativeCostObjective()]]
@@ -222,6 +225,11 @@ class TestEnvironment(ExperimentalEnvironment):
 
             visualiser = Visualiser(vis_settings, vis_data)
 
-            opt_res = optimiser.optimise(wave_model, task, visualiser=visualiser)
+            StaticStorage.max_gens = 5
+            params = DefaultSPEA2.Params(max_gens=StaticStorage.max_gens, pop_size=5, archive_size=2,
+                                         crossover_rate=0.5, mutation_rate=0.5,
+                                         mutation_value_rate=[], min_or_max=task.goal)
+
+            opt_res = optimiser.optimise(wave_model, task, visualiser=visualiser, external_params=params)
             # print("Final result")
             # print(opt_res.history[19][0].genotype.get_parameterized_chromosome_as_num_list())
