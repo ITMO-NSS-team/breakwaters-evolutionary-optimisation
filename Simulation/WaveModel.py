@@ -93,12 +93,12 @@ class WaveModel(object):
             return None
 
         if not os.path.exists(f'D:\\SWAN_sochi\\r\\hs{configuration_label}.d'):
-            #print(f"REFERENCED FILE NOT FOUND {serialised_breakers}")
+            print(f"REFERENCED FILE NOT FOUND {serialised_breakers}")
             if StaticStorage.remove_tmp:
                 db.rem(serialised_breakers)
             return None
 
-        #print(f"REFERENCED FILE FOUND {serialised_breakers}")
+        print(f"REFERENCED FILE FOUND {serialised_breakers}")
         return configuration_label
 
     def _load_simulation_result_reference_by_id(self, id):

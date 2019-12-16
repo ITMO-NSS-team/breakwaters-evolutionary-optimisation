@@ -108,10 +108,10 @@ class ExperimentalEnvironment:
             ExperimentalEnvironment._init_conditions_for_experiment(exp_domain)
 
             exp_name = f"{algopt_id}_task{task_id}_enc{enc_id}"
-            EvoAnalytics.clear()
             EvoAnalytics.run_id = 'run{add_label}_{exp_name}_{date:%Y_%m_%d_%H_%M_%S}'.format(add_label=add_label,
                                                                                               exp_name=exp_name,
                                                                                               date=datetime.datetime.now())
+            EvoAnalytics.clear()
 
             print(EvoAnalytics.run_id)
 
@@ -181,9 +181,10 @@ class TestEnvironment(ExperimentalEnvironment):
             ExperimentalEnvironment._init_conditions_for_experiment(exp_domain)
 
             exp_name = f"test_{algopt_id}_task{task_id}_enc{enc_id}"
-            EvoAnalytics.clear()
             EvoAnalytics.run_id = 'run_{exp_name}_{date:%Y_%m_%d_%H_%M_%S}'.format(exp_name=exp_name,
                                                                                    date=datetime.datetime.now())
+            EvoAnalytics.clear()
+
             if run_local:
                 computational_manager = SwanWinLocalComputationalManager()
             else:
