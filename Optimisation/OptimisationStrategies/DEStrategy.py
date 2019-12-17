@@ -23,17 +23,20 @@ class DEOptimisationStrategy(OptimisationStrategyAbstract):
     def __init__(self, greedy_heuristic=None):
         self.greedy_heuristic = greedy_heuristic
 
-    def optimise(self, model: WaveModel, task: OptimisationTask, visualiser: Visualiser):
+    def optimise(self, model: WaveModel, task: OptimisationTask, visualiser: Visualiser,external_params):
         StaticStorage.multi_objective_optimization = False
 
         operators = default_operators()
 
+        if external_params is None:
+            external_params = DefaultDE.Params(max_gens=StaticStorage.max_gens, pop_size=30,
+                                                  crossover_rate=0.5, mutation_rate=0.5,
+                                                  mutation_value_rate=[], min_or_max=task.goal)
+
         StaticStorage.max_gens = 30
 
         _, archive_history = DefaultDE(
-            params=DefaultDE.Params(max_gens=StaticStorage.max_gens, pop_size=20,
-                                       crossover_rate=0.5, mutation_rate=0.5,  # 0.9 0.9
-                                       mutation_value_rate=[], min_or_max=task.goal),
+            params=external_params,
             calculate_objectives=partial(calculate_objectives, model, task),
             evolutionary_operators=operators,
             visualiser=visualiser, greedy_heuristic=self.greedy_heuristic).solution(verbose=False)

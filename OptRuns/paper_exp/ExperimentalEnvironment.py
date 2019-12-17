@@ -100,7 +100,7 @@ class ExperimentalEnvironment:
             return DEOptimiser()
         raise NotImplementedError
 
-    def run_optimisation_experiment(self, task_id, enc_id, algopt_id, run_local, add_label="", is_vis=False):
+    def run_optimisation_experiment(self, task_id, enc_id, algopt_id, run_local, add_label="", is_vis=True):
         if __name__ == 'OptRuns.paper_exp.ExperimentalEnvironment':
 
             exp_domain = SochiHarbor()
@@ -126,15 +126,15 @@ class ExperimentalEnvironment:
 
             selected_modifications_for_tuning = ExperimentalEnvironment._get_modifications_for_experiment(task_id)
 
-            '''
+
             optimisation_objectives = [
                 RelativeCostObjective(),
                 RelativeNavigationObjective(),
                 WaveHeightObjective(),
                 RelativeWaveHeightObjective()]
-            '''
 
-            optimisation_objectives = [CompositeObjective()]
+
+            #optimisation_objectives = [CompositeObjective()]
 
             analytics_objectives = [
                 NavigationObjective(),

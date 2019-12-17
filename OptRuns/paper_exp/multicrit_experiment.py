@@ -16,4 +16,4 @@ for i in range(0, 1):
     random.seed(seed)
 
     env = ExperimentalEnvironment()
-    env.run_optimisation_experiment(task_id, enc_id, opt_id, run_local=False)
+    env.run_optimisation_experiment(task_id, enc_id, opt_id, run_local=True)
