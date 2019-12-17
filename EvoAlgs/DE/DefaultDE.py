@@ -3,6 +3,7 @@ from math import sqrt
 
 import numpy as np
 import math
+import random
 
 from EvoAlgs.DE.DE_ import DE_
 from EvoAlgs.EvoAnalytics import EvoAnalytics
@@ -41,10 +42,12 @@ class DefaultDE(DE_):
 
             self.fitness()
 
-            selected=self.tournament_selection(group_size=5)
+            #selected=self.tournament_selection(group_size=5)
+            selected=self.rank_selection()
 
             self._pop = self.reproduce(selected, self.params.pop_size)
-            print("self. pop",self._pop)
+
+            self._pop[random.randint(0,len(self._pop) - 1)]=self.clone
 
             if extended_debug: self._print_pop("REPR", self._pop)
 
@@ -54,4 +57,4 @@ class DefaultDE(DE_):
 
             self.generation_number += 1
 
-        return 0
+        return self.clone,[]
