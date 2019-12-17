@@ -22,7 +22,7 @@ class DefaultSPEA2(SPEA2):
             print(p_encoded)
 
     def solution(self, verbose=True, **kwargs):
-        extended_debug = True
+        extended_debug = verbose
         archive_history = []
         history = SPEA2.ErrorHistory()
 

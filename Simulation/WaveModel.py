@@ -1,30 +1,27 @@
+import os
 import uuid
 from multiprocessing import Lock
 
 import pickledb
-import os
 
 from Breakers.BreakersUtils import BreakersUtils
+from CommonUtils.StaticStorage import StaticStorage
 from Computation.СomputationalEnvironment import SwanComputationalManager, ComputationalManager
 from EvoAlgs.BreakersEvo.BreakersEvoUtils import BreakersEvoUtils
-from Simulation.ConfigurationStrategies import GeomConfigurationStrategy, ConfigFileConfigurationStrategy, \
+from Simulation.ConfigurationStrategies import ConfigFileConfigurationStrategy, \
     ConfigurationInfo
-from Simulation.ModelingStrategies import SimpleGeomSimulationStrategy, SwanSimulationStrategy
+from Simulation.ModelingStrategies import SwanSimulationStrategy
 from Simulation.Results import SimulationResult
 
 
 class WaveModel(object):
 
     def __init__(self, domain, simulation_strategy, configuration_strategy,
-                 computational_manager: ComputationalManager, print_info=False):
+                 computational_manager: ComputationalManager):
         self.domain = domain
         self._simulation_strategy = simulation_strategy
         self._configuration_strategy = configuration_strategy
         self.computational_manager = computational_manager
-        self.print_info = print_info
-        if computational_manager is not None:
-            computational_manager.print_info = print_info
-
         self.expensive = False
         self.model_results_file_name = 'D:\SWAN_sochi\model_results.db'
         self.output_time_step = 1
@@ -58,7 +55,7 @@ class WaveModel(object):
                     results = self.run_simulation(configuration_info, computational_manager=self.computational_manager)
 
             else:
-                if self.print_info:
+                if StaticStorage.is_verbose:
                     print("Historical SWAN found")
                 configuration_label = loaded_configuration_reference
                 all_breakers = BreakersUtils.merge_breakers_with_modifications(self.domain.base_breakers, breakers)
@@ -90,12 +87,18 @@ class WaveModel(object):
 
         db = pickledb.load(self.model_results_file_name, False)
 
-        responce = db.get(serialised_breakers)
+        configuration_label = db.get(serialised_breakers)
 
-        if responce is False or not os.path.exists(f'D:\\SWAN_sochi\\r\\hs{responce}.d'):
+        if configuration_label is False:
             return None
 
-        configuration_label = responce
+        if not os.path.exists(f'D:\\SWAN_sochi\\r\\hs{configuration_label}.d'):
+            print(f"REFERENCED FILE NOT FOUND {serialised_breakers}")
+            if StaticStorage.remove_tmp:
+                db.rem(serialised_breakers)
+            return None
+
+        print(f"REFERENCED FILE FOUND {serialised_breakers}")
         return configuration_label
 
     def _load_simulation_result_reference_by_id(self, id):
@@ -105,15 +108,6 @@ class WaveModel(object):
                 # print(key)
                 return key
         return None
-
-
-class SimpleGeomWaveModel(WaveModel):
-
-    def __init__(self, domain):
-        sim_strategy = SimpleGeomSimulationStrategy()
-        conf_strategy = GeomConfigurationStrategy()
-
-        super(SimpleGeomWaveModel, self).__init__(domain, sim_strategy, conf_strategy, None)
 
 
 class SwanWaveModel(WaveModel):
