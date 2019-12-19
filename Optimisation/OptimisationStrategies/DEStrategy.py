@@ -28,12 +28,12 @@ class DEOptimisationStrategy(OptimisationStrategyAbstract):
 
         operators = default_operators()
 
+        StaticStorage.max_gens = 5
+
         if external_params is None:
-            external_params = DefaultDE.Params(max_gens=StaticStorage.max_gens, pop_size=30,
+            external_params = DefaultDE.Params(max_gens=StaticStorage.max_gens, pop_size=5,
                                                   crossover_rate=0.5, mutation_rate=0.5,
                                                   mutation_value_rate=[], min_or_max=task.goal)
-
-        StaticStorage.max_gens = 30
 
         _, archive_history = DefaultDE(
             params=external_params,

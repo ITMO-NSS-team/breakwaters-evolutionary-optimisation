@@ -204,8 +204,12 @@ class Visualiser:
     def print_configuration(self, simulation_result, all_breakers, objective, dir, image_for_gif, num_of_population,
                             ind_num, local_id):
 
-        visualiser = ModelsVisualization(
-            str(num_of_population + 1) + "_" + str(ind_num + 1) + "(id " + str(local_id) + ")")
+        if not local_id:
+            visualiser = ModelsVisualization(
+                str(num_of_population + 1) + "_" + str(ind_num + 1))
+        else:
+            visualiser = ModelsVisualization(
+                str(num_of_population + 1) + "_" + str(ind_num + 1) + "(id " + str(local_id) + ")")
 
         visualiser.simple_visualise(simulation_result.get_5percent_output_for_field(),
                                     all_breakers,
@@ -245,15 +249,16 @@ class Visualiser:
 
             if self.visualisation_settings.store_all_individuals:
 
-                for ind_num, individ in enumerate(population):
-                    self.print_configuration(simulation_result=individ.simulation_result,
+                for ind_num, ind_index in enumerate(population):
+                    self.print_configuration(simulation_result=ind_index.simulation_result,
                                              all_breakers=BreakersUtils.merge_breakers_with_modifications(
                                                  self.visualisation_data.base_breakers,
-                                                 individ.genotype.get_genotype_as_breakers()),
-                                             objective=individ.genotype.get_parameterized_chromosome_as_num_list(),
+                                                 ind_index.genotype.get_genotype_as_breakers()),
+                                             objective=ind_index.genotype.get_parameterized_chromosome_as_num_list(),
                                              dir="all_individuals", image_for_gif=False,
                                              num_of_population=self.state.generation_number, ind_num=ind_num,
-                                             local_id=population[ind_index].local_id)
+                                             #local_id=population[ind_index].local_id)
+                                             local_id=None)
 
             if self.visualisation_settings.create_pareto_set_chart_during_optimization:
                 self.print_pareto_set(best_individuals_indexes, population)
