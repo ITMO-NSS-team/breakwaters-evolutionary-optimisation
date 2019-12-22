@@ -8,6 +8,7 @@ from Configuration.Domains import Fairway
 from Simulation.Results import WaveSimulationResult
 from Breakers.BreakersUtils import BreakersUtils
 
+
 class ConstraintComparisonType(Enum):
     not_equal = 0
     equal = 1
@@ -92,7 +93,8 @@ class StructuralObjective(Objective):
 
     def get_obj_value(self, obj_data):
         num_self_intersection = sum(
-            [sum([int(self._selfintersection(breaker1, breaker2)) for breaker2 in obj_data.new_breakers]) for breaker1 in
+            [sum([int(self._selfintersection(breaker1, breaker2)) for breaker2 in obj_data.new_breakers]) for breaker1
+             in
              obj_data.new_breakers])
 
         return round(num_self_intersection * 100, -1)
@@ -164,6 +166,7 @@ class RelativeNavigationObjective(NavigationObjective):
 
         return nav_obj_rel
 
+
 class WaveHeightObjective(Objective):
     is_simulation_required = True
 
@@ -193,8 +196,8 @@ class RelativeQuailityObjective(Objective):
     def get_obj_value(self, obj_data):
         cost_obj_rel = RelativeCostObjective().get_obj_value(obj_data)
         wh_obj_real = RelativeWaveHeightObjective().get_obj_value(obj_data)
-
-        relative_quality_obj_value = (100 + np.mean(wh_obj_real)) / (100 - cost_obj_rel)
+        nav_obj_real = RelativeNavigationObjective().get_obj_value(obj_data)
+        relative_quality_obj_value = (100 + np.mean(wh_obj_real) + nav_obj_real) / (100 - cost_obj_rel)
 
         return relative_quality_obj_value * 100
 

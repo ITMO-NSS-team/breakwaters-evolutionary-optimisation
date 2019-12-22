@@ -1,13 +1,7 @@
-import copy
-from math import sqrt
-
-import numpy as np
-import math
 import random
 
-from EvoAlgs.DE.DE_ import DE_
-from EvoAlgs.EvoAnalytics import EvoAnalytics
 from CommonUtils.StaticStorage import StaticStorage
+from EvoAlgs.DE.DE_ import DE_
 from Visualisation.Visualiser import VisualiserState
 
 
@@ -42,12 +36,11 @@ class DefaultDE(DE_):
 
             self.fitness()
 
-            #selected=self.tournament_selection(group_size=5)
-            selected=self.rank_selection()
+            selected = self.rank_selection()
 
             self._pop = self.reproduce(selected, self.params.pop_size)
 
-            self._pop[random.randint(0,len(self._pop) - 1)]=self.clone
+            self._pop[random.randint(0, len(self._pop) - 1)] = self.clone
 
             if extended_debug: self._print_pop("REPR", self._pop)
 
@@ -57,4 +50,4 @@ class DefaultDE(DE_):
 
             self.generation_number += 1
 
-        return self.clone,[]
+        return self.clone, []

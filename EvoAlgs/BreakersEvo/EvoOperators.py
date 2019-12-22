@@ -19,7 +19,6 @@ def _flatten(items, seqtypes=(list, tuple)):
 
 
 def calculate_objectives(model, task, population, visualiser=None):
-
     if any(obj.is_simulation_required for obj in task.objectives):
         pre_simulated_results = model.computational_manager.prepare_simulations_for_population(population, model) \
             if any(obj.is_simulation_required for obj in task.objectives) else None
@@ -72,7 +71,7 @@ def calculate_objectives(model, task, population, visualiser=None):
                     label_to_reference = None
 
         # un-list objectives
-        if len(objectives_values)>1:
+        if len(objectives_values) > 1:
             objectives_values = _flatten(objectives_values)
 
         individual.objectives = objectives_values
@@ -89,9 +88,9 @@ def calculate_objectives(model, task, population, visualiser=None):
 
         local_id = local_id + 1
 
-
     if visualiser is not None:
         visualiser.print_individuals(population)
+
 
 def crossover(p1, p2, rate):
     random_val = random.random()
@@ -204,5 +203,3 @@ def _validate_constraints(proposed_breakers, constraints):
             is_bad = True
             break
     return is_bad
-
-

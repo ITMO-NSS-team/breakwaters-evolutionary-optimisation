@@ -11,7 +11,7 @@ from EvoAlgs.EvoAnalytics import EvoAnalytics
 from EvoAlgs.SPEA2.DefaultSPEA2 import DefaultSPEA2
 from Optimisation.Objective import *
 from Optimisation.OptimisationTask import OptimisationTask
-from Optimisation.Optimiser import ParetoEvolutionaryOptimiser, GreedyParetoEvolutionaryOptimiser, DEOptimiser
+from Optimisation.Optimiser import ParetoEvolutionaryOptimiser, GreedyParetoEvolutionaryOptimiser, DEOptimiser, GreedyDEOptimiser
 from Simulation.WaveModel import SwanWaveModel
 from Visualisation.Visualiser import Visualiser, VisualisationSettings, VisualisationData
 
@@ -32,8 +32,7 @@ class ExpAlgs(Enum):
     greedy_multi = 1
     verygreedy_multi = 3
     single = 4
-    greedy_single = 5
-    varygreedy_single = 6
+    verygreedy_single = 5
 
 
 class ExperimentalEnvironment:
@@ -98,6 +97,8 @@ class ExperimentalEnvironment:
             return GreedyParetoEvolutionaryOptimiser()
         if enc_id == ExpAlgs.single:
             return DEOptimiser()
+        if enc_id == ExpAlgs.verygreedy_single:
+            return GreedyDEOptimiser()
         raise NotImplementedError
 
     def run_optimisation_experiment(self, task_id, enc_id, algopt_id, run_local, add_label="", is_vis=True):
@@ -118,7 +119,7 @@ class ExperimentalEnvironment:
             if run_local:
                 computational_manager = SwanWinLocalComputationalManager()
             else:
-                computational_manager = SwanWinRemoteComputationalManager(resources_names=["125", "124", "123", "121"])
+                computational_manager = SwanWinRemoteComputationalManager(resources_names=["125", "124", "123"])
             wave_model = SwanWaveModel(exp_domain, computational_manager)
             wave_model.model_results_file_name = 'D:\SWAN_sochi\model_results_paper_martech.db'
 
@@ -126,24 +127,23 @@ class ExperimentalEnvironment:
 
             selected_modifications_for_tuning = ExperimentalEnvironment._get_modifications_for_experiment(task_id)
 
-
-            optimisation_objectives = [
-                RelativeCostObjective(),
-                RelativeNavigationObjective(),
-                WaveHeightObjective(),
-                RelativeWaveHeightObjective()]
-
-
-            #optimisation_objectives = [CompositeObjective()]
-
-            analytics_objectives = [
-                NavigationObjective(),
-                RelativeWaveHeightObjective(),
-                RelativeCostObjective()]
+            if algopt_id == ExpAlgs.single or algopt_id == ExpAlgs.verygreedy_single:
+                optimisation_objectives = [
+                    RelativeQuailityObjective()]
+                analytics_objectives = [
+                    RelativeCostObjective(),
+                    RelativeNavigationObjective(),
+                    RelativeWaveHeightObjective(),
+                ]
+            else:
+                optimisation_objectives = [
+                    RelativeCostObjective(),
+                    RelativeNavigationObjective(),
+                    RelativeWaveHeightObjective()]
+                analytics_objectives = [
+                    RelativeQuailityObjective()]
 
             pareto_objectives = [[RelativeWaveHeightObjective(), RelativeCostObjective()]]
-
-            best_selection_objective = RelativeQuailityObjective()
 
             task = OptimisationTask(optimisation_objectives, selected_modifications_for_tuning,
                                     goal="minimise", analytics_objectives=analytics_objectives)
@@ -193,18 +193,27 @@ class TestEnvironment(ExperimentalEnvironment):
             else:
                 computational_manager = SwanWinRemoteComputationalManager(resources_names=["125", "124", "123"])
             wave_model = SwanWaveModel(exp_domain, computational_manager)
-            wave_model.model_results_file_name = 'D:\\SWAN_sochi\\test2.db'
+            wave_model.model_results_file_name = 'D:\\SWAN_sochi\\test4.db'
 
             optimiser = ExperimentalEnvironment._get_optimiser_for_experiment(algopt_id)
 
             selected_modifications_for_tuning = ExperimentalEnvironment._get_modifications_for_experiment(task_id)
 
-            optimisation_objectives = [
-                RelativeCostObjective(),
-                RelativeWaveHeightObjective()]
-
-            analytics_objectives = [
-                RelativeQuailityObjective()]
+            if algopt_id == ExpAlgs.single or algopt_id == ExpAlgs.verygreedy_single:
+                optimisation_objectives = [
+                    RelativeQuailityObjective()]
+                analytics_objectives = [
+                    RelativeCostObjective(),
+                    RelativeNavigationObjective(),
+                    RelativeWaveHeightObjective(),
+                ]
+            else:
+                optimisation_objectives = [
+                    RelativeCostObjective(),
+                    RelativeNavigationObjective(),
+                    RelativeWaveHeightObjective()]
+                analytics_objectives = [
+                    RelativeQuailityObjective()]
 
             pareto_objectives = [[RelativeWaveHeightObjective(), RelativeCostObjective()]]
 

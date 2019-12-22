@@ -17,4 +17,4 @@ StaticStorage.is_verbose = False
 StaticStorage.remove_tmp = True
 
 env = TestEnvironment()
-env.run_optimisation_experiment(task_id, enc_id, opt_id, run_local=True)
+env.run_optimisation_experiment(task_id, enc_id, opt_id, run_local=False)

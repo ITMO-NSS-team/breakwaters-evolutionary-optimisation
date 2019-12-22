@@ -21,7 +21,7 @@ class DefaultSPEA2(SPEA2):
                 StaticStorage.exp_domain.model_grid)
             print(p_encoded)
 
-    def solution(self, verbose=True, **kwargs):
+    def solution(self, verbose=False, **kwargs):
         extended_debug = verbose
         archive_history = []
         history = SPEA2.ErrorHistory()
@@ -50,7 +50,7 @@ class DefaultSPEA2(SPEA2):
             union = self._archive + self._pop
             selected = self.selected(self.params.pop_size, union)
 
-            print("selected",selected)
+            print("selected", selected)
 
             if extended_debug: self._print_pop("SEL", selected)
 

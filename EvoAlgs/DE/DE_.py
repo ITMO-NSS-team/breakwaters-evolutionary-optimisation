@@ -3,7 +3,7 @@ import random
 from math import sqrt
 from operator import itemgetter
 import numpy as np
-from random import randint,random
+from random import randint, random
 
 from EvoAlgs.SPEA2.RawFitness import raw_fitness
 from CommonUtils.StaticStorage import StaticStorage
@@ -35,7 +35,7 @@ class DE_:
 
         gens = self.init_population(self.params.pop_size)
         self._pop = [DE_.Individ(genotype=gen) for gen in gens]
-        self.clone=None
+        self.clone = None
 
     class Params:
         def __init__(self, max_gens, pop_size, crossover_rate, mutation_rate, mutation_value_rate,
@@ -50,8 +50,8 @@ class DE_:
     class Individ:
         def __init__(self, genotype):
             self.objectives = ()
-            self.analytics_objectives=[]
-            self.fitness=None
+            self.analytics_objectives = []
+            self.fitness = None
             self.genotype = copy.deepcopy(genotype)
             self.dominators = []
             self.raw_fitness = 0
@@ -65,13 +65,15 @@ class DE_:
     def fitness(self):
 
         self.calculate_objectives(population=self._pop, visualiser=self.visualiser)
-        self.clone=copy.deepcopy(self._pop[np.argmin([ind.objectives[0] for ind in self._pop])])#the best individual from population
+        self.clone = copy.deepcopy(
+            self._pop[np.argmin([ind.objectives[0] for ind in self._pop])])  # the best individual from population
 
-    def proportional_selection(self): # need to modify fitness function value (normalize it to 0-1 range) to use this type of selection
+    def proportional_selection(
+            self):  # need to modify fitness function value (normalize it to 0-1 range) to use this type of selection
         fitnesses_sum = sum([ind.objectives[0] for ind in self._pop])
 
-        selected_indexes=[]
-        for j in range(len(self._pop)*2):
+        selected_indexes = []
+        for j in range(len(self._pop) * 2):
             randomnum = randint(0, 10000)
             randomnum = randomnum / 10000.0
             check = 0
@@ -85,7 +87,7 @@ class DE_:
 
         return selected_indexes
 
-    def rank_selection (self):
+    def rank_selection(self):
         fitnessmass = [ind.objectives[0] for ind in self._pop]
         decreaseindexes = np.argsort(fitnessmass)[::-1]
         fitnessesprob = [0] * len(self._pop)
@@ -109,14 +111,14 @@ class DE_:
 
     def tournament_selection(self, group_size):
 
-        selected=[]
+        selected = []
 
         for j in range(len(self._pop) * 2):
 
-            tournir = [randint(0,len(self._pop) - 1) for i in range(group_size)]
+            tournir = [randint(0, len(self._pop) - 1) for i in range(group_size)]
             fitnessobjfromtour = [self._pop[tournir[i]].objectives[0] for i in range(group_size)]
 
-            if StaticStorage.task.goal=="minimise":
+            if StaticStorage.task.goal == "minimise":
                 selected.append(self._pop[tournir[np.argmin(fitnessobjfromtour)]])
             else:
                 selected.append(self._pop[tournir[np.argmax(fitnessobjfromtour)]])
@@ -127,9 +129,9 @@ class DE_:
 
         children = []
 
-        for pair_index in range(0,len(selected),2):
-            p1=selected[pair_index]
-            p2=selected[pair_index+1]
+        for pair_index in range(0, len(selected), 2):
+            p1 = selected[pair_index]
+            p2 = selected[pair_index + 1]
 
             child_gen = self.crossover(p1.genotype, p2.genotype, self.params.crossover_rate)
             child_gen = self.mutation(child_gen, self.params.mutation_rate, self.params.mutation_value_rate)
@@ -137,6 +139,3 @@ class DE_:
             children.append(child)
 
         return children
-
-
-

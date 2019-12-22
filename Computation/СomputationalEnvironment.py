@@ -1,14 +1,16 @@
 import json
 import os
 import shutil
+import subprocess
+import time
 from abc import abstractmethod
 from concurrent.futures import ThreadPoolExecutor
 from multiprocessing import Lock
-import subprocess
-from CommonUtils.StaticStorage import StaticStorage
 
 import numpy as np
-import winrm  # install as pip install pywinrm==0.2.2
+import winrm  # install as pip install pywinrm==0.4.0
+
+from CommonUtils.StaticStorage import StaticStorage
 
 '''
 reg add HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System /v LocalAccountTokenFilterPolicy /t REG_DWORD /d 1 /f
@@ -125,6 +127,7 @@ class SwanWinRemoteComputationalManager(SwanComputationalManager):
             # from local SWAN to share
             shutil.copy(f'D:\\SWAN_sochi\\{config_file_name}.swn', resource_description["transfer_folder_localname"])
             if StaticStorage.remove_tmp:
+                time.sleep(5)
                 os.remove(f'D:\\SWAN_sochi\\{config_file_name}.swn')
 
             transfer_folder = resource_description[
@@ -145,6 +148,9 @@ class SwanWinRemoteComputationalManager(SwanComputationalManager):
             ps_script_3 = r"""Copy-Item  %s\\%s %s
                         """ % (swan_remote_path_results, result_name, transfer_folder)
 
+            ps_script_wait = r"""Start-Sleep 1
+                        """
+
             ps_script_4 = r"""Remove-Item %s\\%s.swn
                         """ % (swan_remote_path, config_name)
 
@@ -154,29 +160,50 @@ class SwanWinRemoteComputationalManager(SwanComputationalManager):
             ps_script_6 = r"""Remove-Item %s\\%s.prt
                         """ % (swan_remote_path, config_name)
 
-            if StaticStorage.remove_tmp:
-                script = ps_script_1 + ps_script_2 + ps_script_3 + ps_script_4 + ps_script_5 + ps_script_6
-            else:
-                script = ps_script_1 + ps_script_2 + ps_script_3
+            script = ps_script_1 + ps_script_2 + ps_script_3
+            script_rm = ps_script_4 + ps_script_wait + ps_script_5 + ps_script_wait + ps_script_6
 
-            s = winrm.Session(resource_description['url'],
-                              auth=(resource_description['login'], resource_description['password']))
+            def fix_run_ps(self, script):
+                from base64 import b64encode
+                encoded_ps = b64encode(script.encode('utf_16_le')).decode('ascii')
+                rs = self.run_cmd('powershell -encodedcommand {0}'.format(encoded_ps))
+                if len(rs.std_err):
+                    rs.std_err = rs.std_err.decode('utf-8')
+                    print(rs.std_err)
+                return rs
 
-            res = s.run_ps(script)
+            time.sleep(1)
+            lock = Lock()
+            lock.acquire()
+            try:
+                s = winrm.Session(resource_description['url'],
+                                  auth=(resource_description['login'], resource_description['password']))
+                print(script)
+                winrm.Session.run_ps = fix_run_ps
 
-            # remove config from transfer folder
-            rem_cnf_name = resource_description["transfer_folder_localname"] + '//{config_file_name}.swn'
-            if StaticStorage.remove_tmp and os.path.exists(rem_cnf_name):
-                os.remove(rem_cnf_name)
+                out = s.run_ps(script)
 
-            shutil.copy(resource_description['transfer_folder_localname'] + f"//{out_file_name}", "D:\\SWAN_sochi\\r")
 
-            # remove results from transfer folder
-            tra_res_name = resource_description['transfer_folder_localname'] + f"//{out_file_name}"
-            if StaticStorage.remove_tmp and os.path.exists(tra_res_name):
-                os.remove(tra_res_name)
+                #if StaticStorage.remove_tmp:
+                #    out_rm = s.run_ps(script_rm)
 
-            self.resources_description[cur_res_index]["is_free"] = True
+                # remove config from transfer folder
+                rem_cnf_name = resource_description["transfer_folder_localname"] + '//{config_file_name}.swn'
+                if StaticStorage.remove_tmp and os.path.exists(rem_cnf_name):
+                    time.sleep(1)
+                    os.remove(rem_cnf_name)
+
+                shutil.copy(resource_description['transfer_folder_localname'] + f"//{out_file_name}", "D:\\SWAN_sochi\\r")
+
+                # remove results from transfer folder
+                tra_res_name = resource_description['transfer_folder_localname'] + f"//{out_file_name}"
+                if StaticStorage.remove_tmp and os.path.exists(tra_res_name):
+                    time.sleep(1)
+                    os.remove(tra_res_name)
+
+                self.resources_description[cur_res_index]["is_free"] = True
+            finally:
+                lock.release()
 
         return out_file_name[2:(len(out_file_name) - 2)]
 
@@ -185,15 +212,22 @@ class SwanWinRemoteComputationalManager(SwanComputationalManager):
         # TODO check order
         if len(self.input_data) > 0:
             workers_num = len(self.resources_description)
-            with ThreadPoolExecutor(max_workers=workers_num) as executor:
-                for file in executor.map(self._execute_single, self.input_data):
+            is_parallel = True
+            if is_parallel:
+                with ThreadPoolExecutor(max_workers=workers_num) as executor:
+                    for file in executor.map(self._execute_single, self.input_data):
+                        hs = np.genfromtxt(f'D:\\SWAN_sochi\\r\\hs{file}.d')
+                        lock = Lock()
+                        lock.acquire()
+                        try:
+                            results_list.append((file, hs))
+                        finally:
+                            lock.release()
+            else:
+                for file in map(self._execute_single, self.input_data):
                     hs = np.genfromtxt(f'D:\\SWAN_sochi\\r\\hs{file}.d')
-                    lock = Lock()
-                    lock.acquire()
-                    try:
-                        results_list.append((file, hs))
-                    finally:
-                        lock.release()
+                    results_list.append((file, hs))
+
             self.input_data = []
         return results_list
 
@@ -230,6 +264,7 @@ class SwanWinLocalComputationalManager(SwanComputationalManager):
                     # remove configuration file
                     cnf_name = f'{model_folder}\\{config_file_name}.swn'
                     if os.path.exists(cnf_name):
+                        time.sleep(5)
                         os.remove(cnf_name)
                     # remove log file
                     tmp_name = f'{model_folder}\\{config_file_name}.prt'
