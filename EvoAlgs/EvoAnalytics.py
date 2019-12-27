@@ -172,7 +172,8 @@ class EvoAnalytics:
 
             ax = plt.subplot()
             plt.rcParams['axes.titlesize'] = 30
-            ax.set_title("Population " + str(num_of_generation + 1))
+            f'Population {num_of_generation + 1}'
+            ax.set_title(f'Population {num_of_generation + 1}')
             sns.boxplot(data=df, palette="Blues")
 
             plt.savefig(
@@ -236,7 +237,7 @@ class EvoAnalytics:
                     plt.subplots_adjust(hspace=.3)
                     gener = [[j, k] for j in range(num_of_rows) for k in range(num_of_cols)]
 
-                    axs[gener[0][0]][gener[0][0]].set_title("Population " + str(0))
+                    axs[gener[0][0]][gener[0][0]].set_title("Population 0")
 
                     sns.boxplot(data=df_of_launch[num_of_launch][:pop_size], palette="Blues", ax=axs[0][0],
                                 linewidth=2)
@@ -248,16 +249,15 @@ class EvoAnalytics:
 
                     ax = plt.subplot()
 
-                    ax.set_title("Population " + str(1))
+                    ax.set_title('Population 1')
 
                     sns.boxplot(data=df_of_launch[num_of_launch][:pop_size], palette="Blues")
 
-                    plt.savefig(
-                        "boxplots/" + str(data_for_analyze) + "/" + str(EvoAnalytics.run_id) + "/" + "1" + ".png")
+                    plt.savefig(f'boxplots/{data_for_analyze}/{EvoAnalytics.run_id}/1.png')
 
                 for i in range(1, int(df_of_launch[0].shape[0] / pop_size)):
                     if series:
-                        axs[gener[i][0]][gener[i][1]].set_title("Population " + str(i))
+                        axs[gener[i][0]][gener[i][1]].set_title(f'Population {i}')
                         sns.boxplot(data=df_of_launch[num_of_launch][pop_size * i:pop_size * i + pop_size],
                                     palette="Blues",
                                     ax=axs[gener[i][0]][gener[i][1]], linewidth=2)
@@ -271,9 +271,7 @@ class EvoAnalytics:
                         sns.boxplot(data=df_of_launch[num_of_launch][pop_size * i:pop_size * i + pop_size],
                                     palette="Blues")
 
-                        plt.savefig(
-                            "boxplots/" + str(data_for_analyze) + "/" + str(EvoAnalytics.run_id) + "/" + str(
-                                i + 1) +".png")
+                        plt.savefig(f'boxplots/{data_for_analyze}/{EvoAnalytics.run_id}/{i+1}.png')
 
                 if series:
-                    plt.savefig(data_for_analyze + '_for_launch-' + EvoAnalytics.run_id+'.png')
+                    plt.savefig(f'{data_for_analyze}_for_launch-{EvoAnalytics.run_id}.png')

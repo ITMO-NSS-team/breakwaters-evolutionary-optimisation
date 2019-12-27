@@ -11,7 +11,8 @@ from EvoAlgs.EvoAnalytics import EvoAnalytics
 from EvoAlgs.SPEA2.DefaultSPEA2 import DefaultSPEA2
 from Optimisation.Objective import *
 from Optimisation.OptimisationTask import OptimisationTask
-from Optimisation.Optimiser import ParetoEvolutionaryOptimiser, GreedyParetoEvolutionaryOptimiser, DEOptimiser, GreedyDEOptimiser
+from Optimisation.Optimiser import ParetoEvolutionaryOptimiser, GreedyParetoEvolutionaryOptimiser, DEOptimiser, \
+    GreedyDEOptimiser
 from Simulation.WaveModel import SwanWaveModel
 from Visualisation.Visualiser import Visualiser, VisualisationSettings, VisualisationData
 
@@ -71,8 +72,6 @@ class ExperimentalEnvironment:
             StaticStorage.bdy = "5.3 9.1 200 30"
             StaticStorage.exp_domain = domain
 
-
-
         else:
             raise NotImplementedError
 
@@ -111,11 +110,9 @@ class ExperimentalEnvironment:
             exp_name = f"{str(algopt_id).rsplit('.', 2)[1]}_task-{str(task_id).rsplit('.', 2)[1]}_enc-{str(enc_id).rsplit('.', 2)[1]}"
 
             EvoAnalytics.run_id = '{add_label}_{exp_name}_{date:%Y_%m_%d_%H_%M_%S}'.format(add_label=add_label,
-                                                                                              exp_name=exp_name,
-                                                                                              date=datetime.datetime.now())
+                                                                                           exp_name=exp_name,
+                                                                                           date=datetime.datetime.now())
             EvoAnalytics.clear()
-
-            print(EvoAnalytics.run_id)
 
             if run_local:
                 computational_manager = SwanWinLocalComputationalManager()
@@ -161,7 +158,8 @@ class ExperimentalEnvironment:
                                                  create_boxplots=is_vis,
                                                  print_pareto_front=is_vis,
                                                  create_pareto_set_chart_during_optimization=is_vis,
-                                                 create_boxplots_during_optimization=is_vis)
+                                                 create_boxplots_during_optimization=is_vis,
+                                                 create_boxplots_from_history=is_vis)
 
             vis_data = VisualisationData(optimisation_objectives, base_breakers=exp_domain.base_breakers, task=task,
                                          data_for_pareto_set_chart=pareto_objectives)
@@ -174,80 +172,3 @@ class ExperimentalEnvironment:
                                          mutation_value_rate=[], min_or_max=task.goal)
 
             optimiser.optimise(wave_model, task, visualiser=visualiser, external_params=params)
-
-
-            for parameter in ('obj', 'gen_len'):
-                EvoAnalytics.create_boxplot(num_of_generation=None, f=None,
-                                            data_for_analyze=parameter, analyze_only_last_generation=False,
-                                            series=False)
-
-
-class TestEnvironment(ExperimentalEnvironment):
-    def run_optimisation_experiment(self, task_id, enc_id, algopt_id, run_local):
-        if __name__ == 'OptRuns.paper_exp.ExperimentalEnvironment':
-
-            exp_domain = SochiHarbor()
-
-            ExperimentalEnvironment._init_conditions_for_experiment(exp_domain)
-
-            exp_name = f"test_{algopt_id}_task{task_id}_enc{enc_id}"
-            EvoAnalytics.run_id = 'run_{exp_name}_{date:%Y_%m_%d_%H_%M_%S}'.format(exp_name=exp_name,
-                                                                                   date=datetime.datetime.now())
-            EvoAnalytics.clear()
-
-            if run_local:
-                computational_manager = SwanWinLocalComputationalManager()
-            else:
-                computational_manager = SwanWinRemoteComputationalManager(resources_names=["125", "124", "123"])
-            wave_model = SwanWaveModel(exp_domain, computational_manager)
-            wave_model.model_results_file_name = 'D:\\SWAN_sochi\\test4.db'
-
-            optimiser = ExperimentalEnvironment._get_optimiser_for_experiment(algopt_id)
-
-            selected_modifications_for_tuning = ExperimentalEnvironment._get_modifications_for_experiment(task_id)
-
-            if algopt_id == ExpAlgs.single or algopt_id == ExpAlgs.verygreedy_single:
-                optimisation_objectives = [
-                    RelativeQuailityObjective()]
-                analytics_objectives = [
-                    RelativeCostObjective(),
-                    RelativeNavigationObjective(),
-                    RelativeWaveHeightObjective(),
-                ]
-            else:
-                optimisation_objectives = [
-                    RelativeCostObjective(),
-                    RelativeNavigationObjective(),
-                    RelativeWaveHeightObjective()]
-                analytics_objectives = [
-                    RelativeQuailityObjective()]
-
-            pareto_objectives = [[RelativeWaveHeightObjective(), RelativeCostObjective()]]
-
-            task = OptimisationTask(optimisation_objectives, selected_modifications_for_tuning,
-                                    goal="minimise", analytics_objectives=analytics_objectives)
-            task.constraints = [(StructuralObjective(), ConstraintComparisonType.equal, 0)]
-
-            StaticStorage.task = task
-
-            StaticStorage.genotype_encoder = ExperimentalEnvironment._get_encoder_for_experiment(enc_id)
-
-            vis_settings = VisualisationSettings(store_all_individuals=False, store_best_individuals=False,
-                                                 num_of_best_individuals_from_population_for_print=5,
-                                                 create_gif_image=False,
-                                                 create_boxplots=False,
-                                                 print_pareto_front=False,
-                                                 create_pareto_set_chart_during_optimization=False,
-                                                 create_boxplots_during_optimization=False,)
-
-            vis_data = VisualisationData(optimisation_objectives, base_breakers=exp_domain.base_breakers, task=task,
-                                         data_for_pareto_set_chart=pareto_objectives)
-
-            visualiser = Visualiser(vis_settings, vis_data)
-
-            StaticStorage.max_gens = 5
-            params = DefaultSPEA2.Params(max_gens=StaticStorage.max_gens, pop_size=5, archive_size=2,
-                                         crossover_rate=0.5, mutation_rate=0.5,
-                                         mutation_value_rate=[], min_or_max=task.goal)
-
-            opt_res = optimiser.optimise(wave_model, task, visualiser=visualiser, external_params=params)
