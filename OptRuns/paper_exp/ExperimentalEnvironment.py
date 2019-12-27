@@ -1,6 +1,6 @@
 import datetime
 from builtins import staticmethod
-
+import math
 from Breakers.Breaker import xy_to_points
 from CommonUtils.StaticStorage import StaticStorage
 from Computation.СomputationalEnvironment import SwanWinRemoteComputationalManager, SwanWinLocalComputationalManager
@@ -108,7 +108,8 @@ class ExperimentalEnvironment:
 
             ExperimentalEnvironment._init_conditions_for_experiment(exp_domain)
 
-            exp_name = f"{algopt_id}_task{task_id}_enc{enc_id}"
+            exp_name = f"{str(algopt_id).rsplit('.', 2)[1]}_task-{str(task_id).rsplit('.', 2)[1]}_enc-{str(enc_id).rsplit('.', 2)[1]}"
+
             EvoAnalytics.run_id = '{add_label}_{exp_name}_{date:%Y_%m_%d_%H_%M_%S}'.format(add_label=add_label,
                                                                                               exp_name=exp_name,
                                                                                               date=datetime.datetime.now())
@@ -175,6 +176,12 @@ class ExperimentalEnvironment:
             optimiser.optimise(wave_model, task, visualiser=visualiser, external_params=params)
 
 
+            for parameter in ('obj', 'gen_len'):
+                EvoAnalytics.create_boxplot(num_of_generation=None, f=None,
+                                            data_for_analyze=parameter, analyze_only_last_generation=False,
+                                            series=False)
+
+
 class TestEnvironment(ExperimentalEnvironment):
     def run_optimisation_experiment(self, task_id, enc_id, algopt_id, run_local):
         if __name__ == 'OptRuns.paper_exp.ExperimentalEnvironment':
@@ -231,7 +238,7 @@ class TestEnvironment(ExperimentalEnvironment):
                                                  create_boxplots=False,
                                                  print_pareto_front=False,
                                                  create_pareto_set_chart_during_optimization=False,
-                                                 create_boxplots_during_optimization=False)
+                                                 create_boxplots_during_optimization=False,)
 
             vis_data = VisualisationData(optimisation_objectives, base_breakers=exp_domain.base_breakers, task=task,
                                          data_for_pareto_set_chart=pareto_objectives)

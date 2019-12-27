@@ -4,7 +4,7 @@ import numpy as np
 
 from CommonUtils.StaticStorage import StaticStorage
 from OptRuns.paper_exp.ExperimentalEnvironment import ExpCases, ExpEncoders, ExpAlgs, ExperimentalEnvironment
-
+from EvoAlgs.EvoAnalytics import EvoAnalytics
 # experiment_params
 is_vis = True
 is_local = True
@@ -15,7 +15,6 @@ env = ExperimentalEnvironment()
 task_id = ExpCases.double3
 for i in range(0, 5):
     enc_id = ExpEncoders.angular
-    #print("Name of value", str(enc_id).rsplit('.', 2)[1] )
 
     opt_id = ExpAlgs.multi
 

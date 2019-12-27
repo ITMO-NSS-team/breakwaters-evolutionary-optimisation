@@ -218,152 +218,20 @@ class Visualiser:
                                          objective=ind_index.genotype.get_parameterized_chromosome_as_num_list(),
                                          dir="all_individuals", image_for_gif=False,
                                          num_of_population=self.state.generation_number, ind_num=ind_num,
-                                         #local_id=population[ind_index].local_id)
                                          local_id=None)
 
         if self.visualisation_settings.create_pareto_set_chart_during_optimization:
             self.print_pareto_set(best_individuals_indexes, population)
 
         if self.visualisation_settings.create_boxplots_during_optimization:
-            #EvoAnalytics.num_of_rows = math.ceil(EvoAnalytics.num_of_generations / EvoAnalytics.num_of_cols)
-            EvoAnalytics.pop_size = len(population)
-            #EvoAnalytics.set_params()
 
             f = f'HistoryFiles/history_{EvoAnalytics.run_id}.csv'
             for parameter in ('obj', 'gen_len'):
                 EvoAnalytics.create_boxplot(num_of_generation=self.state.generation_number, f=f,
-                                            data_for_analyze=parameter, analyze_only_last_generation=True,
-                                            chart_for_gif=self.visualisation_settings.create_gif_image)
+                                            data_for_analyze=parameter, analyze_only_last_generation=True)
 
         if self.state.generation_number == StaticStorage.max_gens - 1:
-            self.gif_images_maker()
-            self.gif_series_maker()
-        #except:
-        #    print("Visualisation error")
-
-    def gif_image_maker(self, directory=EvoAnalytics.run_id, gif_type="breakers", save_path=None):
-
-        if not save_path:
-            save_path = f'{str(os.path.abspath(os.curdir))}/gif_img/{directory}/'
-
-        if gif_type == "pareto_set":
-            for chart_name in self.visualisation_data.pareto_charts_folder_names:
-                path = f'pareto_front/{chart_name}/{directory}/'
-
-                images = []
-                for i in range(StaticStorage.max_gens):
-                    images.append(Image.open(path + str(i + 1) + ".png"))
-
-                images[0].save("{}.gif".format(save_path + chart_name), save_all=True,
-                               append_images=images[1:], duration=300,
-                               loop=0)
-                return
-
-        if gif_type == "breakers":
-            if self.visualisation_settings.store_best_individuals:
-                path = f'best_individuals/{directory}/'
-            elif self.visualisation_settings.store_all_individuals:
-                path = f'all_individuals/{directory}/'
-        elif gif_type == "gen_len" or gif_type == "obj":
-            path = f'boxplots/{gif_type}/{directory}/'
-
-        images = []
-        sorted_names_of_images = []
-
-        for i1 in range(StaticStorage.max_gens):
-            for i2 in range(self.visualisation_settings.num_of_best_individuals):
-
-                if gif_type == "breakers":
-                    for filename_in_dir in glob.glob(f'{path}*{i1 + 1}_{i2 + 1}(*'):
-                        sorted_names_of_images.append(filename_in_dir)
-                else:
-                    sorted_names_of_images.append(f'{path}{i1 + 1}_{i2 + 1}.png')
-
-        for filename in sorted_names_of_images:
-            images.append(Image.open(filename))
-
-        if gif_type == "breakers":
-            images[0].save("{}breakers.gif".format(save_path), save_all=True, append_images=images[1:], duration=100,
-                           loop=0)
-        else:
-            images[0].save("{}{}.gif".format(save_path, gif_type), save_all=True, append_images=images[1:],
-                           duration=100,
-                           loop=0)
-
-    def gif_images_maker(self, directory=None):
-
-        if not os.path.isdir('gif_img'):
-            os.mkdir('gif_img')
-
-        if directory:
-            run_id = directory
-        else:
-            run_id = EvoAnalytics.run_id
-
-        if not os.path.isdir(f'gif_img/{run_id}'):
-            os.mkdir(f'gif_img/{run_id}')
-
-        if self.visualisation_settings.store_best_individuals:
-            self.gif_image_maker(run_id, gif_type="breakers")
-        elif self.visualisation_settings.store_all_individuals:
-            self.gif_image_maker(run_id, gif_type="breakers")
-
-        if self.visualisation_settings.create_boxplots_during_optimization or self.visualisation_settings.create_boxplots_from_history:
-            self.gif_image_maker(run_id, gif_type="gen_len")
-            self.gif_image_maker(run_id, gif_type="obj")
-        if self.visualisation_settings.create_pareto_set_chart_during_optimization or self.visualisation_settings.create_pareto_set_from_history:
-            self.gif_image_maker(run_id, gif_type="pareto_set")
-
-    def gif_series_maker(self, directory=None, gif_type="breakers"):
-
-        if not os.path.isdir('series'):
-            os.mkdir('series')
-
-        if not directory:
-            directory = EvoAnalytics.run_id
-
-        if not os.path.isdir(f'series/{EvoAnalytics.run_id}'):
-            os.mkdir(f'series/{EvoAnalytics.run_id}')
-
-        num_of_subplots = 3
-
-        for i1 in range(StaticStorage.max_gens):
-
-            for i2 in range(self.visualisation_settings.num_of_best_individuals):
-
-
-                images = []
-                # sorted_names_of_images.append("{}_{}.png".format(i1 + 1, i2 + 1))
-                if self.visualisation_settings.store_best_individuals:
-                    breakers_folder = 'best_individuals'
-                else:
-                    breakers_folder = 'all_individuals'
-
-                name_of_breaker_image = [filename_in_dir for filename_in_dir in
-                                         glob.glob(f'{breakers_folder}/{directory}/*{i1 + 1}_{i2 + 1}(*')][0]
-
-                images.append(Image.open(name_of_breaker_image))
-                images.append(Image.open(f'boxplots/gen_len/{directory}/{i1+1}_{i2+1}.png'))
-                images.append(Image.open(f'boxplots/obj/{directory}/{i1+1}_{i2+1}.png'))
-
-                plt.rcParams['figure.figsize'] = [25, 15]
-
-                f, axarr = plt.subplots(1, num_of_subplots)
-                plt.subplots_adjust(wspace=0.1, hspace=0)
-
-                for j in range(num_of_subplots):
-                    axarr[j].set_yticklabels([])
-                    axarr[j].set_xticklabels([])
-                    axarr[j].imshow(images[j])
-
-                plt.savefig(f'series/{EvoAnalytics.run_id}/{i1+1}_{i2+1}.png', bbox_inches='tight')
-
-        if not os.path.isdir(f'gif_img/{directory}'):
-            os.mkdir(f'gif_img/{directory}')
-        images = []
-        for i1 in range(StaticStorage.max_gens):
-            for i2 in range(self.visualisation_settings.num_of_best_individuals):
-                images.append(Image.open("series/{}/{}_{}.png".format(directory, i1 + 1, i2 + 1)))
-
-        images[0].save("gif_img/{}/Graphs.gif".format(directory), save_all=True, append_images=images[1:], duration=100,
-                       loop=0)
+            if self.visualisation_settings.create_boxplots_from_history:
+                for parameter in ('obj', 'gen_len'):
+                    EvoAnalytics.create_boxplot(num_of_generation=self.state.generation_number, f=f,
+                                                data_for_analyze=parameter, analyze_only_last_generation=True,series=True)
