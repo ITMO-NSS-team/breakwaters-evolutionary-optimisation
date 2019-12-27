@@ -14,8 +14,8 @@ class Fairway:
 
 class Domain:
     base_breakers = []
-    base_grid = []  # grid for indxing
-    model_grid = []  # grid for wave model, now the same
+    base_grid = []
+    model_grid = []
 
     target_points = []
 
@@ -65,13 +65,9 @@ class SochiHarbor(Domain):
                          Fairway(GridPoint(51, 30), GridPoint(65, 33), importance=0.78)]
 
 
-
-
 class BlackSea(Domain):
 
     def __init__(self):
-        all_base_breakers = []
-
         self.target_points = []
 
         self.base_grid = Grid(grid_x=300,
@@ -86,6 +82,7 @@ class BlackSea(Domain):
         self.wind_enabled = True
 
         self.fairways = None
+
 
 class ExpHarbor(Domain):
 

@@ -1,22 +1,14 @@
-from scipy import optimize
-from itertools import chain
-from Optimisation import OptimisationTask
-from Optimisation.Objective import *
-from Configuration.Grid import BreakerPoint
-from Simulation import WaveModel
-from Simulation.WaveModel import SwanWaveModel
-import csv
-import uuid
 from functools import partial
-from Visualisation.Visualiser import Visualiser
+
 from CommonUtils.StaticStorage import StaticStorage
-
-from EvoAlgs.SPEA2.DefaultSPEA2 import DefaultSPEA2
 from EvoAlgs.BreakersEvo.EvoOperators import calculate_objectives
+from EvoAlgs.SPEA2.DefaultSPEA2 import DefaultSPEA2
 from EvoAlgs.SPEA2.Operators import default_operators
-
+from Optimisation import OptimisationTask
 from Optimisation.OptimisationStrategies.AbstractOptimisationStrategy import OptimisationStrategyAbstract, \
     OptimisationResults
+from Simulation import WaveModel
+from Visualisation.Visualiser import Visualiser
 
 
 class SPEA2OptimisationStrategy(OptimisationStrategyAbstract):
@@ -30,7 +22,7 @@ class SPEA2OptimisationStrategy(OptimisationStrategyAbstract):
         operators = default_operators()
 
         if external_params is None:
-            external_params = DefaultSPEA2.Params(max_gens=StaticStorage.max_gens, pop_size=30, archive_size=20,
+            external_params = DefaultSPEA2.Params(max_gens=StaticStorage.max_gens, pop_size=5, archive_size=5,
                                                   crossover_rate=0.5, mutation_rate=0.5,
                                                   mutation_value_rate=[], min_or_max=task.goal)
 

@@ -1,15 +1,14 @@
 from Optimisation.Objective import Objective
 from typing import List
-from Breakers import Breaker
 
 
 class OptimisationTask(object):
     def __init__(self,
                  objectives: List[Objective],
                  possible_modifications,
-                 goal,analytics_objectives):
+                 goal, analytics_objectives):
         self.objectives = objectives
-        self.analytics_objectives=analytics_objectives
+        self.analytics_objectives = analytics_objectives
 
         self.possible_modifications = possible_modifications
 

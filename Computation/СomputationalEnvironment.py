@@ -8,19 +8,9 @@ from concurrent.futures import ThreadPoolExecutor
 from multiprocessing import Lock
 
 import numpy as np
-import winrm  # install as pip install pywinrm==0.4.0
+import winrm
 
 from CommonUtils.StaticStorage import StaticStorage
-
-'''
-reg add HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System /v LocalAccountTokenFilterPolicy /t REG_DWORD /d 1 /f
-net start WinRM
-powershell enable - psremoting - force
-exit
-winrm get winrm/config
-winrm set winrm/config/service/auth @{Basic="true"}
-winrm set winrm/config/service @{AllowUnencrypted="true"}
-'''
 
 
 class ComputationalResourceDescription(object):
@@ -112,7 +102,6 @@ class SwanWinRemoteComputationalManager(SwanComputationalManager):
             try:
                 cur_res_index = -1
                 for rd_ind, rd in enumerate(self.resources_description):
-                    # print(rd["name"])
                     if rd["is_free"]:
                         cur_res_index = rd_ind
                         self.resources_description[cur_res_index]["is_free"] = False
@@ -183,17 +172,14 @@ class SwanWinRemoteComputationalManager(SwanComputationalManager):
 
                 out = s.run_ps(script)
 
-
-                #if StaticStorage.remove_tmp:
-                #    out_rm = s.run_ps(script_rm)
-
                 # remove config from transfer folder
                 rem_cnf_name = resource_description["transfer_folder_localname"] + '//{config_file_name}.swn'
                 if StaticStorage.remove_tmp and os.path.exists(rem_cnf_name):
                     time.sleep(1)
                     os.remove(rem_cnf_name)
 
-                shutil.copy(resource_description['transfer_folder_localname'] + f"//{out_file_name}", "D:\\SWAN_sochi\\r")
+                shutil.copy(resource_description['transfer_folder_localname'] + f"//{out_file_name}",
+                            "D:\\SWAN_sochi\\r")
 
                 # remove results from transfer folder
                 tra_res_name = resource_description['transfer_folder_localname'] + f"//{out_file_name}"

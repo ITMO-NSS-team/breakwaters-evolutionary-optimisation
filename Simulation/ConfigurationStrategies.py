@@ -127,8 +127,6 @@ class ConfigFileConfigurationStrategy(ConfigurationStrategyAbstract):
 
             finally:
                 lock.release()
-        #else:
-        #    new_config_name = None
 
         os.chdir(saved_work_dir)
 

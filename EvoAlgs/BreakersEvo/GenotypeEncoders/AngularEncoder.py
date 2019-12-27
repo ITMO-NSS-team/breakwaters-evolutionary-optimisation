@@ -1,9 +1,6 @@
 import copy
 import random
-
 import numpy as np
-
-from CommonUtils.StaticStorage import StaticStorage
 from EvoAlgs.BreakersEvo.GenotypeEncoders.GenotypeEncoder import DirectGenotypeEncoder
 
 
@@ -81,11 +78,11 @@ class AngularGenotypeEncoder(DirectGenotypeEncoder):
 
         mutation_ratio_len = abs(
             np.random.normal(mutation_params_len[0], mutation_params_len[1],
-                                           mutation_params_len[2])[0])
+                             mutation_params_len[2])[0])
 
         mutation_ratio_dir = abs(
             np.random.normal(mutation_params_dir[0], mutation_params_dir[1],
-                                           mutation_params_dir[2])[0])
+                             mutation_params_dir[2])[0])
 
         sign = 1 if random.random() < 0.5 else -1
 
@@ -100,7 +97,6 @@ class AngularGenotypeEncoder(DirectGenotypeEncoder):
 
         return comp_value1, comp_value2
 
-
     def crossover_components(self, comp_values1, comp_values2):
         part1_rate = abs(random.random())
         part2_rate = 1 - part1_rate
@@ -110,7 +106,7 @@ class AngularGenotypeEncoder(DirectGenotypeEncoder):
 
         rate = abs(random.random())
 
-        if rate<0.5:
+        if rate < 0.5:
             new_value2 = comp_values1[1]
         else:
             new_value2 = comp_values2[1]

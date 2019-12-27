@@ -1,11 +1,6 @@
 import copy
-import random
-from math import sqrt
-from operator import itemgetter
 import numpy as np
-from random import randint, random
-
-from EvoAlgs.SPEA2.RawFitness import raw_fitness
+from random import randint
 from CommonUtils.StaticStorage import StaticStorage
 
 
@@ -14,7 +9,6 @@ class DE_:
         '''
          Differential Evolution Algorithm (DE)
         '''
-
         self.params = params
 
         self.calculate_objectives = calculate_objectives
@@ -68,25 +62,6 @@ class DE_:
         self.clone = copy.deepcopy(
             self._pop[np.argmin([ind.objectives[0] for ind in self._pop])])  # the best individual from population
 
-    def proportional_selection(
-            self):  # need to modify fitness function value (normalize it to 0-1 range) to use this type of selection
-        fitnesses_sum = sum([ind.objectives[0] for ind in self._pop])
-
-        selected_indexes = []
-        for j in range(len(self._pop) * 2):
-            randomnum = randint(0, 10000)
-            randomnum = randomnum / 10000.0
-            check = 0
-            for i in range(len(self._pop)):
-                check += (self._pop[i].objectives[0] / fitnesses_sum)
-                if check >= randomnum:
-                    selected_indexes.append(self._pop[i])
-                    break
-                elif i == len(self._pop) - 1:
-                    selected_indexes.append(self._pop[i])
-
-        return selected_indexes
-
     def rank_selection(self):
         fitnessmass = [ind.objectives[0] for ind in self._pop]
         decreaseindexes = np.argsort(fitnessmass)[::-1]
@@ -125,7 +100,7 @@ class DE_:
 
         return selected
 
-    def reproduce(self, selected, pop_size):
+    def reproduce(self, selected):
 
         children = []
 
@@ -134,7 +109,7 @@ class DE_:
             p2 = selected[pair_index + 1]
 
             child_gen = self.crossover(p1.genotype, p2.genotype, self.params.crossover_rate)
-            child_gen = self.mutation(child_gen, self.params.mutation_rate, self.params.mutation_value_rate)
+            child_gen = self.mutation(child_gen, self.params.mutation_rate)
             child = DE_.Individ(genotype=child_gen)
             children.append(child)
 

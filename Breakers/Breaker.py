@@ -1,6 +1,5 @@
 from math import sqrt
 from typing import List
-
 from Configuration.Grid import BreakerPoint
 
 

@@ -1,9 +1,7 @@
 import os
 import uuid
 from multiprocessing import Lock
-
 import pickledb
-
 from Breakers.BreakersUtils import BreakersUtils
 from CommonUtils.StaticStorage import StaticStorage
 from Computation.СomputationalEnvironment import SwanComputationalManager, ComputationalManager
@@ -105,7 +103,6 @@ class WaveModel(object):
         db = pickledb.load(self.model_results_file_name, False)
         for key in db.db:
             if db.db[key] == id:
-                # print(key)
                 return key
         return None
 

@@ -1,11 +1,4 @@
-import copy
-from math import sqrt
-
-import numpy as np
-import math
-
 from EvoAlgs.SPEA2.SPEA2 import SPEA2
-from EvoAlgs.EvoAnalytics import EvoAnalytics
 from CommonUtils.StaticStorage import StaticStorage
 from Visualisation.Visualiser import VisualiserState
 
@@ -61,8 +54,6 @@ class DefaultSPEA2(SPEA2):
             if self.greedy_heuristic is not None:
                 StaticStorage.genotype_encoder.genotype_mask = self.greedy_heuristic.modify_mask(
                     StaticStorage.genotype_encoder.genotype_mask, self.generation_number)
-
-            # EvoAnalytics.create_chart(gen)
 
             self.generation_number += 1
 

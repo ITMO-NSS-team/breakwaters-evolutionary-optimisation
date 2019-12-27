@@ -1,7 +1,6 @@
 import copy
 import random
 import uuid
-
 import numpy as np
 
 from CommonUtils.StaticStorage import StaticStorage
@@ -128,7 +127,7 @@ def crossover(p1, p2, rate):
     return new_individ
 
 
-def mutation(individ, rate, mutation_value_rate):
+def mutation(individ, rate):
     new_individ = BreakerStructureRepresentation(copy.deepcopy(individ.genotype))
 
     random_val = random.random()
@@ -155,7 +154,7 @@ def mutation(individ, rate, mutation_value_rate):
     return new_individ
 
 
-def initial_pop_random(size, **kwargs):
+def initial_pop_random(size):
     if StaticStorage.is_verbose:
         print("INITIAL")
     population_new = []

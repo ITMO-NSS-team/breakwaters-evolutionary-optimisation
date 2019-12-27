@@ -17,6 +17,7 @@ class DEOptimiser(Optimiser):
         strategy = DEOptimisationStrategy()
         super(DEOptimiser, self).__init__(strategy)
 
+
 class GreedyDEOptimiser(Optimiser):
     def __init__(self):
         strategy = DEOptimisationStrategy(greedy_heuristic=SequentialGreedyHeurictic())

@@ -205,7 +205,7 @@ class SPEA2:
                 p2 = selected[0]
 
             child_gen = self.crossover(p1.genotype, p2.genotype, self.params.crossover_rate)
-            child_gen = self.mutation(child_gen, self.params.mutation_rate, self.params.mutation_value_rate)
+            child_gen = self.mutation(child_gen, self.params.mutation_rate)
             child = SPEA2.Individ(genotype=child_gen)
             children.append(child)
 

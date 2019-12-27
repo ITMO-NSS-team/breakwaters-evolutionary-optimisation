@@ -1,16 +1,9 @@
 import os
-import re
 from abc import ABCMeta, abstractmethod
-
-import matplotlib.pyplot as plt
 import numpy as np
-from sympy import Line, Point, Segment, intersection
-
-from Simulation.ConfigurationStrategies import ConfigurationInfo
-from Visualisation.ModelVisualization import ModelsVisualization
-from Simulation.Results import WaveSimulationResult
 from Computation.СomputationalEnvironment import SwanComputationalManager, ComputationalManager
-from CommonUtils.StaticStorage import StaticStorage
+from Simulation.ConfigurationStrategies import ConfigurationInfo
+from Simulation.Results import WaveSimulationResult
 
 
 class SimulationStrategyAbstract(metaclass=ABCMeta):

@@ -109,7 +109,7 @@ class ExperimentalEnvironment:
             ExperimentalEnvironment._init_conditions_for_experiment(exp_domain)
 
             exp_name = f"{algopt_id}_task{task_id}_enc{enc_id}"
-            EvoAnalytics.run_id = 'run{add_label}_{exp_name}_{date:%Y_%m_%d_%H_%M_%S}'.format(add_label=add_label,
+            EvoAnalytics.run_id = '{add_label}_{exp_name}_{date:%Y_%m_%d_%H_%M_%S}'.format(add_label=add_label,
                                                                                               exp_name=exp_name,
                                                                                               date=datetime.datetime.now())
             EvoAnalytics.clear()
@@ -167,8 +167,8 @@ class ExperimentalEnvironment:
 
             visualiser = Visualiser(vis_settings, vis_data)
 
-            StaticStorage.max_gens = 30
-            params = DefaultSPEA2.Params(max_gens=StaticStorage.max_gens, pop_size=30, archive_size=20,
+            StaticStorage.max_gens = 5
+            params = DefaultSPEA2.Params(max_gens=StaticStorage.max_gens, pop_size=5, archive_size=5,
                                          crossover_rate=0.5, mutation_rate=0.5,
                                          mutation_value_rate=[], min_or_max=task.goal)
 
@@ -244,5 +244,3 @@ class TestEnvironment(ExperimentalEnvironment):
                                          mutation_value_rate=[], min_or_max=task.goal)
 
             opt_res = optimiser.optimise(wave_model, task, visualiser=visualiser, external_params=params)
-            # print("Final result")
-            # print(opt_res.history[19][0].genotype.get_parameterized_chromosome_as_num_list())
