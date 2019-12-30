@@ -90,13 +90,13 @@ class DE_:
 
         for j in range(len(self._pop) * 2):
 
-            tournir = [randint(0, len(self._pop) - 1) for i in range(group_size)]
-            fitnessobjfromtour = [self._pop[tournir[i]].objectives[0] for i in range(group_size)]
+            tournament = [randint(0, len(self._pop) - 1) for i in range(group_size)]
+            fitness_obj_from_tour = [self._pop[tournament[i]].objectives[0] for i in range(group_size)]
 
             if StaticStorage.task.goal == "minimise":
-                selected.append(self._pop[tournir[np.argmin(fitnessobjfromtour)]])
+                selected.append(self._pop[tournament[np.argmin(fitness_obj_from_tour)]])
             else:
-                selected.append(self._pop[tournir[np.argmax(fitnessobjfromtour)]])
+                selected.append(self._pop[tournament[np.argmax(fitness_obj_from_tour)]])
 
         return selected
 

@@ -1,19 +1,16 @@
 import math
 import os
-import re
-import glob
-import seaborn as sb
 import warnings
+
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
-from PIL import Image
-from EvoAlgs.SPEA2.RawFitness import raw_fitness
+import seaborn as sb
+
+from Breakers.BreakersUtils import BreakersUtils
 from CommonUtils.StaticStorage import StaticStorage
 from EvoAlgs.EvoAnalytics import EvoAnalytics
-from Optimisation.Objective import CostObjective, RelativeCostObjective, RelativeNavigationObjective, \
-    RelativeQuailityObjective, RelativeWaveHeightObjective, WaveHeightObjective
-from Breakers.BreakersUtils import BreakersUtils
+from EvoAlgs.SPEA2.RawFitness import raw_fitness
+from Optimisation.Objective import RelativeWaveHeightObjective, WaveHeightObjective
 
 warnings.filterwarnings("ignore")
 
@@ -67,8 +64,7 @@ class VisualisationData:
                         self.labels[chart_num].append("cost")
                         self.labels[chart_num].append("Цена")
                         continue
-                    #add others
-
+                    # add others
 
         self.pareto_charts_folder_names = []
         for chart_num, chart_data in enumerate(self.labels):
@@ -106,7 +102,7 @@ class Visualiser:
                 os.mkdir(f'pareto_front/{self.visualisation_data.pareto_charts_folder_names[chart_num]}')
             if not os.path.isdir(
                     f'pareto_front/{self.visualisation_data.pareto_charts_folder_names[chart_num]}/{directory}'):
-                print("FOLDER pareto chart name",self.visualisation_data.pareto_charts_folder_names[chart_num])
+                print("FOLDER pareto chart name", self.visualisation_data.pareto_charts_folder_names[chart_num])
                 os.mkdir(f'pareto_front/{self.visualisation_data.pareto_charts_folder_names[chart_num]}/{directory}')
 
             axis_data = [[] for axis in range(len(self.visualisation_data.data_for_pareto_set_chart[chart_num]))]
@@ -119,11 +115,11 @@ class Visualiser:
                         if obj_num != 0:
                             num_of_wh_functions_before = len([True for
                                                               objective_type in (
-                                                                                            StaticStorage.task.objectives + StaticStorage.task.analytics_objectives)[
+                                                                                        StaticStorage.task.objectives + StaticStorage.task.analytics_objectives)[
                                                                                 :obj_num] if isinstance(objective_type,
                                                                                                         (
-                                                                                                        WaveHeightObjective,
-                                                                                                        RelativeWaveHeightObjective)) is True])
+                                                                                                            WaveHeightObjective,
+                                                                                                            RelativeWaveHeightObjective)) is True])
 
                         if axis.__class__.__name__ in ('WaveHeightObjective', 'RelativeWaveHeightObjective'):
                             for index_of_best_ind in best_individuals_indexes:
@@ -137,7 +133,6 @@ class Visualiser:
 
                         else:
                             for index_of_best_ind in best_individuals_indexes:
-
                                 objective_values_of_ind = (population[index_of_best_ind].objectives + population[
                                     index_of_best_ind].analytics_objectives)
 
@@ -147,7 +142,7 @@ class Visualiser:
 
             if len(self.visualisation_data.data_for_pareto_set_chart[chart_num]) == 2:
                 EvoAnalytics.print_pareto_set_(data=axis_data,
-                                               save_directory=f'pareto_front/{self.visualisation_data.pareto_charts_folder_names[chart_num]}/{directory}/{self.state.generation_number+1}.png',
+                                               save_directory=f'pareto_front/{self.visualisation_data.pareto_charts_folder_names[chart_num]}/{directory}/{self.state.generation_number + 1}.png',
                                                population_num=self.state.generation_number,
                                                labels=[self.visualisation_data.labels[chart_num][i] for i in
                                                        range(1, len(self.visualisation_data.labels[chart_num]), 2)])
@@ -159,22 +154,21 @@ class Visualiser:
                             ind_num, local_id):
 
         if not local_id:
-            picture_name = f'{num_of_population+1}_{ind_num+1}'
+            picture_name = f'{num_of_population + 1}_{ind_num + 1}'
 
         else:
 
-            picture_name=f'{num_of_population+1}_{ind_num+1}(id{local_id})'
+            picture_name = f'{num_of_population + 1}_{ind_num + 1}(id{local_id})'
 
         self.simple_visualise(simulation_result.get_5percent_output_for_field(),
-                                    all_breakers,
-                                    self.visualisation_data.base_breakers,
-                                    StaticStorage.exp_domain.fairways, StaticStorage.exp_domain.target_points,
-                                    objective, dir=dir, image_for_gif=image_for_gif,
-                                    population_and_ind_number=[num_of_population, ind_num],configuration_label=picture_name)
-
+                              all_breakers,
+                              self.visualisation_data.base_breakers,
+                              StaticStorage.exp_domain.fairways, StaticStorage.exp_domain.target_points,
+                              objective, dir=dir, image_for_gif=image_for_gif,
+                              population_and_ind_number=[num_of_population, ind_num], configuration_label=picture_name)
 
     def print_individuals(self, population):
-        #try:
+        # try:
         if self.visualisation_settings.store_best_individuals or self.visualisation_settings.print_pareto_front:
             if StaticStorage.multi_objective_optimization:
                 if self.visualisation_data.task.goal == "minimize":
@@ -184,7 +178,8 @@ class Visualiser:
 
             else:
                 if self.visualisation_data.task.goal == "minimize":
-                    best_individuals_indexes=np.argsort([ind.objectives[0] for ind in population])[:self.visualisation_settings.num_of_best_individuals]
+                    best_individuals_indexes = np.argsort([ind.objectives[0] for ind in population])[
+                                               :self.visualisation_settings.num_of_best_individuals]
                 else:
                     best_individuals_indexes = np.argsort([ind.objectives[0] for ind in population])[::-1][
                                                :self.visualisation_settings.num_of_best_individuals]
@@ -226,15 +221,15 @@ class Visualiser:
             if self.visualisation_settings.create_boxplots_from_history:
                 for parameter in ('obj', 'gen_len'):
                     EvoAnalytics.create_boxplot(num_of_generation=self.state.generation_number, f=f,
-                                                data_for_analyze=parameter, analyze_only_last_generation=False,series=True)
-
+                                                data_for_analyze=parameter, analyze_only_last_generation=False,
+                                                series=True)
 
     def simple_visualise(self, hs: np.ndarray, all_breakers, base_breakers, fairways, target_points, fitness=None,
                          dir="img", image_for_gif=False, \
-                         population_and_ind_number=[],configuration_label=None,exp_name=None):
+                         population_and_ind_number=[], configuration_label=None, exp_name=None):
 
         if not exp_name:
-            exp_name=EvoAnalytics.run_id
+            exp_name = EvoAnalytics.run_id
 
         if not os.path.isdir(dir):
             os.mkdir(dir)
@@ -261,8 +256,8 @@ class Visualiser:
 
             if image_for_gif:
 
-                ax.set_title(f'Generation {population_and_ind_number[0]+1}, \r\n'
-                             f'Individ {population_and_ind_number[1]+1}')
+                ax.set_title(f'Generation {population_and_ind_number[0] + 1}, \r\n'
+                             f'Individ {population_and_ind_number[1] + 1}')
             else:
                 ax.set_title(f'Высоты волн с 5%-ной обеспеченносью в целевых точках: {values}, \r\n'
                              f'fitness {fit_str}')
